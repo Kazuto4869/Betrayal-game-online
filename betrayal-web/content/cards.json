@@ -9,7 +9,14 @@
       "keepInPlay": true,
       "isWeapon": false,
       "isCompanion": false,
-      "onUse": [{ "e": "trait", "who": "actor", "trait": "speed", "delta": 2 }]
+      "onUse": [
+        {
+          "e": "trait",
+          "who": "actor",
+          "trait": "speed",
+          "delta": 2
+        }
+      ]
     },
     {
       "id": "item.amulet_of_the_ages",
@@ -21,10 +28,30 @@
       "isWeapon": false,
       "isCompanion": false,
       "onDraw": [
-        { "e": "trait", "who": "actor", "trait": "might", "delta": 1 },
-        { "e": "trait", "who": "actor", "trait": "speed", "delta": 1 },
-        { "e": "trait", "who": "actor", "trait": "sanity", "delta": 1 },
-        { "e": "trait", "who": "actor", "trait": "knowledge", "delta": 1 }
+        {
+          "e": "trait",
+          "who": "actor",
+          "trait": "might",
+          "delta": 1
+        },
+        {
+          "e": "trait",
+          "who": "actor",
+          "trait": "speed",
+          "delta": 1
+        },
+        {
+          "e": "trait",
+          "who": "actor",
+          "trait": "sanity",
+          "delta": 1
+        },
+        {
+          "e": "trait",
+          "who": "actor",
+          "trait": "knowledge",
+          "delta": 1
+        }
       ]
     },
     {
@@ -66,7 +93,14 @@
       "keepInPlay": true,
       "isWeapon": false,
       "isCompanion": false,
-      "onUse": [{ "e": "trait", "who": "actor", "trait": "sanity", "delta": 1 }]
+      "onUse": [
+        {
+          "e": "trait",
+          "who": "actor",
+          "trait": "sanity",
+          "delta": 1
+        }
+      ]
     },
     {
       "id": "item.blood_dagger",
@@ -87,7 +121,14 @@
       "keepInPlay": true,
       "isWeapon": false,
       "isCompanion": false,
-      "onUse": [{ "e": "trait", "who": "actor", "trait": "might", "delta": 1 }]
+      "onUse": [
+        {
+          "e": "trait",
+          "who": "actor",
+          "trait": "might",
+          "delta": 1
+        }
+      ]
     },
     {
       "id": "item.candle",
@@ -129,8 +170,18 @@
       "isWeapon": false,
       "isCompanion": false,
       "onUse": [
-        { "e": "trait", "who": "actor", "trait": "might", "delta": 1 },
-        { "e": "trait", "who": "actor", "trait": "speed", "delta": 1 }
+        {
+          "e": "trait",
+          "who": "actor",
+          "trait": "might",
+          "delta": 1
+        },
+        {
+          "e": "trait",
+          "who": "actor",
+          "trait": "speed",
+          "delta": 1
+        }
       ]
     },
     {
@@ -162,7 +213,14 @@
       "keepInPlay": true,
       "isWeapon": false,
       "isCompanion": false,
-      "onUse": [{ "e": "trait", "who": "actor", "trait": "might", "delta": 1 }]
+      "onUse": [
+        {
+          "e": "trait",
+          "who": "actor",
+          "trait": "might",
+          "delta": 1
+        }
+      ]
     },
     {
       "id": "item.music_box",
@@ -233,7 +291,14 @@
       "keepInPlay": true,
       "isWeapon": false,
       "isCompanion": false,
-      "onUse": [{ "e": "trait", "who": "actor", "trait": "sanity", "delta": 1 }]
+      "onUse": [
+        {
+          "e": "trait",
+          "who": "actor",
+          "trait": "sanity",
+          "delta": 1
+        }
+      ]
     },
     {
       "id": "omen.bite",
@@ -244,7 +309,14 @@
       "keepInPlay": true,
       "isWeapon": false,
       "isCompanion": false,
-      "onDraw": [{ "e": "trait", "who": "actor", "trait": "might", "delta": -1 }]
+      "onDraw": [
+        {
+          "e": "trait",
+          "who": "actor",
+          "trait": "might",
+          "delta": -1
+        }
+      ]
     },
     {
       "id": "omen.book",
@@ -255,7 +327,14 @@
       "keepInPlay": true,
       "isWeapon": false,
       "isCompanion": false,
-      "onDraw": [{ "e": "trait", "who": "actor", "trait": "knowledge", "delta": 2 }]
+      "onDraw": [
+        {
+          "e": "trait",
+          "who": "actor",
+          "trait": "knowledge",
+          "delta": 2
+        }
+      ]
     },
     {
       "id": "omen.crystal_ball",
@@ -277,8 +356,18 @@
       "isWeapon": false,
       "isCompanion": true,
       "onDraw": [
-        { "e": "trait", "who": "actor", "trait": "might", "delta": 1 },
-        { "e": "trait", "who": "actor", "trait": "sanity", "delta": 1 }
+        {
+          "e": "trait",
+          "who": "actor",
+          "trait": "might",
+          "delta": 1
+        },
+        {
+          "e": "trait",
+          "who": "actor",
+          "trait": "sanity",
+          "delta": 1
+        }
       ]
     },
     {
@@ -291,8 +380,18 @@
       "isWeapon": false,
       "isCompanion": true,
       "onDraw": [
-        { "e": "trait", "who": "actor", "trait": "sanity", "delta": 1 },
-        { "e": "trait", "who": "actor", "trait": "knowledge", "delta": 1 }
+        {
+          "e": "trait",
+          "who": "actor",
+          "trait": "sanity",
+          "delta": 1
+        },
+        {
+          "e": "trait",
+          "who": "actor",
+          "trait": "knowledge",
+          "delta": 1
+        }
       ]
     },
     {
@@ -304,7 +403,14 @@
       "keepInPlay": true,
       "isWeapon": false,
       "isCompanion": false,
-      "onDraw": [{ "e": "trait", "who": "actor", "trait": "sanity", "delta": 2 }]
+      "onDraw": [
+        {
+          "e": "trait",
+          "who": "actor",
+          "trait": "sanity",
+          "delta": 2
+        }
+      ]
     },
     {
       "id": "omen.madman",
@@ -316,8 +422,18 @@
       "isWeapon": false,
       "isCompanion": true,
       "onDraw": [
-        { "e": "trait", "who": "actor", "trait": "might", "delta": 2 },
-        { "e": "trait", "who": "actor", "trait": "sanity", "delta": -1 }
+        {
+          "e": "trait",
+          "who": "actor",
+          "trait": "might",
+          "delta": 2
+        },
+        {
+          "e": "trait",
+          "who": "actor",
+          "trait": "sanity",
+          "delta": -1
+        }
       ]
     },
     {
@@ -359,7 +475,14 @@
       "keepInPlay": true,
       "isWeapon": false,
       "isCompanion": false,
-      "onDraw": [{ "e": "trait", "who": "actor", "trait": "sanity", "delta": -1 }]
+      "onDraw": [
+        {
+          "e": "trait",
+          "who": "actor",
+          "trait": "sanity",
+          "delta": -1
+        }
+      ]
     },
     {
       "id": "omen.spear",
@@ -385,254 +508,1088 @@
       "id": "event.something_slimy",
       "deck": "event",
       "name": "Something Slimy",
-      "text": "Something cold and gelatinous brushes against your legs! Lose 1 Speed.",
+      "text": "Something cold and gelatinous brushes against your legs! Make a Might roll: 4+ You pull away safely. 1-3 It clings to you (Lose 1 Speed). 0 It drags you down (Lose 2 Speed).",
       "flavor": "A foul-smelling mucus coats your boots as you scramble back.",
       "keepInPlay": false,
       "isWeapon": false,
       "isCompanion": false,
-      "onDraw": [{ "e": "trait", "who": "actor", "trait": "speed", "delta": -1 }]
+      "onDraw": [
+        {
+          "e": "roll",
+          "who": "actor",
+          "trait": "might",
+          "reason": "Something Slimy (Might Roll)",
+          "branches": [
+            {
+              "min": 4,
+              "effects": []
+            },
+            {
+              "min": 1,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "speed",
+                  "delta": -1
+                }
+              ]
+            },
+            {
+              "min": 0,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "speed",
+                  "delta": -2
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "event.burning_man",
       "deck": "event",
       "name": "Burning Man",
-      "text": "A figure engulfed in raging flames rushes screaming past you! Lose 1 Sanity.",
+      "text": "A figure engulfed in raging flames rushes screaming past you! Make a Sanity roll: 4+ You stand firm. 2-3 You reel in terror (Lose 1 Sanity). 0-1 You scream in panic (Lose 2 Sanity).",
       "flavor": "The heat scorches your eyebrows, yet leaves no ash upon the floor.",
       "keepInPlay": false,
       "isWeapon": false,
       "isCompanion": false,
-      "onDraw": [{ "e": "trait", "who": "actor", "trait": "sanity", "delta": -1 }]
+      "onDraw": [
+        {
+          "e": "roll",
+          "who": "actor",
+          "trait": "sanity",
+          "reason": "Burning Man (Sanity Roll)",
+          "branches": [
+            {
+              "min": 4,
+              "effects": []
+            },
+            {
+              "min": 2,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "sanity",
+                  "delta": -1
+                }
+              ]
+            },
+            {
+              "min": 0,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "sanity",
+                  "delta": -2
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "event.whoops",
       "deck": "event",
       "name": "Whoops!",
-      "text": "You trip over a broken floorboard and tumble painfully. Lose 1 Speed.",
+      "text": "You trip over a broken floorboard! Make a Speed roll: 3+ You regain balance. 0-2 You crash painfully (Lose 1 Speed).",
       "flavor": "Wood splinters beneath your boots as you crash to the ground.",
       "keepInPlay": false,
       "isWeapon": false,
       "isCompanion": false,
-      "onDraw": [{ "e": "trait", "who": "actor", "trait": "speed", "delta": -1 }]
+      "onDraw": [
+        {
+          "e": "roll",
+          "who": "actor",
+          "trait": "speed",
+          "reason": "Whoops! (Speed Roll)",
+          "branches": [
+            {
+              "min": 3,
+              "effects": []
+            },
+            {
+              "min": 0,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "speed",
+                  "delta": -1
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "event.smoke",
       "deck": "event",
       "name": "Smoke",
-      "text": "Thick acrid smoke fills your lungs. Lose 1 Might from coughing violently.",
+      "text": "Thick acrid smoke fills your lungs. Make a Might roll: 4+ You cough but push through. 1-3 You choke (Lose 1 Might). 0 You collapse coughing (Lose 2 Might).",
       "flavor": "Black soot clings to your throat and stings your tearful eyes.",
       "keepInPlay": false,
       "isWeapon": false,
       "isCompanion": false,
-      "onDraw": [{ "e": "trait", "who": "actor", "trait": "might", "delta": -1 }]
+      "onDraw": [
+        {
+          "e": "roll",
+          "who": "actor",
+          "trait": "might",
+          "reason": "Smoke (Might Roll)",
+          "branches": [
+            {
+              "min": 4,
+              "effects": []
+            },
+            {
+              "min": 1,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "might",
+                  "delta": -1
+                }
+              ]
+            },
+            {
+              "min": 0,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "might",
+                  "delta": -2
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "event.skeletons",
       "deck": "event",
       "name": "Skeletons",
-      "text": "Skeletal hands reach out from the walls trying to pull you into the dark! Lose 1 Might.",
+      "text": "Skeletal hands reach out from the walls trying to pull you into the dark! Make a Sanity roll: 4+ Nerves of steel. 1-3 Panic sets in (Lose 1 Sanity). 0 Terrified (Lose 2 Sanity).",
       "flavor": "Dry bones rattle with sickening clatter all around you.",
       "keepInPlay": false,
       "isWeapon": false,
       "isCompanion": false,
-      "onDraw": [{ "e": "trait", "who": "actor", "trait": "might", "delta": -1 }]
+      "onDraw": [
+        {
+          "e": "roll",
+          "who": "actor",
+          "trait": "sanity",
+          "reason": "Skeletons (Sanity Roll)",
+          "branches": [
+            {
+              "min": 4,
+              "effects": []
+            },
+            {
+              "min": 1,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "sanity",
+                  "delta": -1
+                }
+              ]
+            },
+            {
+              "min": 0,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "sanity",
+                  "delta": -2
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "event.spider",
       "deck": "event",
       "name": "Spider",
-      "text": "A hairy spider the size of a dinner plate bites into your shoulder! Lose 1 Might.",
+      "text": "A hairy spider the size of a dinner plate drops onto your shoulder! Make a Speed roll: 4+ You dodge swiftly. 1-3 It bites your arm (Lose 1 Might). 0 Venom courses through you (Lose 2 Might).",
       "flavor": "Venom burns like acid through your veins.",
       "keepInPlay": false,
       "isWeapon": false,
       "isCompanion": false,
-      "onDraw": [{ "e": "trait", "who": "actor", "trait": "might", "delta": -1 }]
+      "onDraw": [
+        {
+          "e": "roll",
+          "who": "actor",
+          "trait": "speed",
+          "reason": "Spider (Speed Roll)",
+          "branches": [
+            {
+              "min": 4,
+              "effects": []
+            },
+            {
+              "min": 1,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "might",
+                  "delta": -1
+                }
+              ]
+            },
+            {
+              "min": 0,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "might",
+                  "delta": -2
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "event.angry_being",
       "deck": "event",
       "name": "Angry Being",
-      "text": "A furious specter bellows in rage, chilling you to the bone. Lose 1 Sanity.",
+      "text": "A furious specter bellows in rage, chilling you to the bone! Make a Sanity roll: 4+ You endure the roar. 1-3 Chilled to the soul (Lose 1 Sanity). 0 Paralyzing dread (Lose 2 Sanity).",
       "flavor": "Its hollow scream reverberates inside your skull.",
       "keepInPlay": false,
       "isWeapon": false,
       "isCompanion": false,
-      "onDraw": [{ "e": "trait", "who": "actor", "trait": "sanity", "delta": -1 }]
+      "onDraw": [
+        {
+          "e": "roll",
+          "who": "actor",
+          "trait": "sanity",
+          "reason": "Angry Being (Sanity Roll)",
+          "branches": [
+            {
+              "min": 4,
+              "effects": []
+            },
+            {
+              "min": 1,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "sanity",
+                  "delta": -1
+                }
+              ]
+            },
+            {
+              "min": 0,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "sanity",
+                  "delta": -2
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "event.hideous_shriek",
       "deck": "event",
       "name": "Hideous Shriek",
-      "text": "An ear-splitting shriek pierces the dark corridors! Lose 1 Sanity.",
+      "text": "An ear-splitting shriek pierces the dark corridors! Make a Sanity roll: 4+ You cover your ears in time. 1-3 Piercing ringing (Lose 1 Sanity). 0 Eardrums burst (Lose 2 Sanity).",
       "flavor": "You clap your hands over your bleeding ears, trembling.",
       "keepInPlay": false,
       "isWeapon": false,
       "isCompanion": false,
-      "onDraw": [{ "e": "trait", "who": "actor", "trait": "sanity", "delta": -1 }]
+      "onDraw": [
+        {
+          "e": "roll",
+          "who": "actor",
+          "trait": "sanity",
+          "reason": "Hideous Shriek (Sanity Roll)",
+          "branches": [
+            {
+              "min": 4,
+              "effects": []
+            },
+            {
+              "min": 1,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "sanity",
+                  "delta": -1
+                }
+              ]
+            },
+            {
+              "min": 0,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "sanity",
+                  "delta": -2
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "event.something_hidden",
       "deck": "event",
       "name": "Something Hidden",
-      "text": "You notice a secret hollow in the paneling containing ancient research! Gain 1 Knowledge.",
+      "text": "You notice a secret hollow in the paneling containing ancient research! Make a Knowledge roll: 4+ Ancient occult treatise (Gain 2 Knowledge). 1-3 Useful blueprints (Gain 1 Knowledge). 0 The text has rotted away.",
       "flavor": "Mouldering manuscripts describe the history of this accursed estate.",
       "keepInPlay": false,
       "isWeapon": false,
       "isCompanion": false,
-      "onDraw": [{ "e": "trait", "who": "actor", "trait": "knowledge", "delta": 1 }]
+      "onDraw": [
+        {
+          "e": "roll",
+          "who": "actor",
+          "trait": "knowledge",
+          "reason": "Something Hidden (Knowledge Roll)",
+          "branches": [
+            {
+              "min": 4,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "knowledge",
+                  "delta": 2
+                }
+              ]
+            },
+            {
+              "min": 1,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "knowledge",
+                  "delta": 1
+                }
+              ]
+            },
+            {
+              "min": 0,
+              "effects": []
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "event.locked_safe",
       "deck": "event",
       "name": "Locked Safe",
-      "text": "An iron safe embedded in the brickwork. Studying its mechanism yields 1 Knowledge.",
+      "text": "An iron safe embedded in the brickwork. Make a Knowledge roll: 4+ You crack the tumblers (Gain 1 Knowledge, Gain 1 Might). 1-3 You study the mechanism (Gain 1 Knowledge). 0 The lock is rusted solid.",
       "flavor": "Tumblers click in heavy sequence beneath your careful touch.",
       "keepInPlay": false,
       "isWeapon": false,
       "isCompanion": false,
-      "onDraw": [{ "e": "trait", "who": "actor", "trait": "knowledge", "delta": 1 }]
+      "onDraw": [
+        {
+          "e": "roll",
+          "who": "actor",
+          "trait": "knowledge",
+          "reason": "Locked Safe (Knowledge Roll)",
+          "branches": [
+            {
+              "min": 4,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "knowledge",
+                  "delta": 1
+                },
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "might",
+                  "delta": 1
+                }
+              ]
+            },
+            {
+              "min": 1,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "knowledge",
+                  "delta": 1
+                }
+              ]
+            },
+            {
+              "min": 0,
+              "effects": []
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "event.disquieting_sounds",
       "deck": "event",
       "name": "Disquieting Sounds",
-      "text": "Wet footsteps shuffle behind you, stopping whenever you pause. Lose 1 Sanity.",
+      "text": "Wet footsteps shuffle behind you! Make a Sanity roll: 4+ You master your fears (Gain 1 Sanity). 1-3 Creeping paranoia (Lose 1 Sanity). 0 Total panic (Lose 2 Sanity).",
       "flavor": "You spin around with flashlight raised, but only shadows stare back.",
       "keepInPlay": false,
       "isWeapon": false,
       "isCompanion": false,
-      "onDraw": [{ "e": "trait", "who": "actor", "trait": "sanity", "delta": -1 }]
+      "onDraw": [
+        {
+          "e": "roll",
+          "who": "actor",
+          "trait": "sanity",
+          "reason": "Disquieting Sounds (Sanity Roll)",
+          "branches": [
+            {
+              "min": 4,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "sanity",
+                  "delta": 1
+                }
+              ]
+            },
+            {
+              "min": 1,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "sanity",
+                  "delta": -1
+                }
+              ]
+            },
+            {
+              "min": 0,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "sanity",
+                  "delta": -2
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "event.image_in_mirror",
       "deck": "event",
       "name": "Image in the Mirror",
-      "text": "Your reflection turns and laughs cruelly before decaying into dust. Lose 1 Sanity.",
+      "text": "Your reflection turns and laughs cruelly before decaying into dust! Make a Sanity roll: 4+ You recognize the trick. 1-3 Shaken (Lose 1 Sanity). 0 Broken psyche (Lose 2 Sanity).",
       "flavor": "The glass shivers, showing horrors that have not yet occurred.",
       "keepInPlay": false,
       "isWeapon": false,
       "isCompanion": false,
-      "onDraw": [{ "e": "trait", "who": "actor", "trait": "sanity", "delta": -1 }]
+      "onDraw": [
+        {
+          "e": "roll",
+          "who": "actor",
+          "trait": "sanity",
+          "reason": "Image in the Mirror (Sanity Roll)",
+          "branches": [
+            {
+              "min": 4,
+              "effects": []
+            },
+            {
+              "min": 1,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "sanity",
+                  "delta": -1
+                }
+              ]
+            },
+            {
+              "min": 0,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "sanity",
+                  "delta": -2
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "event.groundskeeper",
       "deck": "event",
       "name": "Groundskeeper",
-      "text": "A hulking phantom in muddy overalls strikes with a rusty shovel! Lose 1 Might.",
+      "text": "A hulking phantom in muddy overalls strikes with a rusty shovel! Make a Might roll: 4+ You deflect the shovel (Gain 1 Might). 1-3 A glancing blow (Lose 1 Might). 0 Heavy blow (Lose 2 Might).",
       "flavor": "He dissolves into autumn leaves as his blade clatters on the stone.",
       "keepInPlay": false,
       "isWeapon": false,
       "isCompanion": false,
-      "onDraw": [{ "e": "trait", "who": "actor", "trait": "might", "delta": -1 }]
+      "onDraw": [
+        {
+          "e": "roll",
+          "who": "actor",
+          "trait": "might",
+          "reason": "Groundskeeper (Might Roll)",
+          "branches": [
+            {
+              "min": 4,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "might",
+                  "delta": 1
+                }
+              ]
+            },
+            {
+              "min": 1,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "might",
+                  "delta": -1
+                }
+              ]
+            },
+            {
+              "min": 0,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "might",
+                  "delta": -2
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "event.mist_from_walls",
       "deck": "event",
       "name": "Mist from the Walls",
-      "text": "Freezing mist seeps through cracks, numbing your legs. Lose 1 Speed.",
+      "text": "Freezing mist seeps through cracks, numbing your legs! Make a Sanity roll: 4+ You hold your breath. 1-3 Shivering cold (Lose 1 Speed). 0 Frostbite (Lose 2 Speed).",
       "flavor": "Frost crystallizes across the floorboards in intricate spiderwebs.",
       "keepInPlay": false,
       "isWeapon": false,
       "isCompanion": false,
-      "onDraw": [{ "e": "trait", "who": "actor", "trait": "speed", "delta": -1 }]
+      "onDraw": [
+        {
+          "e": "roll",
+          "who": "actor",
+          "trait": "sanity",
+          "reason": "Mist from the Walls (Sanity Roll)",
+          "branches": [
+            {
+              "min": 4,
+              "effects": []
+            },
+            {
+              "min": 1,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "speed",
+                  "delta": -1
+                }
+              ]
+            },
+            {
+              "min": 0,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "speed",
+                  "delta": -2
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "event.the_voice",
       "deck": "event",
       "name": "The Voice",
-      "text": "A sweet, disembodied whisper shares hidden truths of the house. Gain 1 Knowledge.",
+      "text": "A sweet, disembodied whisper shares hidden truths of the house. Make a Sanity roll: 4+ You absorb the arcane secrets (Gain 2 Knowledge). 1-3 You learn a useful secret (Gain 1 Knowledge). 0 Maddening babble (Lose 1 Sanity).",
       "flavor": "Secrets of the architecture and ancient architects flow into your thoughts.",
       "keepInPlay": false,
       "isWeapon": false,
       "isCompanion": false,
-      "onDraw": [{ "e": "trait", "who": "actor", "trait": "knowledge", "delta": 1 }]
+      "onDraw": [
+        {
+          "e": "roll",
+          "who": "actor",
+          "trait": "sanity",
+          "reason": "The Voice (Sanity Roll)",
+          "branches": [
+            {
+              "min": 4,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "knowledge",
+                  "delta": 2
+                }
+              ]
+            },
+            {
+              "min": 1,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "knowledge",
+                  "delta": 1
+                }
+              ]
+            },
+            {
+              "min": 0,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "sanity",
+                  "delta": -1
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "event.phone_call",
       "deck": "event",
       "name": "Phone Call",
-      "text": "An antique rotary phone rings. A dead loved one whispers your name. Lose 1 Sanity.",
+      "text": "An antique rotary phone rings. A dead loved one whispers your name! Make a Sanity roll: 4+ A loving message calms you (Gain 1 Sanity). 1-3 Chilling sobs (Lose 1 Sanity). 0 A prophecy of doom (Lose 2 Sanity).",
       "flavor": "The cord has been cut clean through, yet the bell still tolls.",
       "keepInPlay": false,
       "isWeapon": false,
       "isCompanion": false,
-      "onDraw": [{ "e": "trait", "who": "actor", "trait": "sanity", "delta": -1 }]
+      "onDraw": [
+        {
+          "e": "roll",
+          "who": "actor",
+          "trait": "sanity",
+          "reason": "Phone Call (Sanity Roll)",
+          "branches": [
+            {
+              "min": 4,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "sanity",
+                  "delta": 1
+                }
+              ]
+            },
+            {
+              "min": 1,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "sanity",
+                  "delta": -1
+                }
+              ]
+            },
+            {
+              "min": 0,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "sanity",
+                  "delta": -2
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "event.rotten",
       "deck": "event",
       "name": "Rotten",
-      "text": "Foul fungal stench fills the room. You retch violently, losing 1 Might.",
+      "text": "Foul fungal stench fills the room! Make a Might roll: 4+ You fight off nausea. 1-3 You retch violently (Lose 1 Might). 0 Choking spores (Lose 2 Might).",
       "flavor": "Black mold drips down the peeling floral wallpaper.",
       "keepInPlay": false,
       "isWeapon": false,
       "isCompanion": false,
-      "onDraw": [{ "e": "trait", "who": "actor", "trait": "might", "delta": -1 }]
+      "onDraw": [
+        {
+          "e": "roll",
+          "who": "actor",
+          "trait": "might",
+          "reason": "Rotten (Might Roll)",
+          "branches": [
+            {
+              "min": 4,
+              "effects": []
+            },
+            {
+              "min": 1,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "might",
+                  "delta": -1
+                }
+              ]
+            },
+            {
+              "min": 0,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "might",
+                  "delta": -2
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "event.the_walls",
       "deck": "event",
       "name": "The Walls",
-      "text": "Blood begins weeping from the plaster seams, staining your clothes. Lose 1 Sanity.",
+      "text": "Blood begins weeping from the plaster seams! Make a Sanity roll: 4+ You ignore the gore. 1-3 Sickened (Lose 1 Sanity). 0 Hysterical horror (Lose 2 Sanity).",
       "flavor": "Warm red rivulets streak down the painted portraits.",
       "keepInPlay": false,
       "isWeapon": false,
       "isCompanion": false,
-      "onDraw": [{ "e": "trait", "who": "actor", "trait": "sanity", "delta": -1 }]
+      "onDraw": [
+        {
+          "e": "roll",
+          "who": "actor",
+          "trait": "sanity",
+          "reason": "The Walls (Sanity Roll)",
+          "branches": [
+            {
+              "min": 4,
+              "effects": []
+            },
+            {
+              "min": 1,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "sanity",
+                  "delta": -1
+                }
+              ]
+            },
+            {
+              "min": 0,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "sanity",
+                  "delta": -2
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "event.hanged_men",
       "deck": "event",
       "name": "Hanged Men",
-      "text": "Gallows ropes swing from the ceiling with shadowy figures. Lose 1 Sanity.",
+      "text": "Gallows ropes swing from the ceiling with shadowy figures! Make a Sanity roll: 4+ You remain steady. 1-3 Shudder in dread (Lose 1 Sanity). 0 Terrifying hallucination (Lose 2 Sanity).",
       "flavor": "Hemp creaks against timber in a breeze that shouldn't exist indoors.",
       "keepInPlay": false,
       "isWeapon": false,
       "isCompanion": false,
-      "onDraw": [{ "e": "trait", "who": "actor", "trait": "sanity", "delta": -1 }]
+      "onDraw": [
+        {
+          "e": "roll",
+          "who": "actor",
+          "trait": "sanity",
+          "reason": "Hanged Men (Sanity Roll)",
+          "branches": [
+            {
+              "min": 4,
+              "effects": []
+            },
+            {
+              "min": 1,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "sanity",
+                  "delta": -1
+                }
+              ]
+            },
+            {
+              "min": 0,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "sanity",
+                  "delta": -2
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "event.funeral",
       "deck": "event",
       "name": "Funeral",
-      "text": "You see mourners gathered around a mahogany casket bearing your own photo. Lose 1 Sanity.",
+      "text": "You see mourners gathered around a mahogany casket bearing your own photo! Make a Sanity roll: 4+ You dispel the macabre vision. 1-3 Morbid dread (Lose 1 Sanity). 0 Crushing despair (Lose 2 Sanity).",
       "flavor": "Black veils turn in unison to stare through you with empty eyes.",
       "keepInPlay": false,
       "isWeapon": false,
       "isCompanion": false,
-      "onDraw": [{ "e": "trait", "who": "actor", "trait": "sanity", "delta": -1 }]
+      "onDraw": [
+        {
+          "e": "roll",
+          "who": "actor",
+          "trait": "sanity",
+          "reason": "Funeral (Sanity Roll)",
+          "branches": [
+            {
+              "min": 4,
+              "effects": []
+            },
+            {
+              "min": 1,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "sanity",
+                  "delta": -1
+                }
+              ]
+            },
+            {
+              "min": 0,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "sanity",
+                  "delta": -2
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "event.creepy_crawlies",
       "deck": "event",
       "name": "Creepy Crawlies",
-      "text": "Thousands of centipedes and beetles drop from the ceiling onto you! Lose 1 Sanity.",
+      "text": "Thousands of centipedes and beetles drop from the ceiling onto you! Make a Sanity roll: 4+ You brush them off unflinchingly. 1-3 Repulsed and bitten (Lose 1 Sanity). 0 Swarmed in darkness (Lose 2 Sanity).",
       "flavor": "Tiny pincers and tickling legs swarm through your collar and hair.",
       "keepInPlay": false,
       "isWeapon": false,
       "isCompanion": false,
-      "onDraw": [{ "e": "trait", "who": "actor", "trait": "sanity", "delta": -1 }]
+      "onDraw": [
+        {
+          "e": "roll",
+          "who": "actor",
+          "trait": "sanity",
+          "reason": "Creepy Crawlies (Sanity Roll)",
+          "branches": [
+            {
+              "min": 4,
+              "effects": []
+            },
+            {
+              "min": 1,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "sanity",
+                  "delta": -1
+                }
+              ]
+            },
+            {
+              "min": 0,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "sanity",
+                  "delta": -2
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "event.closet_door",
       "deck": "event",
       "name": "Closet Door",
-      "text": "A cupboard door swings open, revealing a stash of old medical supplies! Gain 1 Might.",
+      "text": "A cupboard door swings open, revealing a stash of old medical supplies! Make a Knowledge roll: 4+ Pristine apothecary restoratives (Gain 1 Might, Gain 1 Speed). 1-3 Clean bandages and salves (Gain 1 Might). 0 Empty jars.",
       "flavor": "Salves and bandages preserved in amber apothecary jars.",
       "keepInPlay": false,
       "isWeapon": false,
       "isCompanion": false,
-      "onDraw": [{ "e": "trait", "who": "actor", "trait": "might", "delta": 1 }]
+      "onDraw": [
+        {
+          "e": "roll",
+          "who": "actor",
+          "trait": "knowledge",
+          "reason": "Closet Door (Knowledge Roll)",
+          "branches": [
+            {
+              "min": 4,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "might",
+                  "delta": 1
+                },
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "speed",
+                  "delta": 1
+                }
+              ]
+            },
+            {
+              "min": 1,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "might",
+                  "delta": 1
+                }
+              ]
+            },
+            {
+              "min": 0,
+              "effects": []
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "event.bloody_vision",
       "deck": "event",
       "name": "Bloody Vision",
-      "text": "The entire room suddenly appears drenched in fresh arterial blood, then vanishes. Lose 1 Sanity.",
+      "text": "The entire room suddenly appears drenched in fresh arterial blood, then vanishes! Make a Sanity roll: 4+ You look away in time. 1-3 Heart palpitations (Lose 1 Sanity). 0 Overcome with gore (Lose 2 Sanity).",
       "flavor": "Metallic copper taste fills your mouth as you gasp in terror.",
       "keepInPlay": false,
       "isWeapon": false,
       "isCompanion": false,
-      "onDraw": [{ "e": "trait", "who": "actor", "trait": "sanity", "delta": -1 }]
+      "onDraw": [
+        {
+          "e": "roll",
+          "who": "actor",
+          "trait": "sanity",
+          "reason": "Bloody Vision (Sanity Roll)",
+          "branches": [
+            {
+              "min": 4,
+              "effects": []
+            },
+            {
+              "min": 1,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "sanity",
+                  "delta": -1
+                }
+              ]
+            },
+            {
+              "min": 0,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "sanity",
+                  "delta": -2
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "event.night_view",
@@ -643,18 +1600,60 @@
       "keepInPlay": false,
       "isWeapon": false,
       "isCompanion": false,
-      "onDraw": [{ "e": "trait", "who": "actor", "trait": "sanity", "delta": 1 }]
+      "onDraw": [
+        {
+          "e": "trait",
+          "who": "actor",
+          "trait": "sanity",
+          "delta": 1
+        }
+      ]
     },
     {
       "id": "event.ground_tremors",
       "deck": "event",
       "name": "Ground Tremors",
-      "text": "The foundations shake violently as if something massive is stirring beneath. Lose 1 Speed.",
+      "text": "The foundations shake violently as if something massive is stirring beneath! Make a Speed roll: 4+ You keep your footing. 1-3 You stumble hard (Lose 1 Speed). 0 You crash violently to the floor (Lose 2 Speed).",
       "flavor": "Plaster dust rains down as stones grind against each other.",
       "keepInPlay": false,
       "isWeapon": false,
       "isCompanion": false,
-      "onDraw": [{ "e": "trait", "who": "actor", "trait": "speed", "delta": -1 }]
+      "onDraw": [
+        {
+          "e": "roll",
+          "who": "actor",
+          "trait": "speed",
+          "reason": "Ground Tremors (Speed Roll)",
+          "branches": [
+            {
+              "min": 4,
+              "effects": []
+            },
+            {
+              "min": 1,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "speed",
+                  "delta": -1
+                }
+              ]
+            },
+            {
+              "min": 0,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "speed",
+                  "delta": -2
+                }
+              ]
+            }
+          ]
+        }
+      ]
     }
   ]
 }

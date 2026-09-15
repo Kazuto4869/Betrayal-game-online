@@ -43,8 +43,27 @@ describe('trait effect', () => {
     );
   });
 
-  it('kills the explorer on reaching the skull, and only fires died once', () => {
+  it('clamps at index 1 and prevents death in explore phase', () => {
     const { state } = startedGame();
+    const seat = state.activeSeat!;
+    const out = runEffects(
+      state,
+      [{ e: 'trait', who: 'actor', trait: 'sanity', delta: -99 }],
+      baseCtx(state),
+      content,
+    );
+    expect(out.state.players[seat]!.traits.sanity).toBe(1);
+    expect(out.state.players[seat]!.isDead).toBe(false);
+    expect(out.events.filter((e) => e.t === 'died')).toHaveLength(0);
+  });
+
+  it('kills the explorer on reaching the skull during haunt, and only fires died once', () => {
+    const { state: base } = startedGame();
+    const state: GameState = {
+      ...base,
+      phase: 'haunt',
+      haunt: { hauntId: 1, traitorSeat: null, revealed: true, acknowledged: [] },
+    };
     const seat = state.activeSeat!;
     const out = runEffects(
       state,
@@ -507,5 +526,51 @@ describe('conditions', () => {
     expect(
       evalCondition(state, { k: 'or', cs: [alwaysTrue, alwaysFalse] }, ctx, content),
     ).toBe(true);
+  });
+});
+
+describe('roll effect', () => {
+  it('rolls dice based on trait and branches on outcome', () => {
+    const { state } = startedGame();
+    const seat = state.activeSeat!;
+    const effect: Effect = {
+      e: 'roll',
+      who: 'actor',
+      trait: 'might',
+      reason: 'Test Might Roll',
+      branches: [
+        { min: 4, effects: [{ e: 'log', text: 'Success: 4+' }] },
+        { min: 0, effects: [{ e: 'trait', who: 'actor', trait: 'might', delta: -1 }] },
+      ],
+    };
+
+    const out = runEffects(state, [effect], baseCtx(state), content);
+    expect(out.events).toContainEqual(
+      expect.objectContaining({
+        t: 'rolled',
+        seat,
+        reason: 'Test Might Roll',
+      }),
+    );
+  });
+
+  it('rolls explicit fixed dice count if trait is omitted', () => {
+    const { state } = startedGame();
+    const _seat = state.activeSeat!;
+    const effect: Effect = {
+      e: 'roll',
+      who: 'actor',
+      dice: 3,
+      reason: 'Fixed 3 Dice Roll',
+      branches: [
+        { min: 0, effects: [{ e: 'log', text: 'Rolled fixed dice' }] },
+      ],
+    };
+
+    const out = runEffects(state, [effect], baseCtx(state), content);
+    const rolledEvent = out.events.find((e) => e.t === 'rolled') as any;
+    expect(rolledEvent).toBeDefined();
+    expect(rolledEvent.dice).toHaveLength(3);
+    expect(rolledEvent.reason).toBe('Fixed 3 Dice Roll');
   });
 });

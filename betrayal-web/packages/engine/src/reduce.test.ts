@@ -213,7 +213,7 @@ describe('host transfer', () => {
 });
 
 describe('starting a game', () => {
-  it('starts a game when minimum players have chosen', () => {
+  it('starts a game when minimum players have chosen (temporary solo-development rule: MIN_PLAYERS = 1)', () => {
     const g = playGame({
       players: ['Ana'],
       actions: [

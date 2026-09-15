@@ -3,12 +3,13 @@ import { useStore } from '../store.js';
 
 export function DiceRollTray() {
   const activeRoll = useStore((s) => s.activeRoll);
+  const activeCardDraw = useStore((s) => s.activeCardDraw);
   const dismissRoll = useStore((s) => s.dismissRoll);
   const [isRolling, setIsRolling] = useState(true);
   const [displayDice, setDisplayDice] = useState<number[]>([]);
 
   useEffect(() => {
-    if (!activeRoll) {
+    if (!activeRoll || activeCardDraw) {
       setIsRolling(true);
       return;
     }
@@ -32,9 +33,9 @@ export function DiceRollTray() {
       clearInterval(interval);
       clearTimeout(timer);
     };
-  }, [activeRoll]);
+  }, [activeRoll, activeCardDraw]);
 
-  if (!activeRoll) return null;
+  if (!activeRoll || activeCardDraw) return null;
 
   const isHaunt = Boolean(activeRoll.hauntRoll) || activeRoll.reason === 'haunt_roll';
 

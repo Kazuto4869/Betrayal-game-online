@@ -12,7 +12,15 @@ export {
   takenColours,
   traitValue,
 } from './selectors.js';
-export { makeRng, next, nextInt, rollDice, shuffle } from './rng.js';
+export { makeRng, next, nextInt, rollDie, rollDice, shuffle, type DieFace } from './rng.js';
+export {
+  gainTrait,
+  loseTrait,
+  setTrait,
+  healTrait,
+  killExplorer,
+  type TraitOperationResult,
+} from './traits.js';
 export { beginTurnFor, findPath, getConnections, getReachable } from './movement.js';
 export {
   playGame,

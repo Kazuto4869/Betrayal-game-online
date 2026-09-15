@@ -1127,7 +1127,7 @@ function turnBudget(state: GameState): number {
  * first enumerable legal answer stands in, because for a `rotate_tile` prompt
  * "clear it instead" means losing a drawn tile.
  */
-function resolvePromptWithDefault(state: GameState, content: Content): ReduceResult {
+export function resolvePromptWithDefault(state: GameState, content: Content): ReduceResult {
   const pending = state.pending;
   if (!pending) return { state, events: [] };
 

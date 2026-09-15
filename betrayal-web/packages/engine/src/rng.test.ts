@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { makeRng, next, nextInt, rollDice, shuffle } from './rng.js';
+import { makeRng, next, nextInt, rollDie, rollDice, shuffle } from './rng.js';
 
 describe('rng', () => {
   it('is deterministic for a given seed', () => {
@@ -10,8 +10,8 @@ describe('rng', () => {
   });
 
   it('produces different streams for different seeds', () => {
-    const a = rollDice(makeRng(1), 20)[0];
-    const b = rollDice(makeRng(2), 20)[0];
+    const a = rollDice(makeRng(1), 8)[0];
+    const b = rollDice(makeRng(2), 8)[0];
     expect(a).not.toEqual(b);
   });
 
@@ -21,8 +21,19 @@ describe('rng', () => {
     next(rng);
     nextInt(rng, 10);
     shuffle(rng, [1, 2, 3]);
+    rollDie(rng);
     rollDice(rng, 3);
     expect(rng).toEqual(before);
+  });
+
+  it('rollDie rolls faces in {0,1,2} and advances counter by one', () => {
+    let rng = makeRng(42);
+    for (let i = 0; i < 100; i++) {
+      const [face, nextRng] = rollDie(rng);
+      expect([0, 1, 2]).toContain(face);
+      expect(nextRng.counter).toBe(rng.counter + 1);
+      rng = nextRng;
+    }
   });
 
   it('advances the counter by one per draw', () => {
@@ -32,11 +43,31 @@ describe('rng', () => {
     expect(r2.counter).toBe(6);
   });
 
-  it('rolls dice with faces in {0,1,2}', () => {
-    const [faces, total] = rollDice(makeRng(42), 100);
-    expect(faces).toHaveLength(100);
-    for (const f of faces) expect([0, 1, 2]).toContain(f);
-    expect(total).toBe(faces.reduce((a, b) => a + b, 0));
+  it('rollDice count 0 returns empty array, total 0, and unchanged RNG', () => {
+    const rng = makeRng(99);
+    const [faces, total, nextRng] = rollDice(rng, 0);
+    expect(faces).toEqual([]);
+    expect(total).toBe(0);
+    expect(nextRng).toEqual(rng);
+  });
+
+  it('rollDice accepts counts up to max 8 and total matches face sum', () => {
+    for (let count = 1; count <= 8; count++) {
+      const [faces, total, nextRng] = rollDice(makeRng( count * 10), count);
+      expect(faces).toHaveLength(count);
+      for (const f of faces) expect([0, 1, 2]).toContain(f);
+      expect(total).toBe(faces.reduce((a, b) => a + b, 0));
+      expect(nextRng.counter).toBe(count);
+    }
+  });
+
+  it('rollDice throws on invalid counts without consuming RNG', () => {
+    const rng = makeRng(123);
+    const invalidCounts = [-1, -5, 1.5, 2.7, 9, 10, 100, NaN, Infinity, -Infinity];
+    for (const count of invalidCounts) {
+      expect(() => rollDice(rng, count)).toThrow();
+      expect(rng.counter).toBe(0);
+    }
   });
 
   it('rolls a plausible distribution over many samples', () => {

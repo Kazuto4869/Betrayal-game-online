@@ -184,7 +184,15 @@ export type Effect =
   | { e: 'end_turn'; who: SeatRef }
   | { e: 'log'; text: string }
   | { e: 'if'; c: Condition; then: Effect[]; else?: Effect[] | undefined }
-  | { e: 'for_each'; who: SeatRef; do: Effect[] };
+  | { e: 'for_each'; who: SeatRef; do: Effect[] }
+  | {
+      e: 'roll';
+      who: SeatRef;
+      trait?: Trait | undefined;
+      dice?: number | undefined;
+      reason?: string | undefined;
+      branches: Array<{ min: number; effects: Effect[] }>;
+    };
 
 export const EffectSchema: z.ZodType<Effect> = z.lazy(() =>
   z.discriminatedUnion('e', [
@@ -222,5 +230,18 @@ export const EffectSchema: z.ZodType<Effect> = z.lazy(() =>
       else: z.array(EffectSchema).optional(),
     }),
     z.object({ e: z.literal('for_each'), who: SeatRefSchema, do: z.array(EffectSchema) }),
+    z.object({
+      e: z.literal('roll'),
+      who: SeatRefSchema,
+      trait: TraitSchema.optional(),
+      dice: z.number().int().min(1).max(8).optional(),
+      reason: z.string().optional(),
+      branches: z.array(
+        z.object({
+          min: z.number().int(),
+          effects: z.lazy(() => z.array(EffectSchema)),
+        }),
+      ),
+    }),
   ]),
 );

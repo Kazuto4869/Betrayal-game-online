@@ -47,16 +47,40 @@ export function shuffle<T>(rng: RngState, items: readonly T[]): [T[], RngState] 
   return [out, r];
 }
 
+export type DieFace = 0 | 1 | 2;
+
+/**
+ * Roll a single die: uniform draw from {0,1,2}.
+ * Returns [face, nextRng].
+ */
+export function rollDie(rng: RngState): [DieFace, RngState] {
+  const [face, nextRng] = nextInt(rng, 3);
+  return [face as DieFace, nextRng];
+}
+
 /**
  * The game's dice: six-sided with faces 0,0,1,1,2,2 — so each die is a
- * uniform draw from {0,1,2}. Returns [faces, total, nextState].
+ * uniform draw from {0,1,2}.
+ * Only accepts an integer count in 0..8. Reuses rollDie.
+ * Returns [faces, total, nextState].
  */
-export function rollDice(rng: RngState, count: number): [number[], number, RngState] {
-  const faces: number[] = [];
+export function rollDice(
+  rng: RngState,
+  count: number,
+): [DieFace[], number, RngState] {
+  if (!Number.isInteger(count) || count < 0 || count > 8) {
+    throw new Error(
+      `rollDice requires an integer count between 0 and 8, got ${count}`,
+    );
+  }
+  if (count === 0) {
+    return [[], 0, rng];
+  }
+  const faces: DieFace[] = [];
   let r = rng;
   let total = 0;
   for (let i = 0; i < count; i++) {
-    const [face, nr] = nextInt(r, 3);
+    const [face, nr] = rollDie(r);
     r = nr;
     faces.push(face);
     total += face;

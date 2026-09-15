@@ -37,7 +37,9 @@ import type {
 } from '@bahoth/content';
 import { raisePrompt } from './prompts.js';
 import { getReachable } from './movement.js';
-import { nextInt } from './rng.js';
+import { traitValue } from './selectors.js';
+import { makeRng, nextInt, rollDice } from './rng.js';
+import { gainTrait, loseTrait } from './traits.js';
 
 export class EffectError extends Error {
   constructor(message: string) {
@@ -288,6 +290,36 @@ function runList(
       return { state: { ...working, pending }, events, suspended: true };
     }
 
+    if (effect.e === 'roll') {
+      const seat = resolveSingleSeat(working, effect.who, activeCtx);
+      let diceCount = effect.dice ?? 1;
+      if (effect.trait) {
+        const player = working.players[seat];
+        if (player && player.charId) {
+          const charDef = content.charactersById[player.charId];
+          const track = charDef?.tracks[effect.trait];
+          const idx = player.traits[effect.trait];
+          const val = track ? Number(track[idx]) : 1;
+          diceCount = isNaN(val) ? 1 : val;
+        }
+      }
+      diceCount = Math.max(1, Math.min(8, diceCount));
+      const rng = working.rng ?? makeRng(12345);
+      const [dice, total, nextRng] = rollDice(rng, diceCount);
+      if (working.rng) working = { ...working, rng: nextRng };
+      const reason =
+        effect.reason ??
+        (effect.trait ? `${effect.trait.toUpperCase()} ROLL` : 'EVENT ROLL');
+      events.push({ t: 'rolled', seat, dice, total, reason });
+
+      const sorted = [...effect.branches].sort((a, b) => b.min - a.min);
+      const branch = sorted.find((b) => total >= b.min);
+      if (branch && branch.effects.length > 0) {
+        queue.unshift(...branch.effects);
+      }
+      continue;
+    }
+
     const leaf = applyLeaf(working, effect, activeCtx, content);
     working = leaf.state;
     events.push(...leaf.events);
@@ -325,7 +357,7 @@ function runForEach(
 
 function applyLeaf(
   state: GameState,
-  effect: Exclude<Effect, { e: 'if' } | { e: 'for_each' } | { e: 'prompt' }>,
+  effect: Exclude<Effect, { e: 'if' } | { e: 'for_each' } | { e: 'prompt' } | { e: 'roll' }>,
   ctx: EffectContext,
   content: Content,
 ): EffectOutcome {
@@ -352,31 +384,13 @@ function applyTrait(
   content: Content,
 ): EffectOutcome {
   const seat = resolveSingleSeat(state, effect.who, ctx);
-  const player = state.players[seat];
-  if (!player || player.isDead || !player.charId) return { state, events: [] };
-  const character = content.charactersById[player.charId];
-  const track = character?.tracks[effect.trait];
-  if (!track) return { state, events: [] };
-
-  const from = player.traits[effect.trait];
-  const to = Math.max(0, Math.min(track.length - 1, from + effect.delta));
-  if (to === from) return { state, events: [] };
-
-  const becameDead = to === 0 && !player.isDead;
-  const nextPlayer: PlayerState = {
-    ...player,
-    traits: { ...player.traits, [effect.trait]: to },
-    isDead: player.isDead || becameDead,
-  };
-  const events: GameEvent[] = [
-    { t: 'trait_changed', seat, trait: effect.trait, from, to },
-  ];
-  if (becameDead) events.push({ t: 'died', seat });
-
-  return {
-    state: { ...state, players: { ...state.players, [seat]: nextPlayer } },
-    events,
-  };
+  if (effect.delta > 0) {
+    return gainTrait(state, seat, effect.trait, effect.delta, content);
+  }
+  if (effect.delta < 0) {
+    return loseTrait(state, seat, effect.trait, -effect.delta, content);
+  }
+  return { state, events: [] };
 }
 
 function applyMove(
@@ -654,11 +668,13 @@ export function evalCondition(
     case 'holds':
     case 'trait_at_least': {
       if (c.who === 'any_hero' || c.who === 'all_heroes') {
-        const results = heroSeats(state).map((seat) => evalSeatCondition(state, c, seat));
+        const results = heroSeats(state).map((seat) =>
+          evalSeatCondition(state, c, seat, content),
+        );
         return c.who === 'any_hero' ? results.some(Boolean) : results.every(Boolean);
       }
       const seat = resolveSingleSeat(state, c.who, ctx);
-      return evalSeatCondition(state, c, seat);
+      return evalSeatCondition(state, c, seat, content);
     }
   }
 }
@@ -680,6 +696,7 @@ function evalSeatCondition(
   state: GameState,
   c: Extract<Condition, { k: 'seat_dead' | 'in_room' | 'holds' | 'trait_at_least' }>,
   seat: SeatId,
+  content: Content,
 ): boolean {
   const player = state.players[seat];
   if (!player) return false;
@@ -692,8 +709,10 @@ function evalSeatCondition(
     }
     case 'holds':
       return player.items.includes(c.cardId) || player.omens.includes(c.cardId);
-    case 'trait_at_least':
-      return player.traits[c.trait] >= c.value;
+    case 'trait_at_least': {
+      const printed = traitValue(state, seat, c.trait, content);
+      return printed >= c.value;
+    }
   }
 }
 

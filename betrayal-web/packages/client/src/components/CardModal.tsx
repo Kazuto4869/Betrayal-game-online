@@ -3,6 +3,7 @@ import { useStore } from '../store.js';
 
 export function CardModal() {
   const activeCardDraw = useStore((s) => s.activeCardDraw);
+  const activeRoll = useStore((s) => s.activeRoll);
   const content = useStore((s) => s.content);
   const dismissCardDraw = useStore((s) => s.dismissCardDraw);
   const [revealed, setRevealed] = useState(false);
@@ -29,6 +30,16 @@ export function CardModal() {
       : card.deck === 'item'
         ? '🎒 VẬT PHẨM (ITEM)'
         : '⚡ BIẾN CỐ (EVENT)';
+
+  let actionButtonLabel = '✅ Đã Đọc Xong (Xác Nhận)';
+  if (activeRoll) {
+    actionButtonLabel =
+      activeRoll.hauntRoll || activeRoll.reason === 'haunt_roll'
+        ? '🔮 Tiếp Tục: Gieo Xúc Xắc Ám Ảnh (Haunt Roll)'
+        : `🎲 Tiếp Tục: Gieo Xúc Xắc Kiểm Tra (${activeRoll.reason.toUpperCase()})`;
+  } else if (card.deck === 'item' || card.deck === 'omen') {
+    actionButtonLabel = '🎒 Nhận Thẻ Vào Túi Đồ (Xác Nhận)';
+  }
 
   return (
     <div className="modal-backdrop modal-backdrop--card">
@@ -79,9 +90,7 @@ export function CardModal() {
                 className="btn btn--primary btn--large"
                 onClick={dismissCardDraw}
               >
-                {card.deck === 'item' || card.deck === 'omen'
-                  ? '🎒 Nhận Thẻ Vào Túi Đồ (Xác Nhận)'
-                  : '✅ Đã Đọc Xong (Xác Nhận)'}
+                {actionButtonLabel}
               </button>
             </div>
           </div>
