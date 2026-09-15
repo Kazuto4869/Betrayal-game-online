@@ -33,3 +33,8 @@ Thumbs.db
 # Docker overrides
 docker-compose.override.yml
 **/docker-compose.override.yml
+
+# Reference repositories - local only, not needed for deployment
+/betrayal-alpht-reference/
+/betrayal-grapesalad-legacy/
+/betrayal-pupriku-reference/
