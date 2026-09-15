@@ -5,9 +5,11 @@ export function HauntBanner() {
   const state = useStore((s) => s.state);
   const content = useStore((s) => s.content);
   const seatId = useStore((s) => s.seatId);
+  const activeCardDraw = useStore((s) => s.activeCardDraw);
+  const activeRoll = useStore((s) => s.activeRoll);
   const [expanded, setExpanded] = useState(false);
 
-  if (!state || state.phase !== 'haunt' || !state.haunt || !content) {
+  if (!state || state.phase !== 'haunt' || !state.haunt || !content || activeCardDraw || activeRoll) {
     return null;
   }
 

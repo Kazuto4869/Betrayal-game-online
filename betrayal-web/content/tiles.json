@@ -109,7 +109,40 @@
       "symbol": "event",
       "copies": 1,
       "staticLinks": [],
-      "onEnter": []
+      "onEnter": [
+        {
+          "e": "roll",
+          "who": "actor",
+          "trait": "knowledge",
+          "reason": "Operating Lab (Knowledge Roll)",
+          "branches": [
+            {
+              "min": 4,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "knowledge",
+                  "delta": 1
+                },
+                {
+                  "e": "log",
+                  "text": "You master surgical techniques! Gain 1 Knowledge."
+                }
+              ]
+            },
+            {
+              "min": 0,
+              "effects": [
+                {
+                  "e": "log",
+                  "text": "The gruesome surgical instruments yield no answers."
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "tile.research_laboratory",
@@ -127,7 +160,40 @@
       "symbol": "event",
       "copies": 1,
       "staticLinks": [],
-      "onEnter": []
+      "onEnter": [
+        {
+          "e": "roll",
+          "who": "actor",
+          "trait": "knowledge",
+          "reason": "Research Lab (Knowledge Roll)",
+          "branches": [
+            {
+              "min": 4,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "knowledge",
+                  "delta": 1
+                },
+                {
+                  "e": "log",
+                  "text": "You conduct successful experiments! Gain 1 Knowledge."
+                }
+              ]
+            },
+            {
+              "min": 0,
+              "effects": [
+                {
+                  "e": "log",
+                  "text": "The chemicals fizzle out with no result."
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "tile.stairs_from_basement",
@@ -252,7 +318,17 @@
       "symbol": null,
       "copies": 1,
       "staticLinks": [],
-      "onEnter": []
+      "onEnter": [
+        {
+          "e": "move",
+          "who": "actor",
+          "to": "landing:basement"
+        },
+        {
+          "e": "log",
+          "text": "Whoosh! You slide down the Coal Chute straight into the Basement Landing!"
+        }
+      ]
     },
     {
       "id": "tile.gardens",
@@ -269,7 +345,36 @@
       "symbol": "event",
       "copies": 1,
       "staticLinks": [],
-      "onEnter": []
+      "onEnter": [
+        {
+          "e": "if",
+          "c": {
+            "k": "flag",
+            "scope": "seat",
+            "key": "healed_gardens",
+            "op": "=",
+            "value": 0
+          },
+          "then": [
+            {
+              "e": "trait",
+              "who": "actor",
+              "trait": "might",
+              "delta": 1
+            },
+            {
+              "e": "set_flag",
+              "scope": "seat",
+              "key": "healed_gardens",
+              "value": 1
+            },
+            {
+              "e": "log",
+              "text": "The fresh floral scent revitalizes your strength! Gain 1 Might (once per explorer)."
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "tile.ballroom",
@@ -573,7 +678,40 @@
       "symbol": null,
       "copies": 1,
       "staticLinks": [],
-      "onEnter": []
+      "onEnter": [
+        {
+          "e": "roll",
+          "who": "actor",
+          "trait": "speed",
+          "reason": "Chasm Crossing (Speed Roll)",
+          "branches": [
+            {
+              "min": 3,
+              "effects": [
+                {
+                  "e": "log",
+                  "text": "You leap cleanly across the bottomless chasm!"
+                }
+              ]
+            },
+            {
+              "min": 0,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "speed",
+                  "delta": -1
+                },
+                {
+                  "e": "log",
+                  "text": "You stumble on the jagged edge! Lose 1 Speed."
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "tile.junk_room",
@@ -592,7 +730,40 @@
       "symbol": "omen",
       "copies": 1,
       "staticLinks": [],
-      "onEnter": []
+      "onEnter": [
+        {
+          "e": "roll",
+          "who": "actor",
+          "trait": "might",
+          "reason": "Junk Room (Might Roll)",
+          "branches": [
+            {
+              "min": 3,
+              "effects": [
+                {
+                  "e": "log",
+                  "text": "You navigate through the piles of debris with ease."
+                }
+              ]
+            },
+            {
+              "min": 0,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "speed",
+                  "delta": -1
+                },
+                {
+                  "e": "log",
+                  "text": "Jagged metal and sharp glass scratch your legs! Lose 1 Speed."
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "tile.chapel",
@@ -610,7 +781,36 @@
       "symbol": "event",
       "copies": 1,
       "staticLinks": [],
-      "onEnter": []
+      "onEnter": [
+        {
+          "e": "if",
+          "c": {
+            "k": "flag",
+            "scope": "seat",
+            "key": "blessed_chapel",
+            "op": "=",
+            "value": 0
+          },
+          "then": [
+            {
+              "e": "trait",
+              "who": "actor",
+              "trait": "sanity",
+              "delta": 1
+            },
+            {
+              "e": "set_flag",
+              "scope": "seat",
+              "key": "blessed_chapel",
+              "value": 1
+            },
+            {
+              "e": "log",
+              "text": "The serene sanctuary calms your soul! Gain 1 Sanity (once per explorer)."
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "tile.gymnasium",
@@ -628,7 +828,36 @@
       "symbol": "omen",
       "copies": 1,
       "staticLinks": [],
-      "onEnter": []
+      "onEnter": [
+        {
+          "e": "if",
+          "c": {
+            "k": "flag",
+            "scope": "seat",
+            "key": "trained_gym",
+            "op": "=",
+            "value": 0
+          },
+          "then": [
+            {
+              "e": "trait",
+              "who": "actor",
+              "trait": "speed",
+              "delta": 1
+            },
+            {
+              "e": "set_flag",
+              "scope": "seat",
+              "key": "trained_gym",
+              "value": 1
+            },
+            {
+              "e": "log",
+              "text": "You train on the vintage equipment. Gain 1 Speed (once per explorer)."
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "tile.the_pentagram_chamber",
@@ -663,7 +892,36 @@
       "symbol": "event",
       "copies": 1,
       "staticLinks": [],
-      "onEnter": []
+      "onEnter": [
+        {
+          "e": "if",
+          "c": {
+            "k": "flag",
+            "scope": "seat",
+            "key": "studied_library",
+            "op": "=",
+            "value": 0
+          },
+          "then": [
+            {
+              "e": "trait",
+              "who": "actor",
+              "trait": "knowledge",
+              "delta": 1
+            },
+            {
+              "e": "set_flag",
+              "scope": "seat",
+              "key": "studied_library",
+              "value": 1
+            },
+            {
+              "e": "log",
+              "text": "You study the arcane tomes on the shelves! Gain 1 Knowledge (once per explorer)."
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "tile.attic",
@@ -697,7 +955,18 @@
       "symbol": "omen",
       "copies": 1,
       "staticLinks": [],
-      "onEnter": []
+      "onEnter": [
+        {
+          "e": "trait",
+          "who": "actor",
+          "trait": "might",
+          "delta": -1
+        },
+        {
+          "e": "log",
+          "text": "The searing heat of the Furnace Room scorches you! Lose 1 Might."
+        }
+      ]
     },
     {
       "id": "tile.graveyard",
@@ -714,7 +983,40 @@
       "symbol": "event",
       "copies": 1,
       "staticLinks": [],
-      "onEnter": []
+      "onEnter": [
+        {
+          "e": "roll",
+          "who": "actor",
+          "trait": "sanity",
+          "reason": "Graveyard (Sanity Roll)",
+          "branches": [
+            {
+              "min": 4,
+              "effects": [
+                {
+                  "e": "log",
+                  "text": "You walk past the quiet headstones peacefully."
+                }
+              ]
+            },
+            {
+              "min": 0,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "sanity",
+                  "delta": -1
+                },
+                {
+                  "e": "log",
+                  "text": "Restless spirits whisper from their graves! Lose 1 Sanity."
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "tile.larder",
@@ -731,7 +1033,36 @@
       "symbol": "item",
       "copies": 1,
       "staticLinks": [],
-      "onEnter": []
+      "onEnter": [
+        {
+          "e": "if",
+          "c": {
+            "k": "flag",
+            "scope": "seat",
+            "key": "eaten_larder",
+            "op": "=",
+            "value": 0
+          },
+          "then": [
+            {
+              "e": "trait",
+              "who": "actor",
+              "trait": "might",
+              "delta": 1
+            },
+            {
+              "e": "set_flag",
+              "scope": "seat",
+              "key": "eaten_larder",
+              "value": 1
+            },
+            {
+              "e": "log",
+              "text": "You find preserved rations and eat heartily! Gain 1 Might (once per explorer)."
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "tile.crypt",
@@ -748,7 +1079,18 @@
       "symbol": "event",
       "copies": 1,
       "staticLinks": [],
-      "onEnter": []
+      "onEnter": [
+        {
+          "e": "trait",
+          "who": "actor",
+          "trait": "sanity",
+          "delta": -1
+        },
+        {
+          "e": "log",
+          "text": "An eerie chill from the tombs pierces your mind! Lose 1 Sanity."
+        }
+      ]
     },
     {
       "id": "tile.the_vault",
@@ -766,7 +1108,40 @@
       "symbol": "event",
       "copies": 1,
       "staticLinks": [],
-      "onEnter": []
+      "onEnter": [
+        {
+          "e": "roll",
+          "who": "actor",
+          "trait": "knowledge",
+          "reason": "Cracking The Vault (Knowledge Roll)",
+          "branches": [
+            {
+              "min": 6,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "knowledge",
+                  "delta": 1
+                },
+                {
+                  "e": "log",
+                  "text": "Click! You crack the intricate vault mechanism! Gain 1 Knowledge."
+                }
+              ]
+            },
+            {
+              "min": 0,
+              "effects": [
+                {
+                  "e": "log",
+                  "text": "The reinforced vault door remains firmly locked (requires 6+ Knowledge)."
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "tile.upper_landing",
@@ -818,7 +1193,45 @@
       "symbol": "event",
       "copies": 1,
       "staticLinks": [],
-      "onEnter": []
+      "onEnter": [
+        {
+          "e": "roll",
+          "who": "actor",
+          "trait": "speed",
+          "reason": "Collapsed Room (Speed Roll)",
+          "branches": [
+            {
+              "min": 5,
+              "effects": [
+                {
+                  "e": "log",
+                  "text": "You leap swiftly across the crumbling floor to safety!"
+                }
+              ]
+            },
+            {
+              "min": 0,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "might",
+                  "delta": -1
+                },
+                {
+                  "e": "move",
+                  "who": "actor",
+                  "to": "landing:basement"
+                },
+                {
+                  "e": "log",
+                  "text": "The floor gives way! You plummet into the Basement Landing and take 1 Might damage."
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "tile.mystic_elevator",

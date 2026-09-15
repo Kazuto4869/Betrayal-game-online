@@ -148,6 +148,8 @@ export function InventoryTray() {
             const card = content.cardsById[id];
             if (!card) return null;
 
+            const isUsable = Boolean(card.onUse && card.onUse.length > 0);
+
             return (
               <div
                 key={id}
@@ -159,20 +161,32 @@ export function InventoryTray() {
                   <span className="inventory-card__badge">
                     {isOmen ? '🔮 Omen' : '🎒 Item'}
                   </span>
-                  <span className="inventory-card__name">{card.name}</span>
+                  <span className="inventory-card__name">
+                    {card.isWeapon ? `⚔️ ${card.name}` : card.name}
+                  </span>
                 </div>
                 <div className="inventory-card__text">{card.text}</div>
                 <div className="inventory-card__actions">
-                  <button
-                    type="button"
-                    className="btn btn--small btn--primary"
-                    disabled={!isMyTurn || pending}
-                    onClick={() =>
-                      send({ t: 'USE_ITEM', seat: seatId, cardId: id })
-                    }
-                  >
-                    Use
-                  </button>
+                  {isUsable ? (
+                    <button
+                      type="button"
+                      className="btn btn--small btn--primary"
+                      disabled={!isMyTurn || pending}
+                      onClick={() =>
+                        send({ t: 'USE_ITEM', seat: seatId, cardId: id })
+                      }
+                    >
+                      ✨ Dùng (Use)
+                    </button>
+                  ) : card.isWeapon ? (
+                    <span className="tag" title="Tự động áp dụng khi tấn công">
+                      ⚔️ Vũ khí
+                    </span>
+                  ) : (
+                    <span className="tag" title="Hiệu ứng vĩnh viễn/bị động">
+                      🛡️ Bị động
+                    </span>
+                  )}
                   <button
                     type="button"
                     className="btn btn--small btn--ghost"
@@ -181,7 +195,7 @@ export function InventoryTray() {
                       send({ t: 'DROP', seat: seatId, cardIds: [id] })
                     }
                   >
-                    Drop
+                    Thả (Drop)
                   </button>
                 </div>
               </div>

@@ -325,14 +325,14 @@ export function Board({
 }
 
 const SYMBOL_GLYPH: Record<'item' | 'event' | 'omen', string> = {
-  item: '◆',
-  event: '✦',
-  omen: '☾',
+  item: '🗝️',
+  event: '⚡',
+  omen: '🔮',
 };
 const SYMBOL_LABEL: Record<'item' | 'event' | 'omen', string> = {
-  item: 'Item',
-  event: 'Event',
-  omen: 'Omen',
+  item: '🎒 Vật Phẩm (Item)',
+  event: '⚡ Biến Cố (Event)',
+  omen: '🔮 Điềm Báo (Omen)',
 };
 
 /** Small offsets from the pawn anchor so several pawns in one room stay individually readable. */
@@ -397,6 +397,14 @@ function Tile({ view, content, floor, reachable, pawns, onMoveTo, ghost }: TileP
         >
           <span aria-hidden="true">{SYMBOL_GLYPH[view.symbol]}</span>
           <span className="sr-only">{SYMBOL_LABEL[view.symbol]}</span>
+        </span>
+      )}
+      {Boolean(tile?.onEnter && tile.onEnter.length > 0) && (
+        <span
+          className="tile__effect-badge"
+          title="🏰 Phòng có hiệu ứng đặc biệt khi bước vào"
+        >
+          ✨
         </span>
       )}
       {view.links.length > 0 && (

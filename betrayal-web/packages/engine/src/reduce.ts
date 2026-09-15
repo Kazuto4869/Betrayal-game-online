@@ -427,6 +427,16 @@ function move(
     from = step;
   }
 
+  const destPlaced = nextState.board.placed[to];
+  if (destPlaced) {
+    const tileDef = content.tilesById[destPlaced.tileId];
+    if (tileDef && tileDef.onEnter.length > 0) {
+      const outcome = runEffects(nextState, tileDef.onEnter, { actor: seat }, content);
+      nextState = outcome.state;
+      events.push(...outcome.events);
+    }
+  }
+
   return { state: nextState, events };
 }
 

@@ -58,21 +58,43 @@
       "id": "item.angel_feather",
       "deck": "item",
       "name": "Angel Feather",
-      "text": "You may declare any die roll result before rolling.",
+      "text": "A glowing white feather that floats softly. Blesses you with divine protection (+1 Sanity, +1 Speed).",
       "flavor": "Pure white, miraculously unsoiled by the dust and decay around you.",
       "keepInPlay": true,
       "isWeapon": false,
-      "isCompanion": false
+      "isCompanion": false,
+      "onDraw": [
+        {
+          "e": "trait",
+          "who": "actor",
+          "trait": "sanity",
+          "delta": 1
+        },
+        {
+          "e": "trait",
+          "who": "actor",
+          "trait": "speed",
+          "delta": 1
+        }
+      ]
     },
     {
       "id": "item.armor",
       "deck": "item",
       "name": "Armor",
-      "text": "Reduces physical damage taken by 1 step.",
+      "text": "A breastplate of antique steel. Deflects physical attacks (+1 Might).",
       "flavor": "Heavy iron plates that clank with every step.",
       "keepInPlay": true,
       "isWeapon": false,
-      "isCompanion": false
+      "isCompanion": false,
+      "onDraw": [
+        {
+          "e": "trait",
+          "who": "actor",
+          "trait": "might",
+          "delta": 1
+        }
+      ]
     },
     {
       "id": "item.axe",
@@ -106,27 +128,88 @@
       "id": "item.blood_dagger",
       "deck": "item",
       "name": "Blood Dagger",
-      "text": "Weapon: +2 Speed on attack, but takes a toll on your mind.",
+      "text": "A curved, jagged blade thirsty for blood. Weapon: grants +2 Might on draw.",
       "flavor": "A wicked obsidian blade that seems thirsty for blood.",
       "keepInPlay": true,
       "isWeapon": true,
-      "isCompanion": false
+      "isCompanion": false,
+      "onDraw": [
+        {
+          "e": "trait",
+          "who": "actor",
+          "trait": "might",
+          "delta": 2
+        }
+      ]
     },
     {
       "id": "item.bottle",
       "deck": "item",
       "name": "Bottle",
-      "text": "An unlabeled draught. Roll 1 die on use: 2=gain 2 steps, 1=gain 1 step, 0=lose 1 step.",
+      "text": "An amber glass bottle filled with bubbling liquid. Drink it: roll 3 dice. 4+ Invigorating elixir (Gain 1 Might, Speed); 1-3 Bitter tonic (Gain 1 Sanity); 0 Poison (Lose 1 Might).",
       "flavor": "Dark bubbling liquid that smells faintly of almonds.",
-      "keepInPlay": true,
+      "keepInPlay": false,
       "isWeapon": false,
       "isCompanion": false,
       "onUse": [
         {
-          "e": "trait",
+          "e": "roll",
           "who": "actor",
-          "trait": "might",
-          "delta": 1
+          "dice": 3,
+          "reason": "Drink Bottle (Roll 3 Dice)",
+          "branches": [
+            {
+              "min": 4,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "might",
+                  "delta": 1
+                },
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "speed",
+                  "delta": 1
+                },
+                {
+                  "e": "log",
+                  "text": "Invigorating elixir! Gain 1 Might and 1 Speed."
+                }
+              ]
+            },
+            {
+              "min": 1,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "sanity",
+                  "delta": 1
+                },
+                {
+                  "e": "log",
+                  "text": "Bitter herbal tonic clears your mind. Gain 1 Sanity."
+                }
+              ]
+            },
+            {
+              "min": 0,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "might",
+                  "delta": -1
+                },
+                {
+                  "e": "log",
+                  "text": "Acrid poison burns your throat! Lose 1 Might."
+                }
+              ]
+            }
+          ]
         }
       ]
     },
@@ -134,21 +217,93 @@
       "id": "item.candle",
       "deck": "item",
       "name": "Candle",
-      "text": "Illuminates dark chambers. Grants +1 to searches and line-of-sight rolls.",
+      "text": "A beeswax candle whose flame reveals hidden secrets (+1 Knowledge, +1 Sanity).",
       "flavor": "A steady yellow flame that burns without melting the tallow.",
       "keepInPlay": true,
       "isWeapon": false,
-      "isCompanion": false
+      "isCompanion": false,
+      "onDraw": [
+        {
+          "e": "trait",
+          "who": "actor",
+          "trait": "knowledge",
+          "delta": 1
+        },
+        {
+          "e": "trait",
+          "who": "actor",
+          "trait": "sanity",
+          "delta": 1
+        }
+      ]
     },
     {
       "id": "item.dark_dice",
       "deck": "item",
       "name": "Dark Dice",
-      "text": "Carved from blackened bone. Roll to gamble on trait changes.",
+      "text": "Three black dice with crimson pips. Roll 3 dice: 4+ Dark boon grants +1 Might, Speed, Knowledge; 0-3 The dark dice demand payment (Lose 1 Might and 1 Speed).",
       "flavor": "They land with unnatural weight, whispering secrets of misfortune.",
       "keepInPlay": true,
       "isWeapon": false,
-      "isCompanion": false
+      "isCompanion": false,
+      "onUse": [
+        {
+          "e": "roll",
+          "who": "actor",
+          "dice": 3,
+          "reason": "Dark Dice (Roll 3 Dice)",
+          "branches": [
+            {
+              "min": 4,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "might",
+                  "delta": 1
+                },
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "speed",
+                  "delta": 1
+                },
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "knowledge",
+                  "delta": 1
+                },
+                {
+                  "e": "log",
+                  "text": "Dark boon! Gain 1 to Might, Speed, Knowledge."
+                }
+              ]
+            },
+            {
+              "min": 0,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "might",
+                  "delta": -1
+                },
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "speed",
+                  "delta": -1
+                },
+                {
+                  "e": "log",
+                  "text": "The dark dice drain your vitality! Lose 1 Might and 1 Speed."
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "item.dynamite",
@@ -188,37 +343,150 @@
       "id": "item.idol",
       "deck": "item",
       "name": "Idol",
-      "text": "A grotesque statuette that radiates uncanny power.",
+      "text": "A golden idol of a forgotten deity. Make a Sanity roll: 4+ Divine blessing (+1 to all traits!); 0-3 Dark curse (Lose 1 Sanity).",
       "flavor": "The idol's eyes seem to follow you everywhere you turn.",
       "keepInPlay": true,
       "isWeapon": false,
-      "isCompanion": false
+      "isCompanion": false,
+      "onUse": [
+        {
+          "e": "roll",
+          "who": "actor",
+          "trait": "sanity",
+          "reason": "Idol (Sanity Roll)",
+          "branches": [
+            {
+              "min": 4,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "might",
+                  "delta": 1
+                },
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "speed",
+                  "delta": 1
+                },
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "sanity",
+                  "delta": 1
+                },
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "knowledge",
+                  "delta": 1
+                },
+                {
+                  "e": "log",
+                  "text": "The golden idol radiates divine light! All traits increased by 1!"
+                }
+              ]
+            },
+            {
+              "min": 0,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "sanity",
+                  "delta": -1
+                },
+                {
+                  "e": "log",
+                  "text": "A dark curse drains your spirit. Lose 1 Sanity."
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "item.lucky_stone",
       "deck": "item",
       "name": "Lucky Stone",
-      "text": "Add +1 to any die roll you make.",
+      "text": "A smooth river stone that hums with good fortune (+1 Speed, +1 Sanity).",
       "flavor": "Smooth jade that feels pleasantly cool in your palm.",
       "keepInPlay": true,
       "isWeapon": false,
-      "isCompanion": false
+      "isCompanion": false,
+      "onDraw": [
+        {
+          "e": "trait",
+          "who": "actor",
+          "trait": "speed",
+          "delta": 1
+        },
+        {
+          "e": "trait",
+          "who": "actor",
+          "trait": "sanity",
+          "delta": 1
+        }
+      ]
     },
     {
       "id": "item.medical_kit",
       "deck": "item",
       "name": "Medical Kit",
-      "text": "Restore 1 step to a physical trait (Speed or Might) each turn.",
+      "text": "A leather satchel of bandages and salves. Make a Knowledge roll: 4+ Expert care (Gain 2 Might); 1-3 Basic care (Gain 1 Might); 0 Fumbled.",
       "flavor": "Bandages, antiseptic, and surgical tools in a leather case.",
       "keepInPlay": true,
       "isWeapon": false,
       "isCompanion": false,
       "onUse": [
         {
-          "e": "trait",
+          "e": "roll",
           "who": "actor",
-          "trait": "might",
-          "delta": 1
+          "trait": "knowledge",
+          "reason": "Medical Kit (Knowledge Roll)",
+          "branches": [
+            {
+              "min": 4,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "might",
+                  "delta": 2
+                },
+                {
+                  "e": "log",
+                  "text": "You bandage your wounds expertly. Gain 2 Might."
+                }
+              ]
+            },
+            {
+              "min": 1,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "might",
+                  "delta": 1
+                },
+                {
+                  "e": "log",
+                  "text": "You dress your cuts. Gain 1 Might."
+                }
+              ]
+            },
+            {
+              "min": 0,
+              "effects": [
+                {
+                  "e": "log",
+                  "text": "You fail to bandage properly."
+                }
+              ]
+            }
+          ]
         }
       ]
     },
@@ -226,61 +494,185 @@
       "id": "item.music_box",
       "deck": "item",
       "name": "Music Box",
-      "text": "Wind the key to play a haunting lullaby. Enemies must test Sanity or pause.",
+      "text": "A tarnished brass music box with a dancing skeleton. Play melody: make a Sanity roll: 4+ Soothing tune (Gain 1 Sanity); 0-3 Agonizing discord (Lose 1 Sanity).",
       "flavor": "Inlaid with mother-of-pearl, playing a bittersweet melody.",
       "keepInPlay": true,
       "isWeapon": false,
-      "isCompanion": false
+      "isCompanion": false,
+      "onUse": [
+        {
+          "e": "roll",
+          "who": "actor",
+          "trait": "sanity",
+          "reason": "Music Box (Sanity Roll)",
+          "branches": [
+            {
+              "min": 4,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "sanity",
+                  "delta": 1
+                },
+                {
+                  "e": "log",
+                  "text": "A sweet, calming melody soothes your frayed nerves. Gain 1 Sanity."
+                }
+              ]
+            },
+            {
+              "min": 0,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "sanity",
+                  "delta": -1
+                },
+                {
+                  "e": "log",
+                  "text": "Discordant, agonizing chimes ring out! Lose 1 Sanity."
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "item.pickpocket_gloves",
       "deck": "item",
       "name": "Pickpocket's Gloves",
-      "text": "Allows you to take an item from another explorer in your room.",
+      "text": "Soft leather gloves with supple fingertips (+1 Speed, +1 Knowledge).",
       "flavor": "Supple black leather that moves like a second skin.",
       "keepInPlay": true,
       "isWeapon": false,
-      "isCompanion": false
+      "isCompanion": false,
+      "onDraw": [
+        {
+          "e": "trait",
+          "who": "actor",
+          "trait": "speed",
+          "delta": 1
+        },
+        {
+          "e": "trait",
+          "who": "actor",
+          "trait": "knowledge",
+          "delta": 1
+        }
+      ]
     },
     {
       "id": "item.puzzle_box",
       "deck": "item",
       "name": "Puzzle Box",
-      "text": "Test Knowledge 6+ to open it. Inside you find 2 items.",
+      "text": "An intricate puzzle box of polished bone. Make a Knowledge roll: 6+ Crack the box open (Gain 2 Knowledge, Gain 1 Might); 0-5 Remains sealed.",
       "flavor": "Intricate sliding wooden panels with geometric carvings.",
       "keepInPlay": true,
       "isWeapon": false,
-      "isCompanion": false
+      "isCompanion": false,
+      "onUse": [
+        {
+          "e": "roll",
+          "who": "actor",
+          "trait": "knowledge",
+          "reason": "Puzzle Box (Knowledge Roll)",
+          "branches": [
+            {
+              "min": 6,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "knowledge",
+                  "delta": 2
+                },
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "might",
+                  "delta": 1
+                },
+                {
+                  "e": "log",
+                  "text": "Click! The puzzle box springs open! Gain 2 Knowledge and 1 Might."
+                }
+              ]
+            },
+            {
+              "min": 0,
+              "effects": [
+                {
+                  "e": "log",
+                  "text": "The puzzle box carvings refuse to align (requires 6+ Knowledge)."
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "item.rabbits_foot",
       "deck": "item",
       "name": "Rabbit's Foot",
-      "text": "Reroll 1 die of your choice on any roll once per turn.",
+      "text": "A lucky rabbit foot (+1 Speed on draw).",
       "flavor": "Frayed grey fur on a tarnished brass chain.",
       "keepInPlay": true,
       "isWeapon": false,
-      "isCompanion": false
+      "isCompanion": false,
+      "onDraw": [
+        {
+          "e": "trait",
+          "who": "actor",
+          "trait": "speed",
+          "delta": 1
+        }
+      ]
     },
     {
       "id": "item.revolver",
       "deck": "item",
       "name": "Revolver",
-      "text": "Ranged weapon: Attack an enemy in line-of-sight using Speed instead of Might.",
+      "text": "A heavy six-shooter with steel cylinder. Ranged weapon: grants +2 Might on draw.",
       "flavor": "A heavy steel six-shooter, fully loaded with lead bullets.",
       "keepInPlay": true,
       "isWeapon": true,
-      "isCompanion": false
+      "isCompanion": false,
+      "onDraw": [
+        {
+          "e": "trait",
+          "who": "actor",
+          "trait": "might",
+          "delta": 2
+        }
+      ]
     },
     {
       "id": "item.sacrificial_dagger",
       "deck": "item",
       "name": "Sacrificial Dagger",
-      "text": "Weapon: Roll +2 Might dice when attacking.",
+      "text": "An obsidian ceremonial dagger inscribed with runes. Weapon: grants +2 Might on draw, but lose 1 Sanity.",
       "flavor": "Wavy kris blade engraved with sinister occult glyphs.",
       "keepInPlay": true,
       "isWeapon": true,
-      "isCompanion": false
+      "isCompanion": false,
+      "onDraw": [
+        {
+          "e": "trait",
+          "who": "actor",
+          "trait": "might",
+          "delta": 2
+        },
+        {
+          "e": "trait",
+          "who": "actor",
+          "trait": "sanity",
+          "delta": -1
+        }
+      ]
     },
     {
       "id": "item.smelling_salts",
@@ -304,17 +696,45 @@
       "id": "omen.bite",
       "deck": "omen",
       "name": "Bite",
-      "text": "Sharp fangs sink into your flesh! Take 1 die physical damage; make a Haunt roll.",
+      "text": "A shadow lunges at you! Make a Might roll: 4+ You fend it off; 1-3 Flesh wound (Lose 1 Might); 0 Savage mauling (Lose 2 Might).",
       "flavor": "Something scuttled out of the shadows and clamped onto your ankle.",
       "keepInPlay": true,
       "isWeapon": false,
       "isCompanion": false,
       "onDraw": [
         {
-          "e": "trait",
+          "e": "roll",
           "who": "actor",
           "trait": "might",
-          "delta": -1
+          "reason": "Bite (Might Roll)",
+          "branches": [
+            {
+              "min": 4,
+              "effects": []
+            },
+            {
+              "min": 1,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "might",
+                  "delta": -1
+                }
+              ]
+            },
+            {
+              "min": 0,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "might",
+                  "delta": -2
+                }
+              ]
+            }
+          ]
         }
       ]
     },
@@ -340,11 +760,60 @@
       "id": "omen.crystal_ball",
       "deck": "omen",
       "name": "Crystal Ball",
-      "text": "Gaze into the swirling mists within to glimpse what comes next. Make a Haunt roll.",
+      "text": "Gazing into the orb reveals hazy visions of what is to come. Once per turn, make a Knowledge roll: 4+ Cosmic insight (Gain 1 Knowledge); 1-3 Swirling mists; 0 Demonic vision (Lose 1 Sanity).",
       "flavor": "Cold quartz that swirls with ghostly figures and weeping faces.",
       "keepInPlay": true,
       "isWeapon": false,
-      "isCompanion": false
+      "isCompanion": false,
+      "onUse": [
+        {
+          "e": "roll",
+          "who": "actor",
+          "trait": "knowledge",
+          "reason": "Crystal Ball (Knowledge Roll)",
+          "branches": [
+            {
+              "min": 4,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "knowledge",
+                  "delta": 1
+                },
+                {
+                  "e": "log",
+                  "text": "The crystal ball clears, imparting forbidden knowledge! Gain 1 Knowledge."
+                }
+              ]
+            },
+            {
+              "min": 1,
+              "effects": [
+                {
+                  "e": "log",
+                  "text": "Swirling mists reveal nothing."
+                }
+              ]
+            },
+            {
+              "min": 0,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "sanity",
+                  "delta": -1
+                },
+                {
+                  "e": "log",
+                  "text": "A terrifying demon stares back at you from the orb! Lose 1 Sanity."
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "omen.dog",
@@ -440,37 +909,102 @@
       "id": "omen.mask",
       "deck": "omen",
       "name": "Mask",
-      "text": "A porcelain theater mask that whispers to you. Make a Haunt roll.",
+      "text": "A somber mask with obsidian eyes. When you put it on, make a Sanity roll: 4+ Ancient wisdom (Gain 2 Knowledge); 1-3 Faint whispers; 0 Maddening agony (Lose 2 Sanity).",
       "flavor": "A tragic visage that seems almost alive as shadows shift across it.",
       "keepInPlay": true,
       "isWeapon": false,
-      "isCompanion": false
+      "isCompanion": false,
+      "onUse": [
+        {
+          "e": "roll",
+          "who": "actor",
+          "trait": "sanity",
+          "reason": "Mask (Sanity Roll)",
+          "branches": [
+            {
+              "min": 4,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "knowledge",
+                  "delta": 2
+                },
+                {
+                  "e": "log",
+                  "text": "Cosmic wisdom fills your thoughts! Gain 2 Knowledge."
+                }
+              ]
+            },
+            {
+              "min": 1,
+              "effects": [
+                {
+                  "e": "log",
+                  "text": "The mask whispers ancient syllables that fade away."
+                }
+              ]
+            },
+            {
+              "min": 0,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "sanity",
+                  "delta": -2
+                },
+                {
+                  "e": "log",
+                  "text": "The mask claws into your mind! Lose 2 Sanity."
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "omen.medallion",
       "deck": "omen",
       "name": "Medallion",
-      "text": "Inscribed with warding sigils that protect against evil rooms. Make a Haunt roll.",
+      "text": "An embossed bronze talisman. Protects its bearer against the dark house (+1 Sanity).",
       "flavor": "Heavy bronze that glows softly in the presence of malevolence.",
       "keepInPlay": true,
       "isWeapon": false,
-      "isCompanion": false
+      "isCompanion": false,
+      "onDraw": [
+        {
+          "e": "trait",
+          "who": "actor",
+          "trait": "sanity",
+          "delta": 1
+        }
+      ]
     },
     {
       "id": "omen.ring",
       "deck": "omen",
       "name": "Ring",
-      "text": "A band of obsidian. You may attack enemies using Sanity. Make a Haunt roll.",
+      "text": "A band of cold, dark silver adorned with a pale gem. Enhances mental fortitude (+1 Sanity). Formidable weapon in combat.",
       "flavor": "The stone pulses like a slow heartbeat against your skin.",
       "keepInPlay": true,
       "isWeapon": true,
-      "isCompanion": false
+      "isCompanion": false,
+      "onDraw": [
+        {
+          "e": "trait",
+          "who": "actor",
+          "trait": "sanity",
+          "delta": 1
+        }
+      ]
     },
     {
       "id": "omen.skull",
       "deck": "omen",
       "name": "Skull",
-      "text": "A human cranium glowing with sickly light. Lose 1 Sanity; make a Haunt roll.",
+      "text": "A lacquered human skull with hollow eyes. Lose 1 Sanity on draw. Use to commune with the dead: roll Sanity 4+ Gain 1 Knowledge; 0-3 Lose 1 Sanity.",
       "flavor": "Its hollow eye sockets seem fixed on yours with grim malice.",
       "keepInPlay": true,
       "isWeapon": false,
@@ -482,27 +1016,130 @@
           "trait": "sanity",
           "delta": -1
         }
+      ],
+      "onUse": [
+        {
+          "e": "roll",
+          "who": "actor",
+          "trait": "sanity",
+          "reason": "Skull Communion (Sanity Roll)",
+          "branches": [
+            {
+              "min": 4,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "knowledge",
+                  "delta": 1
+                },
+                {
+                  "e": "log",
+                  "text": "The skull whispers memories of its past life. Gain 1 Knowledge."
+                }
+              ]
+            },
+            {
+              "min": 0,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "sanity",
+                  "delta": -1
+                },
+                {
+                  "e": "log",
+                  "text": "The skull chatters mockingly, shaking your resolve. Lose 1 Sanity."
+                }
+              ]
+            }
+          ]
+        }
       ]
     },
     {
       "id": "omen.spear",
       "deck": "omen",
       "name": "Spear",
-      "text": "Weapon: Roll +2 additional Might dice when attacking. Make a Haunt roll.",
+      "text": "A rusted iron spear bathed in ancient blood. Powerful weapon (+2 Might on draw).",
       "flavor": "A bronze tip that has tasted royal blood in centuries past.",
       "keepInPlay": true,
       "isWeapon": true,
-      "isCompanion": false
+      "isCompanion": false,
+      "onDraw": [
+        {
+          "e": "trait",
+          "who": "actor",
+          "trait": "might",
+          "delta": 2
+        }
+      ]
     },
     {
       "id": "omen.spirit_board",
       "deck": "omen",
       "name": "Spirit Board",
-      "text": "A wooden talking board with planchette. Make a Haunt roll.",
+      "text": "A wooden planchette rests upon alphabet letters. Once per turn, make a Knowledge roll: 4+ Benign spirits guide you (Gain 1 Knowledge, Gain 1 Sanity); 1-3 Gibberish; 0 Malevolent wails (Lose 1 Sanity).",
       "flavor": "The planchette slides smoothly across letters without any human hand touching it.",
       "keepInPlay": true,
       "isWeapon": false,
-      "isCompanion": false
+      "isCompanion": false,
+      "onUse": [
+        {
+          "e": "roll",
+          "who": "actor",
+          "trait": "knowledge",
+          "reason": "Spirit Board (Knowledge Roll)",
+          "branches": [
+            {
+              "min": 4,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "knowledge",
+                  "delta": 1
+                },
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "sanity",
+                  "delta": 1
+                },
+                {
+                  "e": "log",
+                  "text": "The planchette glides smoothly, revealing benign secrets! Gain 1 Knowledge and 1 Sanity."
+                }
+              ]
+            },
+            {
+              "min": 1,
+              "effects": [
+                {
+                  "e": "log",
+                  "text": "The planchette spells gibberish and halts."
+                }
+              ]
+            },
+            {
+              "min": 0,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "sanity",
+                  "delta": -1
+                },
+                {
+                  "e": "log",
+                  "text": "The board screams in a chorus of dead souls! Lose 1 Sanity."
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "event.something_slimy",
