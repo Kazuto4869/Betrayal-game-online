@@ -1,0 +1,288 @@
+/**
+ * Structural invariants. See docs/04-data-model.md#45-invariants.
+ *
+ * Checked after every reduction in dev and in tests. In production the caller
+ * logs and reports rather than crashing the room — a wrong board is bad, a
+ * dead server mid-game is worse.
+ */
+
+import {
+  DECK_KINDS,
+  FLOORS,
+  TRAITS,
+  cellKey,
+  isEffectPromptPayload,
+  isRotateTilePayload,
+  placedIdFor,
+  type GameState,
+  type Rotation,
+  type TargetRef,
+} from '@bahoth/shared';
+
+function targetRefEquals(a: TargetRef, b: unknown): boolean {
+  if (typeof b !== 'object' || b === null || !('kind' in b)) return false;
+  const t = b as TargetRef;
+  if (a.kind !== t.kind) return false;
+  return a.kind === 'seat'
+    ? 'seatId' in t && a.seatId === t.seatId
+    : 'monsterId' in t && a.monsterId === t.monsterId;
+}
+
+export class InvariantError extends Error {
+  constructor(
+    message: string,
+    readonly state: GameState,
+  ) {
+    super(`Invariant violated: ${message}`);
+    this.name = 'InvariantError';
+  }
+}
+
+export function checkInvariants(state: GameState): string[] {
+  const problems: string[] = [];
+
+  // 1. Locations refer to real tiles, and every living, still-playing player
+  //    is on the board once the board exists. Keyed off board emptiness
+  //    rather than a phase list so this stays correct once M2 places the
+  //    starting tiles. `removed` is exempted alongside `isDead`: START_GAME
+  //    only places `activePlayers` (D-e), so a seat voted out before the game
+  //    started never gets a location and never will.
+  const boardExists = Object.keys(state.board.placed).length > 0;
+  for (const p of Object.values(state.players)) {
+    if (p.location !== null && !state.board.placed[p.location]) {
+      problems.push(`player ${p.seatId} is at unknown tile ${p.location}`);
+    }
+    if (p.location === null && boardExists && !p.isDead && !p.removed) {
+      problems.push(`player ${p.seatId} is not on the board during phase ${state.phase}`);
+    }
+  }
+
+  // 2. The board index exactly matches board.placed.
+  let indexed = 0;
+  for (const floor of FLOORS) {
+    const floorIndex = state.board.index[floor];
+    for (const [key, placedId] of Object.entries(floorIndex)) {
+      indexed++;
+      const tile = state.board.placed[placedId];
+      if (!tile) {
+        problems.push(`index ${floor}[${key}] points at missing tile ${placedId}`);
+        continue;
+      }
+      if (tile.floor !== floor || `${tile.x},${tile.y}` !== key) {
+        problems.push(`index ${floor}[${key}] disagrees with tile ${placedId}`);
+      }
+    }
+  }
+  const placedCount = Object.keys(state.board.placed).length;
+  if (indexed !== placedCount) {
+    problems.push(`index has ${indexed} entries but ${placedCount} tiles are placed`);
+  }
+
+  // 3. No two tiles share a cell. (Implied by 2 given the index is keyed by
+  //    cell, but checked directly so a bad index cannot mask a real overlap.)
+  const cells = new Set<string>();
+  for (const tile of Object.values(state.board.placed)) {
+    const key = `${tile.floor}:${tile.x},${tile.y}`;
+    if (cells.has(key)) problems.push(`two tiles occupy ${key}`);
+    cells.add(key);
+  }
+
+  // 3b. A placed tile's key, its own `id`, and placedIdFor(floor,x,y) all
+  //     agree. Ids are derived from the cell rather than counted (D-a); this
+  //     turns a whole class of index/placement bugs into an assertion.
+  for (const [key, tile] of Object.entries(state.board.placed)) {
+    const expected = placedIdFor(tile.floor, tile.x, tile.y);
+    if (key !== tile.id || tile.id !== expected) {
+      problems.push(`placed tile keyed ${key} has id ${tile.id}, expected ${expected}`);
+    }
+  }
+
+  // 4. Every card appears exactly once across draw / discard / inPlay.
+  for (const kind of DECK_KINDS) {
+    const deck = state.decks[kind];
+    const all = [...deck.draw, ...deck.discard, ...deck.inPlay];
+    const seen = new Set<string>();
+    for (const id of all) {
+      if (seen.has(id)) problems.push(`card ${id} appears twice in the ${kind} deck`);
+      seen.add(id);
+    }
+  }
+
+  // 5. Trait indices are integers in [0, 8], and a living explorer is never on
+  //    index 0 — that slot is the skull. Range alone is not enough: all-zero
+  //    traits are in range and mean every explorer is nominally dead.
+  for (const p of Object.values(state.players)) {
+    for (const trait of TRAITS) {
+      const v = p.traits[trait];
+      if (!Number.isInteger(v) || v < 0 || v > 8) {
+        problems.push(
+          `player ${p.seatId} has ${trait} index ${v}, expected an integer in [0,8]`,
+        );
+        continue;
+      }
+      if (v === 0 && p.charId !== null && !p.isDead) {
+        problems.push(`living player ${p.seatId} has ${trait} on the skull (index 0)`);
+      }
+    }
+  }
+
+  // 6. Turn order is coherent.
+  for (const seatId of state.turnOrder) {
+    if (!state.players[seatId])
+      problems.push(`turnOrder references unknown seat ${seatId}`);
+  }
+  if (new Set(state.turnOrder).size !== state.turnOrder.length) {
+    problems.push('turnOrder contains duplicates');
+  }
+  if (state.activeSeat !== null && !state.turnOrder.includes(state.activeSeat)) {
+    problems.push(`activeSeat ${state.activeSeat} is not in turnOrder`);
+  }
+  if (state.activeSeat === null && ['explore', 'haunt'].includes(state.phase)) {
+    problems.push(`no activeSeat during phase ${state.phase}`);
+  }
+
+  // 6b. A turn clock only runs while somebody is taking a turn. A deadline
+  //     left armed in the lobby or after game over would expire against a
+  //     seat that is no longer active.
+  if (
+    state.turnDeadline !== null &&
+    (state.activeSeat === null || !['explore', 'haunt'].includes(state.phase))
+  ) {
+    problems.push(`turnDeadline is armed during phase ${state.phase}`);
+  }
+
+  // 6c. A seat voted out is out of the rotation entirely — still on the board
+  //     as a body, but never in turnOrder and never the active seat.
+  for (const p of Object.values(state.players)) {
+    if (!p.removed) continue;
+    if (state.turnOrder.includes(p.seatId)) {
+      problems.push(`removed player ${p.seatId} is still in turnOrder`);
+    }
+    if (state.activeSeat === p.seatId) {
+      problems.push(`removed player ${p.seatId} is the active seat`);
+    }
+  }
+
+  // 6d. Votes refer to real seats, and nobody votes twice or votes on
+  //     themselves.
+  for (const [target, voters] of Object.entries(state.removeVotes)) {
+    if (!state.players[target]) {
+      problems.push(`removeVotes targets unknown seat ${target}`);
+    }
+    if (new Set(voters).size !== voters.length) {
+      problems.push(`removeVotes for ${target} contains a duplicate voter`);
+    }
+    for (const voter of voters) {
+      if (!state.players[voter]) {
+        problems.push(`removeVotes for ${target} has unknown voter ${voter}`);
+      }
+      if (voter === target) problems.push(`seat ${target} voted to remove itself`);
+    }
+  }
+
+  // 7. A pending prompt targets a real seat, and a rotate_tile prompt's
+  //    resume state is coherent enough to finish the discovery it promised.
+  if (state.pending && !state.players[state.pending.seatId]) {
+    problems.push(`pending prompt targets unknown seat ${state.pending.seatId}`);
+  }
+  // 7a. A pending prompt's seat is still around to answer it. `concede` and
+  //     `resolveRemovals` both resolve a seat's own prompt on its default
+  //     before the seat leaves (D5's shape otherwise: a reachable state
+  //     whose only escape is a clock, because a dead seat is still the only
+  //     one getLegalActions lets answer, and a removed seat can answer
+  //     nothing at all). This is the check that makes that unreachable
+  //     rather than merely unlikely.
+  const promptOwner = state.pending && state.players[state.pending.seatId];
+  if (promptOwner && (promptOwner.isDead || promptOwner.removed)) {
+    problems.push(
+      `pending prompt's seat ${state.pending!.seatId} is dead or removed and cannot answer it`,
+    );
+  }
+  // 7b. A prompt deadline is a real instant or absent. `NaN` is the failure
+  //     that matters here rather than a theoretical one: `now + promptMs` with
+  //     a `promptMs` that never made it into `timers` (a log written before
+  //     the budget existed, recovered without merging) produces a deadline
+  //     that no `now >= deadline` comparison can ever satisfy — a prompt clock
+  //     that looks armed and never fires.
+  if (state.pending && state.pending.deadline !== null) {
+    if (!Number.isFinite(state.pending.deadline)) {
+      problems.push(`pending prompt deadline is not a finite instant`);
+    }
+  }
+  if (state.pending?.kind === 'rotate_tile') {
+    const { payload, defaultAnswer } = state.pending;
+    if (!isRotateTilePayload(payload)) {
+      problems.push('rotate_tile prompt payload is not a RotateTilePayload');
+    } else {
+      if (payload.legalRotations.length === 0) {
+        problems.push('rotate_tile prompt has no legal rotations');
+      }
+      if (!payload.legalRotations.includes(defaultAnswer as Rotation)) {
+        problems.push('rotate_tile prompt defaultAnswer is not among its legalRotations');
+      }
+      if (state.board.index[payload.floor][cellKey(payload.x, payload.y)]) {
+        problems.push(
+          `rotate_tile prompt targets ${payload.floor}:${payload.x},${payload.y}, which is already built`,
+        );
+      }
+      if (!state.board.placed[payload.from]) {
+        problems.push(`rotate_tile prompt's "from" ${payload.from} is not a placed tile`);
+      }
+    }
+  }
+  // 7c. Same for choose_target/choose_room: the payload the effect
+  //     interpreter raised is coherent enough to resume.
+  if (state.pending?.kind === 'choose_target' || state.pending?.kind === 'choose_room') {
+    const { payload, defaultAnswer } = state.pending;
+    if (!isEffectPromptPayload(payload) || payload.kind !== state.pending.kind) {
+      problems.push(`${state.pending.kind} prompt payload is not an EffectPromptPayload`);
+    } else {
+      if (payload.candidates.length === 0) {
+        problems.push(`${state.pending.kind} prompt has no candidates`);
+      }
+      const answered =
+        payload.kind === 'choose_room'
+          ? payload.candidates.includes(defaultAnswer as string)
+          : payload.candidates.some((c) => targetRefEquals(c, defaultAnswer));
+      if (!answered) {
+        problems.push(
+          `${state.pending.kind} prompt defaultAnswer is not among its candidates`,
+        );
+      }
+    }
+  }
+
+  // 8. movesLeft is a non-negative integer. Deliberately not "only the active
+  //    seat has movesLeft > 0": later effects grant movement out of turn.
+  for (const p of Object.values(state.players)) {
+    if (!Number.isInteger(p.movesLeft) || p.movesLeft < 0) {
+      problems.push(
+        `player ${p.seatId} has movesLeft ${p.movesLeft}, expected an integer >= 0`,
+      );
+    }
+  }
+
+  // 9. cameFrom, when set, names a placed tile and is never the player's own
+  //    current location — the no-backtrack rule is about the room just left,
+  //    not the room you are standing in.
+  for (const p of Object.values(state.players)) {
+    if (p.cameFrom === null) continue;
+    if (!state.board.placed[p.cameFrom]) {
+      problems.push(
+        `player ${p.seatId} has cameFrom ${p.cameFrom}, which is not a placed tile`,
+      );
+    }
+    if (p.cameFrom === p.location) {
+      problems.push(`player ${p.seatId} has cameFrom equal to its own location`);
+    }
+  }
+
+  return problems;
+}
+
+export function assertInvariants(state: GameState): void {
+  const problems = checkInvariants(state);
+  if (problems.length > 0) {
+    throw new InvariantError(problems.join('; '), state);
+  }
+}

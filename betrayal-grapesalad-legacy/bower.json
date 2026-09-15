@@ -1,0 +1,17 @@
+{
+  "name": "betrayal-clone",
+  "description": "",
+  "main": "",
+  "license": "MIT",
+  "homepage": "https://github.com/GrapeSalad/Betrayal-Clone",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "neat": "^2.1.0"
+  }
+}

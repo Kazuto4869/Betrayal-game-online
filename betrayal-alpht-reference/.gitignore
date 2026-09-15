@@ -1,0 +1,8 @@
+*.md
+docs/
+agents/
+.superpowers/
+.worktrees/
+node_modules/
+coverage/
+*.log

@@ -1,0 +1,712 @@
+/*
+ * M0 styling: dark chrome, parchment accents, two type families.
+ * The full visual pass is M5 — this is "presentable", not "designed".
+ */
+
+:root {
+  --bg: #14110f;
+  --panel: #1d1917;
+  --panel-2: #262120;
+  --line: #3a322e;
+  --text: #ece5dc;
+  --muted: #a2968a;
+  --accent: #c8703c;
+  --danger: #b3453a;
+  --ok: #6f9457;
+  --parchment: #e8dcc4;
+
+  --red: #b8433a;
+  --green: #5d8a4a;
+  --blue: #4a7aa8;
+  --white: #d9d2c7;
+  --purple: #8a5a9e;
+  --yellow: #c9a227;
+
+  --floor-basement: #c5cbc1;
+  --floor-ground: #e3d5b8;
+  --floor-upper: #d9d3cb;
+  --ink: #3b2f26;
+  /*
+   * --accent measures 2.65:1 against --floor-ground and fails the 4.5:1
+   * minimum (docs/07-ui.md#76-accessibility). Anything sitting on a
+   * parchment tile uses this instead; UI chrome keeps --accent.
+   */
+  --accent-on-parchment: #9c4a16;
+  --sym-item: #2d5f7d;
+  --sym-event: #8a5a1c;
+  --sym-omen: #86323c;
+
+  --serif: 'Iowan Old Style', Georgia, 'Times New Roman', serif;
+  --sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+button,
+input {
+  font: inherit;
+  color: inherit;
+}
+
+.app {
+  min-height: 100vh;
+}
+
+.boot {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  color: var(--muted);
+}
+
+/* --- banners ------------------------------------------------------------ */
+
+.banner {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  font-size: 14px;
+}
+.banner--warn {
+  background: #4a3a1c;
+  color: #f0dfae;
+}
+.banner--error {
+  background: var(--danger);
+  color: #fff;
+}
+.banner button {
+  background: none;
+  border: 0;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+}
+
+/* --- layout ------------------------------------------------------------- */
+
+.screen {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px 20px 64px;
+}
+.screen--centred {
+  max-width: 460px;
+  padding-top: 12vh;
+  text-align: center;
+}
+
+.title {
+  font-family: var(--serif);
+  font-size: 30px;
+  font-weight: 600;
+  margin: 0;
+  letter-spacing: 0.01em;
+}
+.title--sm {
+  font-size: 22px;
+}
+.subtitle {
+  color: var(--muted);
+  margin: 4px 0 28px;
+  font-size: 14px;
+}
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 24px;
+  display: grid;
+  gap: 14px;
+  box-shadow: 0 12px 32px rgb(0 0 0 / 35%);
+}
+
+.field {
+  display: grid;
+  gap: 6px;
+  text-align: left;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+input {
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 10px 12px;
+  width: 100%;
+}
+input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+.input--code {
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-family: ui-monospace, monospace;
+}
+
+.row {
+  display: flex;
+  gap: 8px;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}
+
+/* --- buttons ------------------------------------------------------------ */
+
+.btn {
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 10px 16px;
+  cursor: pointer;
+  transition:
+    background 150ms ease-out,
+    border-color 150ms ease-out;
+}
+.btn:hover:not(:disabled) {
+  background: #322b29;
+}
+.btn:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+}
+.btn--primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #1a1310;
+  font-weight: 600;
+}
+.btn--primary:hover:not(:disabled) {
+  background: #d67e47;
+}
+.btn--ghost {
+  background: none;
+}
+.btn--tiny {
+  padding: 2px 8px;
+  font-size: 12px;
+  background: none;
+}
+.btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* --- lobby -------------------------------------------------------------- */
+
+.lobby__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.code {
+  font-family: ui-monospace, monospace;
+  letter-spacing: 0.2em;
+  color: var(--parchment);
+}
+
+h2 {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  margin: 0 0 10px;
+}
+
+.seatlist {
+  list-style: none;
+  margin: 0 0 24px;
+  padding: 0;
+  display: grid;
+  gap: 4px;
+}
+.seat {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+}
+.seat--me {
+  border-color: var(--accent);
+}
+.seat--active {
+  background: var(--panel-2);
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+.seat--game {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+}
+.seat__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+.seat__traits {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+  margin-top: 2px;
+}
+.trait-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 3px 2px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  font-variant-numeric: tabular-nums;
+}
+.trait-chip__icon {
+  font-size: 11px;
+  line-height: 1;
+  margin-bottom: 2px;
+}
+.trait-chip__label {
+  font-size: 9px;
+  text-transform: uppercase;
+  color: var(--muted);
+  line-height: 1;
+}
+.trait-chip__value {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.2;
+}
+.trait-chip--speed .trait-chip__value {
+  color: #86efac;
+}
+.trait-chip--might .trait-chip__value {
+  color: #fca5a5;
+}
+.trait-chip--sanity .trait-chip__value {
+  color: #d8b4fe;
+}
+.trait-chip--knowledge .trait-chip__value {
+  color: #93c5fd;
+}
+
+.seat__moves {
+  display: flex;
+  align-items: center;
+  margin-top: 2px;
+}
+.moves-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 7px;
+  background: #1c3322;
+  border: 1px solid #3d6a45;
+  color: #a7f3d0;
+  border-radius: 4px;
+  font-size: 11px;
+}
+.moves-chip strong {
+  color: #fff;
+}
+.tag--me {
+  background: #3b281c;
+  color: #fbd38d;
+  border-color: #8c532b;
+  margin-left: 4px;
+  font-size: 10px;
+  padding: 1px 4px;
+}
+.seat__name {
+  font-weight: 600;
+}
+.seat__host {
+  padding: 1px 6px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.seat__char {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--muted);
+  opacity: 0.4;
+  flex: none;
+}
+.dot--on {
+  background: var(--ok);
+  opacity: 1;
+}
+
+.swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  flex: none;
+}
+.swatch--red {
+  background: var(--red);
+}
+.swatch--green {
+  background: var(--green);
+}
+.swatch--blue {
+  background: var(--blue);
+}
+.swatch--white {
+  background: var(--white);
+}
+.swatch--purple {
+  background: var(--purple);
+}
+.swatch--yellow {
+  background: var(--yellow);
+}
+
+.chargrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 10px;
+}
+.charcard {
+  display: grid;
+  gap: 6px;
+  justify-items: start;
+  text-align: left;
+  padding: 12px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  cursor: pointer;
+}
+.charcard:hover:not(:disabled) {
+  background: var(--panel-2);
+}
+.charcard:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.charcard--mine {
+  border-color: var(--accent);
+}
+.charcard__name {
+  font-family: var(--serif);
+  font-size: 16px;
+}
+.charcard__traits {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.trait-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 5px;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+}
+.trait-pill__icon {
+  font-size: 11px;
+  line-height: 1;
+}
+.trait-pill__name {
+  font-size: 10px;
+  color: var(--muted);
+}
+.trait-pill__val {
+  font-weight: 600;
+  color: var(--text);
+}
+.trait-pill--speed .trait-pill__val {
+  color: #86efac;
+}
+.trait-pill--might .trait-pill__val {
+  color: #fca5a5;
+}
+.trait-pill--sanity .trait-pill__val {
+  color: #d8b4fe;
+}
+.trait-pill--knowledge .trait-pill__val {
+  color: #93c5fd;
+}
+.charcard__badge {
+  font-size: 11px;
+  color: var(--accent);
+}
+
+/* --- game --------------------------------------------------------------- */
+
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 10px 14px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-size: 13px;
+}
+.topbar__phase {
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.topbar__turn {
+  margin-left: auto;
+  color: var(--muted);
+}
+.topbar__turn--mine {
+  color: var(--accent);
+  font-weight: 600;
+}
+.topbar__version {
+  color: var(--muted);
+  font-family: ui-monospace, monospace;
+  opacity: 0.6;
+}
+.topbar__clock {
+  font-family: ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+}
+.topbar__clock--urgent {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+/*
+ * Players (left) / board (centre) / log (right), per docs/07-ui.md#72. The
+ * centre column is `minmax(0, 1fr)` rather than a bare `1fr`: a grid track
+ * with content wider than its share otherwise refuses to shrink below that
+ * content's intrinsic width (the same "min-width: auto" behaviour flex items
+ * have), which would push the log off-screen instead of giving the board
+ * its intended flexible width. `Board`'s fit-on-mount measures the
+ * viewport's `clientWidth` (see board.css's fixed-height `.viewport`), and a
+ * track that never resolves to a real width is exactly the zero-size bug #15
+ * already hit once — this rule is what keeps that fixed.
+ */
+.game__body {
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr) 300px;
+  gap: 16px;
+  align-items: start;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 16px;
+}
+/* The same panel serves the lobby and the game (one component, two callers),
+   so the tall variant is scoped to the game's right-hand column rather than
+   baked into the panel — in the lobby it sits under the explorer grid and
+   has no full-height column to fill.
+   560px is `.viewport`'s fixed height in board.css, not a round number: the
+   log and the board are side-by-side columns, and the taller one decides
+   whether the whole page scrolls. The old 640 already overshot it; adding
+   the compose row underneath made the overshoot visible. */
+.game__body .log-panel .log {
+  max-height: 560px;
+}
+.screen > .log-panel {
+  margin-top: 28px;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* The rotate_tile prompt (docs/07-ui.md#73-board-rendering, "Discovery
+   flow"): sits above the floor tabs so it reads as blocking the board below
+   it, reusing .panel/.actions rather than inventing new chrome for what is
+   still a small, occasional interaction. */
+.rotate-prompt {
+  margin-bottom: 12px;
+}
+.rotate-prompt h3 {
+  margin: 0 0 8px;
+  font-size: 14px;
+}
+.rotate-prompt p {
+  margin: 0;
+}
+/* The prompt's own clock. Tabular numerals so the countdown does not jitter
+   the heading sideways once a second. */
+.rotate-prompt__clock {
+  margin-left: 8px;
+  font-family: ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  font-weight: 400;
+  color: var(--muted);
+}
+.rotate-prompt__clock--urgent {
+  color: var(--danger);
+  font-weight: 600;
+}
+.rotate-prompt__hint {
+  margin: 0 0 8px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.hint {
+  color: var(--muted);
+  font-size: 12px;
+  margin: 14px 0 0;
+}
+
+.tag {
+  font-size: 11px;
+  background: var(--danger);
+  color: #fff;
+  padding: 1px 6px;
+  border-radius: 3px;
+}
+
+/*
+ * The log panel (docs/07-ui.md#72). Event narration and chat share one
+ * scroller — they are one conversation, and separating them would make
+ * "Ox moved to the Ballroom" and "wait, don't" sit in different columns.
+ * They stay distinguishable by weight and colour instead, never by colour
+ * alone: chat lines carry the speaker's name inside the text (#76).
+ */
+.log {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 300px;
+  overflow-y: auto;
+  font-size: 13px;
+  display: grid;
+  gap: 3px;
+  /* `align-content: start` so a short log's lines stack at the top rather
+     than stretching to fill the scroller's height. */
+  align-content: start;
+}
+.log__line {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  align-items: baseline;
+  gap: 6px;
+  color: var(--muted);
+  border-bottom: 1px solid rgb(255 255 255 / 4%);
+  padding-bottom: 3px;
+}
+/* Tabular numerals so the timestamp column does not shift the text beside
+   it as the digits change — the same reason the prompt clock uses them. */
+.log__time {
+  font-family: ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  font-size: 11px;
+  opacity: 0.55;
+}
+.log__line--chat .log__text {
+  color: var(--text);
+}
+/* The local player's own lines, so you can find yourself in a busy log. */
+.log__line--mine .log__text {
+  font-weight: 600;
+}
+.log__line .swatch {
+  /* The grid's baseline alignment leaves a bare span sitting oddly; nudge
+     the swatch onto the text's optical line. */
+  align-self: center;
+}
+
+.log__compose {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+}
+.log__input {
+  font-size: 13px;
+  padding: 6px 8px;
+}
+
+.json {
+  margin: 0;
+  max-height: 420px;
+  overflow: auto;
+  font-family: ui-monospace, monospace;
+  font-size: 11px;
+  color: var(--muted);
+  background: #100e0d;
+  border-radius: 6px;
+  padding: 12px;
+}
+
+@media (max-width: 780px) {
+  .game__body {
+    grid-template-columns: 1fr;
+  }
+  .lobby__header {
+    flex-direction: column;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}

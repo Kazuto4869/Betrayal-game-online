@@ -1,0 +1,7 @@
+node_modules/
+dist/
+dist-types/
+*.tsbuildinfo
+.superpowers/
+docs/superpowers/
+package-lock.json

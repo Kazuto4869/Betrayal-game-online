@@ -1,0 +1,63 @@
+{
+    "coverage":  "ui-and-protocol",
+    "ui":  {
+               "hostCreateControl":  true,
+               "playerJoinControl":  true,
+               "playerReconnectControl":  true
+           },
+    "steps":  [
+                  {
+                      "name":  "create-room",
+                      "visibleOutcome":  "玩家加入網址：http://192.168.0.182:14206/player"
+                  },
+                  {
+                      "name":  "join-player-1",
+                      "visibleOutcome":  "正在等待遊戲狀態。"
+                  },
+                  {
+                      "name":  "join-player-2",
+                      "visibleOutcome":  "正在等待遊戲狀態。"
+                  },
+                  {
+                      "name":  "join-player-3",
+                      "visibleOutcome":  "探索階段 · 等待玩家 1 的回合"
+                  },
+                  {
+                      "name":  "explore-room",
+                      "revision":  1,
+                      "visibleOutcome":  "探索階段 · 你的回合"
+                  },
+                  {
+                      "name":  "confirm-move",
+                      "revision":  2,
+                      "visibleOutcome":  "探索階段 · 你的回合"
+                  },
+                  {
+                      "name":  "pass-player-1",
+                      "revision":  3,
+                      "visibleOutcome":  "探索階段 · 等待玩家 2 的回合"
+                  },
+                  {
+                      "name":  "pass-player-2",
+                      "revision":  4,
+                      "visibleOutcome":  "探索階段 · 等待玩家 3 的回合"
+                  },
+                  {
+                      "name":  "pass-player-3",
+                      "revision":  5,
+                      "visibleOutcome":  "探索階段 · 等待玩家 1 的回合"
+                  },
+                  {
+                      "name":  "privacy-check",
+                      "publicTokenLeak":  false
+                  }
+              ],
+    "rejected":  [
+
+                 ],
+    "final":  {
+                  "revision":  5,
+                  "phase":  "EXPLORATION",
+                  "activePlayerNumber":  1
+              }
+}

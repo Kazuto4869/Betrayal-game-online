@@ -1,0 +1,372 @@
+<div class="char-container">
+  <div class="header">
+    <h1><span *ngIf="charSelect">Select Your Character</span><span *ngIf="friendSelect">Select Your Friend</span></h1>
+  </div>
+
+  <div class="first-row">
+    <div class="character-card">
+      <div *ngIf="selectedCharacterName === 'Brandon Jaspers'" class="selected-char">
+        <h3>Unavailable</h3>
+      </div>
+      <div class="character-image">
+        <img src="assets/img/brandonjaspers.png" alt="Brandon Jaspers">
+        <h3>{{characters[9]?.name}}</h3>
+      </div>
+
+      <div class="character-bio">
+        <ul>
+          <li><b class="bold">Age</b>: {{characters[9]?.age}}</li>
+          <li><b class="bold">Height</b>: {{characters[9]?.height}}</li>
+          <li><b class="bold">Weight</b>: {{characters[9]?.weight}}</li>
+          <li><b class="bold">Hobbies</b>: {{characters[9]?.hobbies}}</li>
+          <li><b class="bold">Birthday</b>: {{characters[9]?.birthday}}</li>
+          <li><b class="bold">Speed</b>: {{characters[9]?.speed.initialIndex}}</li>
+          <li><b class="bold">Might</b>: {{characters[9]?.might.initialIndex}}</li>
+          <li><b class="bold">Sanity</b>: {{characters[9]?.sanity.initialIndex}}</li>
+          <li><b class="bold">Knowledge</b>: {{characters[9]?.knowledge.initialIndex}}</li>
+          <li><b class="bold">Bio</b>: {{characters[9]?.bio}}<br>
+            <br>{{characters[9]?.bio2}}</li>
+        </ul>
+      </div>
+
+      <div class="select-button">
+        <a (click)="goToFriendSelect(characters[9])"><span *ngIf="charSelect">Select</span></a>
+        <span *ngIf="friendSelect"><a (click)="chosenFriend(characters[9])" routerLink="/game">Select</a></span>
+      </div>
+    </div>
+    <div class="character-card">
+      <div *ngIf="selectedCharacterName === 'Father Rhinehardt'" class="selected-char">
+        <h3>Unavailable</h3>
+      </div>
+      <div class="character-image">
+        <img src="assets/img/fatherrhinehardt.png" alt="Father Rhinehardt">
+        <h3>Father Rhinehardt</h3>
+      </div>
+
+      <div class="character-bio">
+        <ul>
+          <li><b class="bold">Age</b>: {{characters[11]?.age}}</li>
+          <li><b class="bold">Height</b>: {{characters[11]?.height}}</li>
+          <li><b class="bold">Weight</b>: {{characters[11]?.weight}}</li>
+          <li><b class="bold">Hobbies</b>: {{characters[11]?.hobbies}}</li>
+          <li><b class="bold">Birthday</b>: {{characters[11]?.birthday}}</li>
+          <li><b class="bold">Speed</b>: {{characters[11]?.speed.initialIndex}}</li>
+          <li><b class="bold">Might</b>: {{characters[11]?.might.initialIndex}}</li>
+          <li><b class="bold">Sanity</b>: {{characters[11]?.sanity.initialIndex}}</li>
+          <li><b class="bold">Knowledge</b>: {{characters[11]?.knowledge.initialIndex}}</li>
+          <li><b class="bold">Bio</b>: {{characters[11]?.bio}}<br>
+            <br>{{characters[11]?.bio2}}</li>
+        </ul>
+      </div>
+
+      <div class="select-button">
+        <a (click)="goToFriendSelect(characters[11])"><span *ngIf="charSelect">Select</span></a>
+        <span *ngIf="friendSelect"><a (click)="chosenFriend(characters[11])" routerLink="/game">Select</a></span>
+      </div>
+    </div>
+    <div class="character-card">
+      <div *ngIf="selectedCharacterName === 'Darrin Flash Williams'" class="selected-char">
+        <h3>Unavailable</h3>
+      </div>
+      <div class="character-image">
+        <img src="assets/img/flashwilliams.png" alt="Flash Williams">
+        <h3>Darrin Flash Williams</h3>
+      </div>
+
+      <div class="character-bio">
+        <ul>
+          <li><b class="bold">Age</b>: {{characters[3]?.age}}</li>
+          <li><b class="bold">Height</b>: {{characters[3]?.height}}</li>
+          <li><b class="bold">Weight</b>: {{characters[3]?.weight}}</li>
+          <li><b class="bold">Hobbies</b>: {{characters[3]?.hobbies}}</li>
+          <li><b class="bold">Birthday</b>: {{characters[3]?.birthday}}</li>
+          <li><b class="bold">Speed</b>: {{characters[3]?.speed.initialIndex}}</li>
+          <li><b class="bold">Might</b>: {{characters[3]?.might.initialIndex}}</li>
+          <li><b class="bold">Sanity</b>: {{characters[3]?.sanity.initialIndex}}</li>
+          <li><b class="bold">Knowledge</b>: {{characters[3]?.knowledge.initialIndex}}</li>
+          <li><b class="bold">Bio</b>: {{characters[3]?.bio}}<br>
+            <br>{{characters[3]?.bio2}}</li>
+        </ul>
+      </div>
+
+      <div class="select-button">
+        <a (click)="goToFriendSelect(characters[3])"><span *ngIf="charSelect">Select</span></a>
+        <span *ngIf="friendSelect"><a (click)="chosenFriend(characters[3])" routerLink="/game">Select</a></span>
+      </div>
+    </div>
+    <div class="character-card">
+      <div *ngIf="selectedCharacterName === 'Heather Granville'" class="selected-char">
+        <h3>Unavailable</h3>
+      </div>
+      <div class="character-image">
+        <img src="assets/img/heathergranville.png" alt="Heather Granville">
+        <h3>Heather Granville</h3>
+      </div>
+
+      <div class="character-bio">
+        <ul>
+          <li><b class="bold">Age</b>: {{characters[0]?.age}}</li>
+          <li><b class="bold">Height</b>: {{characters[0]?.height}}</li>
+          <li><b class="bold">Weight</b>: {{characters[0]?.weight}}</li>
+          <li><b class="bold">Hobbies</b>: {{characters[0]?.hobbies}}</li>
+          <li><b class="bold">Birthday</b>: {{characters[0]?.birthday}}</li>
+          <li><b class="bold">Speed</b>: {{characters[0]?.speed.initialIndex}}</li>
+          <li><b class="bold">Might</b>: {{characters[0]?.might.initialIndex}}</li>
+          <li><b class="bold">Sanity</b>: {{characters[0]?.sanity.initialIndex}}</li>
+          <li><b class="bold">Knowledge</b>: {{characters[0]?.knowledge.initialIndex}}</li>
+          <li><b class="bold">Bio</b>: {{characters[0]?.bio}}<br>
+            <br>{{characters[0]?.bio2}}</li>
+        </ul>
+      </div>
+
+      <div class="select-button">
+        <a (click)="goToFriendSelect(characters[0])"><span *ngIf="charSelect">Select</span></a>
+        <span *ngIf="friendSelect"><a (click)="chosenFriend(characters[0])" routerLink="/game">Select</a></span>
+      </div>
+    </div>
+  </div>
+  <div class="second-row">
+    <div class="character-card">
+      <div *ngIf="selectedCharacterName === 'Missy Dubourde'" class="selected-char">
+        <h3>Unavailable</h3>
+      </div>
+      <div class="character-image">
+        <img src="assets/img/missydubourde.png" alt="Missy Dubourde">
+        <h3>Missy Dubourde</h3>
+      </div>
+
+      <div class="character-bio">
+        <ul>
+          <li><b class="bold">Age</b>: {{characters[6]?.age}}</li>
+          <li><b class="bold">Height</b>: {{characters[6]?.height}}</li>
+          <li><b class="bold">Weight</b>: {{characters[6]?.weight}}</li>
+          <li><b class="bold">Hobbies</b>: {{characters[6]?.hobbies}}</li>
+          <li><b class="bold">Birthday</b>: {{characters[6]?.birthday}}</li>
+          <li><b class="bold">Speed</b>: {{characters[6]?.speed.initialIndex}}</li>
+          <li><b class="bold">Might</b>: {{characters[6]?.might.initialIndex}}</li>
+          <li><b class="bold">Sanity</b>: {{characters[6]?.sanity.initialIndex}}</li>
+          <li><b class="bold">Knowledge</b>: {{characters[6]?.knowledge.initialIndex}}</li>
+          <li><b class="bold">Bio</b>: {{characters[6]?.bio}}<br>
+            <br>{{characters[6]?.bio2}}</li>
+        </ul>
+      </div>
+
+      <div class="select-button">
+        <a (click)="goToFriendSelect(characters[6])"><span *ngIf="charSelect">Select</span></a>
+        <span *ngIf="friendSelect"><a (click)="chosenFriend(characters[6])" routerLink="/game">Select</a></span>
+      </div>
+    </div>
+    <div class="character-card">
+      <div *ngIf="selectedCharacterName === 'Madame Zostra'" class="selected-char">
+        <h3>Unavailable</h3>
+      </div>
+      <div class="character-image">
+        <img src="assets/img/thezost.png" alt="Madame Zostra">
+        <h3>Madame Zostra</h3>
+      </div>
+
+      <div class="character-bio">
+        <ul>
+          <li><b class="bold">Age</b>: {{characters[5]?.age}}</li>
+          <li><b class="bold">Height</b>: {{characters[5]?.height}}</li>
+          <li><b class="bold">Weight</b>: {{characters[5]?.weight}}</li>
+          <li><b class="bold">Hobbies</b>: {{characters[5]?.hobbies}}</li>
+          <li><b class="bold">Birthday</b>: {{characters[5]?.birthday}}</li>
+          <li><b class="bold">Speed</b>: {{characters[5]?.speed.initialIndex}}</li>
+          <li><b class="bold">Might</b>: {{characters[5]?.might.initialIndex}}</li>
+          <li><b class="bold">Sanity</b>: {{characters[5]?.sanity.initialIndex}}</li>
+          <li><b class="bold">Knowledge</b>: {{characters[5]?.knowledge.initialIndex}}</li>
+          <li><b class="bold">Bio</b>: {{characters[5]?.bio}}<br>
+            <br>{{characters[5]?.bio2}}</li>
+        </ul>
+      </div>
+
+      <div class="select-button">
+        <a (click)="goToFriendSelect(characters[5])"><span *ngIf="charSelect">Select</span></a>
+        <span *ngIf="friendSelect"><a (click)="chosenFriend(characters[5])" routerLink="/game">Select</a></span>
+      </div>
+    </div>
+    <div class="character-card">
+      <div *ngIf="selectedCharacterName === 'Jenny LeClerc'" class="selected-char">
+        <h3>Unavailable</h3>
+      </div>
+      <div class="character-image">
+        <img src="assets/img/jennyleclerc.png" alt="Jenny LeClerc">
+        <h3>Jenny LeClerc</h3>
+      </div>
+
+      <div class="character-bio">
+        <ul>
+          <li><b class="bold">Age</b>: {{characters[1]?.age}}</li>
+          <li><b class="bold">Height</b>: {{characters[1]?.height}}</li>
+          <li><b class="bold">Weight</b>: {{characters[1]?.weight}}</li>
+          <li><b class="bold">Hobbies</b>: {{characters[1]?.hobbies}}</li>
+          <li><b class="bold">Birthday</b>: {{characters[1]?.birthday}}</li>
+          <li><b class="bold">Speed</b>: {{characters[1]?.speed.initialIndex}}</li>
+          <li><b class="bold">Might</b>: {{characters[1]?.might.initialIndex}}</li>
+          <li><b class="bold">Sanity</b>: {{characters[1]?.sanity.initialIndex}}</li>
+          <li><b class="bold">Knowledge</b>: {{characters[1]?.knowledge.initialIndex}}</li>
+          <li><b class="bold">Bio</b>: {{characters[1]?.bio}}<br>
+            <br>{{characters[1]?.bio2}}</li>
+        </ul>
+      </div>
+
+      <div class="select-button">
+        <a (click)="goToFriendSelect(characters[1])"><span *ngIf="charSelect">Select</span></a>
+        <span *ngIf="friendSelect"><a (click)="chosenFriend(characters[1])" routerLink="/game">Select</a></span>
+      </div>
+    </div>
+    <div class="character-card">
+      <div *ngIf="selectedCharacterName === 'Peter Akimoto'" class="selected-char">
+        <h3>Unavailable</h3>
+      </div>
+      <div class="character-image">
+        <img src="assets/img/peterakimoto.png" alt="Peter Akimoto">
+        <h3>Peter Akimoto</h3>
+      </div>
+
+      <div class="character-bio">
+        <ul>
+          <li><b class="bold">Age</b>: {{characters[8]?.age}}</li>
+          <li><b class="bold">Height</b>: {{characters[8]?.height}}</li>
+          <li><b class="bold">Weight</b>: {{characters[8]?.weight}}</li>
+          <li><b class="bold">Hobbies</b>: {{characters[8]?.hobbies}}</li>
+          <li><b class="bold">Birthday</b>: {{characters[8]?.birthday}}</li>
+          <li><b class="bold">Speed</b>: {{characters[8]?.speed.initialIndex}}</li>
+          <li><b class="bold">Might</b>: {{characters[8]?.might.initialIndex}}</li>
+          <li><b class="bold">Sanity</b>: {{characters[8]?.sanity.initialIndex}}</li>
+          <li><b class="bold">Knowledge</b>: {{characters[8]?.knowledge.initialIndex}}</li>
+          <li><b class="bold">Bio</b>: {{characters[8]?.bio}}<br>
+            <br>{{characters[8]?.bio2}}</li>
+        </ul>
+      </div>
+
+      <div class="select-button">
+        <a (click)="goToFriendSelect(characters[8])"><span *ngIf="charSelect">Select</span></a>
+        <span *ngIf="friendSelect"><a (click)="chosenFriend(characters[8])" routerLink="/game">Select</a></span>
+      </div>
+    </div>
+  </div>
+  <div class="third-row">
+    <div class="character-card">
+      <div *ngIf="selectedCharacterName === 'Ox Bellows'" class="selected-char">
+        <h3>Unavailable</h3>
+      </div>
+      <div class="character-image">
+        <img src="assets/img/oxbellows.png" alt="Ox Bellows">
+        <h3>Ox Bellows</h3>
+      </div>
+
+      <div class="character-bio">
+        <ul>
+          <li><b class="bold">Age</b>: {{characters[2]?.age}}</li>
+          <li><b class="bold">Height</b>: {{characters[2]?.height}}</li>
+          <li><b class="bold">Weight</b>: {{characters[2]?.weight}}</li>
+          <li><b class="bold">Hobbies</b>: {{characters[2]?.hobbies}}</li>
+          <li><b class="bold">Birthday</b>: {{characters[2]?.birthday}}</li>
+          <li><b class="bold">Speed</b>: {{characters[2]?.speed.initialIndex}}</li>
+          <li><b class="bold">Might</b>: {{characters[2]?.might.initialIndex}}</li>
+          <li><b class="bold">Sanity</b>: {{characters[2]?.sanity.initialIndex}}</li>
+          <li><b class="bold">Knowledge</b>: {{characters[2]?.knowledge.initialIndex}}</li>
+          <li><b class="bold">Bio</b>: {{characters[2]?.bio}}<br>
+            <br>{{characters[2]?.bio2}}</li>
+        </ul>
+      </div>
+
+      <div class="select-button">
+        <a (click)="goToFriendSelect(characters[2])"><span *ngIf="charSelect">Select</span></a>
+        <span *ngIf="friendSelect"><a (click)="chosenFriend(characters[2])" routerLink="/game">Select</a></span>
+      </div>
+    </div>
+    <div class="character-card">
+      <div *ngIf="selectedCharacterName === 'Professor Longfellow'" class="selected-char">
+        <h3>Unavailable</h3>
+      </div>
+      <div class="character-image">
+        <img src="assets/img/professorlongfellow.png" alt="Professor Longfellow">
+        <h3>Professor Longfellow</h3>
+      </div>
+
+      <div class="character-bio">
+        <ul>
+          <li><b class="bold">Age</b>: {{characters[10]?.age}}</li>
+          <li><b class="bold">Height</b>: {{characters[10]?.height}}</li>
+          <li><b class="bold">Weight</b>: {{characters[10]?.weight}}</li>
+          <li><b class="bold">Hobbies</b>: {{characters[10]?.hobbies}}</li>
+          <li><b class="bold">Birthday</b>: {{characters[10]?.birthday}}</li>
+          <li><b class="bold">Speed</b>: {{characters[10]?.speed.initialIndex}}</li>
+          <li><b class="bold">Might</b>: {{characters[10]?.might.initialIndex}}</li>
+          <li><b class="bold">Sanity</b>: {{characters[10]?.sanity.initialIndex}}</li>
+          <li><b class="bold">Knowledge</b>: {{characters[10]?.knowledge.initialIndex}}</li>
+          <li><b class="bold">Bio</b>: {{characters[10]?.bio}}<br>
+            <br>{{characters[10]?.bio2}}</li>
+        </ul>
+      </div>
+
+      <div class="select-button">
+        <a (click)="goToFriendSelect(characters[10])"><span *ngIf="charSelect">Select</span></a>
+        <span *ngIf="friendSelect"><a (click)="chosenFriend(characters[10])" routerLink="/game">Select</a></span>
+      </div>
+    </div>
+    <div class="character-card">
+      <div *ngIf="selectedCharacterName === 'Vivian Lopez'" class="selected-char">
+        <h3>Unavailable</h3>
+      </div>
+      <div class="character-image">
+        <img src="assets/img/vivianlopez.png" alt="Vivian Lopez">
+        <h3>Vivian Lopez</h3>
+      </div>
+
+      <div class="character-bio">
+        <ul>
+          <li><b class="bold">Age</b>: {{characters[4]?.age}}</li>
+          <li><b class="bold">Height</b>: {{characters[4]?.height}}</li>
+          <li><b class="bold">Weight</b>: {{characters[4]?.weight}}</li>
+          <li><b class="bold">Hobbies</b>: {{characters[4]?.hobbies}}</li>
+          <li><b class="bold">Birthday</b>: {{characters[4]?.birthday}}</li>
+          <li><b class="bold">Speed</b>: {{characters[4]?.speed.initialIndex}}</li>
+          <li><b class="bold">Might</b>: {{characters[4]?.might.initialIndex}}</li>
+          <li><b class="bold">Sanity</b>: {{characters[4]?.sanity.initialIndex}}</li>
+          <li><b class="bold">Knowledge</b>: {{characters[4]?.knowledge.initialIndex}}</li>
+          <li><b class="bold">Bio</b>: {{characters[4]?.bio}}<br>
+            <br>{{characters[4]?.bio2}}</li>
+        </ul>
+      </div>
+
+      <div class="select-button">
+        <a (click)="goToFriendSelect(characters[4])"><span *ngIf="charSelect">Select</span></a>
+        <span *ngIf="friendSelect"><a (click)="chosenFriend(characters[4])" routerLink="/game">Select</a></span>
+      </div>
+    </div>
+    <div class="character-card">
+      <div *ngIf="selectedCharacterName === 'Zoe Ingstrom'" class="selected-char">
+        <h3>Unavailable</h3>
+      </div>
+      <div class="character-image">
+        <img src="assets/img/zoeingstrom.png" alt="Zoe Ingstrom">
+        <h3>Zoe Ingstrom</h3>
+      </div>
+
+      <div class="character-bio">
+        <ul>
+          <li><b class="bold">Age</b>: {{characters[7]?.age}}</li>
+          <li><b class="bold">Height</b>: {{characters[7]?.height}}</li>
+          <li><b class="bold">Weight</b>: {{characters[7]?.weight}}</li>
+          <li><b class="bold">Hobbies</b>: {{characters[7]?.hobbies}}</li>
+          <li><b class="bold">Birthday</b>: {{characters[7]?.birthday}}</li>
+          <li><b class="bold">Speed</b>: {{characters[7]?.speed.initialIndex}}</li>
+          <li><b class="bold">Might</b>: {{characters[7]?.might.initialIndex}}</li>
+          <li><b class="bold">Sanity</b>: {{characters[7]?.sanity.initialIndex}}</li>
+          <li><b class="bold">Knowledge</b>: {{characters[7]?.knowledge.initialIndex}}</li>
+          <li><b class="bold">Bio</b>: {{characters[7]?.bio}}<br>
+            <br>{{characters[7]?.bio2}}</li>
+        </ul>
+      </div>
+
+      <div class="select-button">
+        <a (click)="goToFriendSelect(characters[7])"><span *ngIf="charSelect">Select</span></a>
+        <span *ngIf="friendSelect"><a (click)="chosenFriend(characters[7])" routerLink="/game">Select</a></span>
+      </div>
+    </div>
+  </div><!--end third row div-->
+</div><!--end char container div-->

@@ -1,0 +1,35 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Build outputs
+dist/
+**/dist/
+dist-types/
+**/dist-types/
+*.tsbuildinfo
+**/*.tsbuildinfo
+
+# Logs & temp
+*.log
+**/*.log
+.system_generated/
+**/.system_generated/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment variables
+.env
+.env.local
+*.env
+*.env.local
+
+# Real game content (migrated locally via script) & data logs
+/betrayal-web/content/
+/betrayal-web/data/
+
+# Docker overrides
+docker-compose.override.yml
+**/docker-compose.override.yml
