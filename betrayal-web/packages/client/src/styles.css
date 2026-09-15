@@ -805,99 +805,204 @@ h2 {
   margin-top: 8px;
 }
 
-/* --- Dice Roll Tray --- */
-.dice-tray {
-  position: fixed;
-  bottom: 24px;
-  right: 24px;
-  z-index: 90;
-  background: #241e1c;
-  border: 2px solid var(--accent);
-  border-radius: 12px;
-  padding: 16px 20px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+.card-modal__unrevealed {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  min-width: 280px;
-  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-@keyframes slideUp {
-  from { transform: translateY(30px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
-
-.dice-tray__header {
-  display: flex;
-  justify-content: space-between;
+  gap: 16px;
   align-items: center;
 }
 
-.dice-tray__reason {
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--accent);
-  letter-spacing: 0.05em;
+.card-modal__revealed {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  text-align: center;
+  animation: card-flip 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.dice-tray__close {
-  background: none;
-  border: 0;
+@keyframes card-flip {
+  from {
+    transform: rotateY(90deg);
+    opacity: 0;
+  }
+  to {
+    transform: rotateY(0deg);
+    opacity: 1;
+  }
+}
+
+.card-modal__back-art {
+  width: 110px;
+  height: 150px;
+  background: linear-gradient(135deg, #2b1f1d, #14100e);
+  border: 2px dashed var(--accent);
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  margin: 6px 0;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+}
+
+.card-modal__back-glyph {
+  font-size: 52px;
+  filter: drop-shadow(0 0 14px rgba(255, 255, 255, 0.4));
+  animation: pulse-slow 2s infinite ease-in-out;
+}
+
+@keyframes pulse-slow {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.card-modal__intro {
+  font-size: 14px;
   color: var(--muted);
-  cursor: pointer;
-  font-size: 18px;
-}
-.dice-tray__close:hover {
-  color: #fff;
+  line-height: 1.4;
+  margin: 0;
 }
 
-.dice-tray__dice {
+.card-modal__tags {
   display: flex;
   gap: 8px;
   justify-content: center;
 }
 
+.btn--large {
+  padding: 10px 24px;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.btn--full {
+  width: 100%;
+}
+
+/* --- Dice Roll Tray & Modal --- */
+.modal-backdrop--dice {
+  z-index: 100;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  display: grid;
+  place-items: center;
+}
+
+.dice-tray--modal {
+  position: relative;
+  bottom: auto;
+  right: auto;
+  min-width: 320px;
+  max-width: 440px;
+  width: 90%;
+  background: #1c1816;
+  border: 2px solid var(--accent);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9), 0 0 30px rgba(220, 150, 60, 0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  animation: scaleIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.dice-tray__header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.dice-tray__reason {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--accent);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.dice-tray__status {
+  text-align: center;
+  font-size: 14px;
+  color: var(--parchment);
+  font-weight: 600;
+}
+
+.dice-tray__dice {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin: 6px 0;
+}
+
 .dice-tray__die {
-  width: 38px;
-  height: 38px;
+  width: 44px;
+  height: 44px;
   background: #f4ecdc;
   color: #2b1f1d;
-  border-radius: 6px;
+  border-radius: 8px;
   display: grid;
   place-items: center;
   font-weight: 900;
-  font-size: 18px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3), inset 0 -2px 0 rgba(0, 0, 0, 0.2);
+  font-size: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4), inset 0 -2px 0 rgba(0, 0, 0, 0.25);
+  transition: transform 0.1s ease;
+}
+
+.dice-tray__die--rolling {
+  animation: dice-shake 0.12s infinite alternate;
+  background: #fdf5e6;
+  box-shadow: 0 0 12px rgba(255, 200, 100, 0.6);
+}
+
+@keyframes dice-shake {
+  0% { transform: rotate(-10deg) scale(1.1); }
+  100% { transform: rotate(10deg) scale(1.1); }
 }
 
 .dice-tray__die--0 {
   color: #a89f91;
 }
 
+.dice-tray__result-box {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  animation: fadeIn 0.2s ease-out;
+}
+
 .dice-tray__total {
   text-align: center;
-  font-size: 15px;
+  font-size: 16px;
+  color: var(--parchment);
 }
 
 .dice-tray__haunt-result {
   font-size: 13px;
-  font-weight: 600;
-  padding: 6px 10px;
+  font-weight: 700;
+  padding: 8px 12px;
   border-radius: 6px;
   text-align: center;
+  line-height: 1.4;
 }
 
 .dice-tray__haunt-result--triggered {
-  background: rgba(179, 69, 58, 0.25);
+  background: rgba(179, 69, 58, 0.3);
   color: #ff8579;
   border: 1px solid var(--danger);
+  box-shadow: 0 0 15px rgba(255, 100, 100, 0.3);
 }
 
 .dice-tray__haunt-result--safe {
-  background: rgba(111, 148, 87, 0.25);
+  background: rgba(111, 148, 87, 0.3);
   color: #9cd180;
   border: 1px solid var(--ok);
+}
+
+.dice-tray__actions {
+  margin-top: 4px;
 }
 
 /* --- Haunt Banner --- */

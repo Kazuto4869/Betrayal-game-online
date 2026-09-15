@@ -1,9 +1,15 @@
+import { useState, useEffect } from 'react';
 import { useStore } from '../store.js';
 
 export function CardModal() {
   const activeCardDraw = useStore((s) => s.activeCardDraw);
   const content = useStore((s) => s.content);
   const dismissCardDraw = useStore((s) => s.dismissCardDraw);
+  const [revealed, setRevealed] = useState(false);
+
+  useEffect(() => {
+    setRevealed(false);
+  }, [activeCardDraw?.cardId]);
 
   if (!activeCardDraw || !content) return null;
 
@@ -17,31 +23,69 @@ export function CardModal() {
         ? 'card-modal__badge--item'
         : 'card-modal__badge--event';
 
-  const deckIcon =
-    card.deck === 'omen' ? '🔮 OMEN' : card.deck === 'item' ? '🎒 ITEM' : '⚡ EVENT';
+  const deckTitle =
+    card.deck === 'omen'
+      ? '🔮 ĐIỀM BÁO (OMEN)'
+      : card.deck === 'item'
+        ? '🎒 VẬT PHẨM (ITEM)'
+        : '⚡ BIẾN CỐ (EVENT)';
 
   return (
-    <div className="modal-backdrop" onClick={dismissCardDraw}>
+    <div className="modal-backdrop modal-backdrop--card">
       <div className="card-modal" onClick={(e) => e.stopPropagation()}>
-        <div className={`card-modal__badge ${deckColorClass}`}>
-          {deckIcon}
-        </div>
-        <h2 className="card-modal__title">{card.name}</h2>
-        {card.isWeapon && <span className="card-modal__tag">⚔️ Weapon</span>}
-        {card.isCompanion && <span className="card-modal__tag">🐕 Companion</span>}
-        <div className="card-modal__text">{card.text}</div>
-        {card.flavor && (
-          <div className="card-modal__flavor">“{card.flavor}”</div>
+        {!revealed ? (
+          <div className="card-modal__unrevealed">
+            <div className={`card-modal__badge ${deckColorClass}`}>
+              {deckTitle}
+            </div>
+            <div className="card-modal__back-art">
+              <span className="card-modal__back-glyph">
+                {card.deck === 'omen' ? '🔮' : card.deck === 'item' ? '🗝️' : '⚡'}
+              </span>
+            </div>
+            <h2 className="card-modal__title">
+              Khám Phá Lá Bài {card.deck.toUpperCase()}
+            </h2>
+            <p className="card-modal__intro">
+              Một năng lượng kỳ bí bao trùm căn phòng. Hãy lật thẻ bài để xem số phận của bạn!
+            </p>
+            <div className="card-modal__actions">
+              <button
+                type="button"
+                className="btn btn--primary btn--large"
+                onClick={() => setRevealed(true)}
+              >
+                🎴 BẤM ĐỂ LẬT THẺ BÀI
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="card-modal__revealed">
+            <div className={`card-modal__badge ${deckColorClass}`}>
+              {deckTitle}
+            </div>
+            <h2 className="card-modal__title">{card.name}</h2>
+            <div className="card-modal__tags">
+              {card.isWeapon && <span className="card-modal__tag">⚔️ Vũ Khí (Weapon)</span>}
+              {card.isCompanion && <span className="card-modal__tag">🐕 Bạn Đồng Hành (Companion)</span>}
+            </div>
+            <div className="card-modal__text">{card.text}</div>
+            {card.flavor && (
+              <div className="card-modal__flavor">“{card.flavor}”</div>
+            )}
+            <div className="card-modal__actions">
+              <button
+                type="button"
+                className="btn btn--primary btn--large"
+                onClick={dismissCardDraw}
+              >
+                {card.deck === 'item' || card.deck === 'omen'
+                  ? '🎒 Nhận Thẻ Vào Túi Đồ (Xác Nhận)'
+                  : '✅ Đã Đọc Xong (Xác Nhận)'}
+              </button>
+            </div>
+          </div>
         )}
-        <div className="card-modal__actions">
-          <button
-            type="button"
-            className="btn btn--primary"
-            onClick={dismissCardDraw}
-          >
-            {card.deck === 'item' || card.deck === 'omen' ? 'Take Card' : 'Continue'}
-          </button>
-        </div>
       </div>
     </div>
   );
