@@ -19,6 +19,11 @@ import { FloorTabs } from '../board/FloorTabs.js';
 import { floorOf, pawnsFromState } from '../board/pawns.js';
 import { LogPanel } from '../log/LogPanel.js';
 import { ALL_TRAITS, TRAIT_ICONS, TRAIT_LABELS, TRAIT_SHORT } from '../traits.js';
+import { CardModal } from '../components/CardModal.js';
+import { DiceRollTray } from '../components/DiceRollTray.js';
+import { HauntBanner } from '../components/HauntBanner.js';
+import { InventoryTray } from '../components/InventoryTray.js';
+import { GameOverModal } from '../components/GameOverModal.js';
 
 /** Seconds of countdown to show. Below this, the clock is worth watching. */
 const VISIBLE_WITHIN_MS = 60 * 1000;
@@ -341,13 +346,11 @@ export function Game() {
               Concede
             </button>
           </div>
-          {/* The full players-rail design (docs/07-ui.md#72: portraits, 8-slot
-              trait strips, item rows) is out of scope here. Traits are stored
-              as track indices with no death detection surfaced yet (that
-              lands with combat in M3), so this stays the plain seat list. */}
+          <InventoryTray />
         </section>
 
         <section className="panel game__board">
+          <HauntBanner />
           {pendingPayload && (
             <div className="panel rotate-prompt">
               {isMyPrompt ? (
@@ -464,6 +467,9 @@ export function Game() {
           onSend={sendChat}
         />
       </div>
+      <CardModal />
+      <DiceRollTray />
+      <GameOverModal />
     </main>
   );
 }

@@ -135,9 +135,49 @@ export const HouseSchema = z.object({
   landings: z.record(FloorSchema, z.string().min(1)),
 });
 
+export const DeckKindSchema = z.enum(['item', 'event', 'omen']);
+export type DeckKind = z.infer<typeof DeckKindSchema>;
+
+export const CardSchema = z.object({
+  id: z.string().min(1),
+  deck: DeckKindSchema,
+  name: z.string().min(1),
+  text: z.string(),
+  flavor: z.string().optional(),
+  keepInPlay: z.boolean().default(false),
+  isWeapon: z.boolean().default(false),
+  isCompanion: z.boolean().default(false),
+  onDraw: z.array(EffectSchema).default([]),
+  onUse: z.array(EffectSchema).default([]),
+});
+
+export const TraitorRuleSchema = z.discriminatedUnion('kind', [
+  z.object({ kind: z.literal('trigger') }),
+  z.object({ kind: z.literal('highest'), trait: TraitSchema }),
+  z.object({ kind: z.literal('lowest'), trait: TraitSchema }),
+  z.object({ kind: z.literal('holder'), cardId: z.string() }),
+  z.object({ kind: z.literal('none') }),
+]);
+
+export const SideSchema = z.object({
+  goal: z.string(),
+  rules: z.array(z.string()).default([]),
+});
+
+export const HauntSchema = z.object({
+  id: z.number().int().min(1).max(50),
+  name: z.string().min(1),
+  traitorRule: TraitorRuleSchema,
+  traitor: SideSchema,
+  heroes: SideSchema,
+  implemented: z.boolean().default(false),
+});
+
 export const ContentFileSchema = z.object({
   characters: z.array(CharacterSchema).min(1),
   tiles: z.array(TileSchema).min(1),
+  cards: z.array(CardSchema).default([]),
+  haunts: z.array(HauntSchema).default([]),
   house: HouseSchema,
 });
 
@@ -146,6 +186,9 @@ export type Tile = z.infer<typeof TileSchema>;
 export type StaticLink = z.infer<typeof StaticLinkSchema>;
 export type StartingTile = z.infer<typeof StartingTileSchema>;
 export type House = z.infer<typeof HouseSchema>;
+export type Card = z.infer<typeof CardSchema>;
+export type Haunt = z.infer<typeof HauntSchema>;
+export type TraitorRule = z.infer<typeof TraitorRuleSchema>;
 export type ContentFile = z.infer<typeof ContentFileSchema>;
 
 /**
@@ -159,6 +202,12 @@ export interface Content {
   charactersById: Record<string, Character>;
   tiles: Tile[];
   tilesById: Record<string, Tile>;
+  cards: Card[];
+  cardsById: Record<string, Card>;
+  cardsByDeck: Record<DeckKind, Card[]>;
+  deckCards: Record<DeckKind, string[]>;
+  haunts: Haunt[];
+  hauntsById: Record<number, Haunt>;
   house: House;
   /**
    * The draw deck as tile ids, one entry per copy, in file order: every tile

@@ -58,6 +58,8 @@ export function createServer() {
         hash: content.hash,
         characters: content.characters,
         tiles: content.tiles,
+        cards: content.cards,
+        haunts: content.haunts,
         house: content.house,
       });
     }

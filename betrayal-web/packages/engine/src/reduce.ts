@@ -22,6 +22,7 @@ import {
   placedIdFor,
   rotateDoors,
   type BoardState,
+  type CardId,
   type Dir,
   type GameAction,
   type GameEvent,
@@ -36,6 +37,7 @@ import {
   type RuleErrorCode,
   type SeatId,
   type TargetRef,
+  type Trait,
 } from '@bahoth/shared';
 import type { Character, Content } from '@bahoth/content';
 import { checkInvariants } from './invariants.js';
@@ -55,9 +57,10 @@ import {
   isCharacterTaken,
   nextSeatInOrder,
   takenColours,
+  traitValue,
 } from './selectors.js';
 import { beginTurnFor, findPath } from './movement.js';
-import { shuffle } from './rng.js';
+import { rollDice, shuffle } from './rng.js';
 
 export interface ReduceResult {
   state: GameState;
@@ -143,14 +146,17 @@ function dispatch(state: GameState, action: GameAction, content: Content): Reduc
 
     // Declared in the protocol, implemented in later milestones.
     case 'USE_ITEM':
-    case 'TRADE':
+      return useItem(state, action.seat, action.cardId, action.target, content);
     case 'DROP':
-    case 'ROOM_ACTION':
+      return dropItems(state, action.seat, action.cardIds, content);
     case 'ATTACK':
+      return attack(state, action.seat, action.target, action.trait, content);
+    case 'TRADE':
+    case 'ROOM_ACTION':
     case 'ASSIGN_DAMAGE':
       return fail(
         'UNKNOWN_ACTION',
-        `${action.t} is not implemented until a later milestone`,
+        `${action.t} is not implemented yet`,
       );
   }
 }
@@ -298,9 +304,12 @@ function startGame(state: GameState, seat: SeatId, content: Content): ReduceResu
     rng,
     players.map((p) => p.seatId),
   );
-  // Turn order first, then the tile deck — the ordering is fixed so replay
-  // reproduces the same deck every time (docs/05-engine.md#54).
-  const [tileDeck, nextRng] = shuffle(rngAfterOrder, content.deckTiles);
+  // Turn order first, then the tile deck, then card decks — the ordering is fixed
+  // so replay reproduces the same decks every time (docs/05-engine.md#54).
+  const [tileDeck, rngAfterTile] = shuffle(rngAfterOrder, content.deckTiles);
+  const [itemDeck, rngAfterItem] = shuffle(rngAfterTile, content.deckCards?.item ?? []);
+  const [eventDeck, rngAfterEvent] = shuffle(rngAfterItem, content.deckCards?.event ?? []);
+  const [omenDeck, nextRng] = shuffle(rngAfterEvent, content.deckCards?.omen ?? []);
 
   const board = placeStartingLayout(content);
   const startLayout = content.house.layout.find(
@@ -339,6 +348,13 @@ function startGame(state: GameState, seat: SeatId, content: Content): ReduceResu
     turnDeadline: null,
     board,
     tileDeck,
+    decks: {
+      item: { draw: itemDeck, discard: [], inPlay: [] },
+      event: { draw: eventDeck, discard: [], inPlay: [] },
+      omen: { draw: omenDeck, discard: [], inPlay: [] },
+    },
+    omensDrawn: 0,
+    haunt: null,
   };
   // Only the first active seat gets a movement budget this turn (D-f);
   // everyone else keeps the movesLeft: 0 they were seeded with in makePlayer.
@@ -566,28 +582,118 @@ function finishDiscovery(
   };
 
   const player = state.players[seat]!;
+  const tileDef = content.tilesById[payload.tileId];
+  const hasSymbol = Boolean(tileDef?.symbol);
+  const movesLeft = hasSymbol ? 0 : player.movesLeft - 1;
+
   const players = {
     ...state.players,
     [seat]: {
       ...player,
       location: id,
       cameFrom: payload.from,
-      movesLeft: player.movesLeft - 1,
+      movesLeft,
     },
   };
 
-  const afterMove: GameState = { ...state, board, players, pending: null };
+  let workingState: GameState = { ...state, board, players, pending: null };
   const events: GameEvent[] = [
     { t: 'discovered', seat, placed },
     { t: 'moved', seat, from: payload.from, to: id },
   ];
 
-  const tileDef = content.tilesById[payload.tileId];
-  if (!tileDef || tileDef.onEnter.length === 0) {
-    return { state: afterMove, events };
+  if (tileDef?.symbol && workingState.decks[tileDef.symbol]) {
+    const symbol = tileDef.symbol;
+    let deck = workingState.decks[symbol];
+
+    if (deck.draw.length === 0 && deck.discard.length > 0 && workingState.rng) {
+      const [shuffled, newRng] = shuffle(workingState.rng, deck.discard);
+      deck = { ...deck, draw: shuffled, discard: [] };
+      workingState = {
+        ...workingState,
+        rng: newRng,
+        decks: { ...workingState.decks, [symbol]: deck },
+      };
+    }
+
+    if (deck.draw.length > 0) {
+      const cardId = deck.draw[0]!;
+      const nextDraw = deck.draw.slice(1);
+      const cardDef = content.cardsById[cardId];
+      events.push({ t: 'drew_card', seat, deck: symbol, cardId });
+
+      if (symbol === 'item') {
+        const nextInPlay = [...deck.inPlay, cardId];
+        const nextDeck = { ...deck, draw: nextDraw, inPlay: nextInPlay };
+        const currentPlayer = workingState.players[seat]!;
+        workingState = {
+          ...workingState,
+          decks: { ...workingState.decks, item: nextDeck },
+          players: {
+            ...workingState.players,
+            [seat]: { ...currentPlayer, items: [...currentPlayer.items, cardId] },
+          },
+        };
+        if (cardDef?.onDraw && cardDef.onDraw.length > 0) {
+          const effOutcome = runEffects(workingState, cardDef.onDraw, { actor: seat }, content);
+          workingState = effOutcome.state;
+          events.push(...effOutcome.events);
+        }
+      } else if (symbol === 'omen') {
+        const nextInPlay = [...deck.inPlay, cardId];
+        const nextDeck = { ...deck, draw: nextDraw, inPlay: nextInPlay };
+        const currentPlayer = workingState.players[seat]!;
+        const nextOmensDrawn = workingState.omensDrawn + 1;
+        workingState = {
+          ...workingState,
+          decks: { ...workingState.decks, omen: nextDeck },
+          omensDrawn: nextOmensDrawn,
+          players: {
+            ...workingState.players,
+            [seat]: { ...currentPlayer, omens: [...currentPlayer.omens, cardId] },
+          },
+        };
+        if (cardDef?.onDraw && cardDef.onDraw.length > 0) {
+          const effOutcome = runEffects(workingState, cardDef.onDraw, { actor: seat }, content);
+          workingState = effOutcome.state;
+          events.push(...effOutcome.events);
+        }
+        if (workingState.haunt === null && workingState.rng) {
+          const [dice, total, nextRng] = rollDice(workingState.rng, 6);
+          workingState = { ...workingState, rng: nextRng };
+          events.push({ t: 'rolled', seat, dice, total, reason: 'haunt_roll' });
+          const triggered = total < nextOmensDrawn;
+          events.push({ t: 'haunt_roll', total, needed: nextOmensDrawn, triggered });
+          if (triggered) {
+            const hauntOutcome = triggerHaunt(workingState, seat, cardId, payload.tileId, content);
+            workingState = hauntOutcome.state;
+            events.push(...hauntOutcome.events);
+          }
+        }
+      } else if (symbol === 'event') {
+        if (cardDef?.onDraw && cardDef.onDraw.length > 0) {
+          const effOutcome = runEffects(workingState, cardDef.onDraw, { actor: seat }, content);
+          workingState = effOutcome.state;
+          events.push(...effOutcome.events);
+        }
+        if (cardDef?.keepInPlay) {
+          const nextDeck = { ...deck, draw: nextDraw, inPlay: [...deck.inPlay, cardId] };
+          workingState = { ...workingState, decks: { ...workingState.decks, event: nextDeck } };
+        } else {
+          const nextDeck = { ...deck, draw: nextDraw, discard: [...deck.discard, cardId] };
+          workingState = { ...workingState, decks: { ...workingState.decks, event: nextDeck } };
+        }
+      }
+    }
   }
-  const resolved = runEffects(afterMove, tileDef.onEnter, { actor: seat }, content);
-  return { state: resolved.state, events: [...events, ...resolved.events] };
+
+  if (tileDef && tileDef.onEnter.length > 0) {
+    const resolved = runEffects(workingState, tileDef.onEnter, { actor: seat }, content);
+    workingState = resolved.state;
+    events.push(...resolved.events);
+  }
+
+  return { state: workingState, events };
 }
 
 /**
@@ -1133,4 +1239,363 @@ function tick(state: GameState, now: number, content: Content): ReduceResult {
       ...ended.events,
     ],
   };
+}
+
+function triggerHaunt(
+  state: GameState,
+  revealerSeat: SeatId,
+  omenCardId: string,
+  tileId: string,
+  content: Content,
+): { state: GameState; events: GameEvent[] } {
+  let hauntId = 1;
+  if (omenCardId.includes('holy_symbol') || omenCardId.includes('symbol')) hauntId = 1;
+  else if (omenCardId.includes('spirit_board') || omenCardId.includes('board')) hauntId = 2;
+  else if (omenCardId.includes('bite')) hauntId = 5;
+  else if (omenCardId.includes('ring')) hauntId = 10;
+  else if (omenCardId.includes('skull')) hauntId = 16;
+  else {
+    const list = content.haunts;
+    if (list.length > 0) {
+      let sum = 0;
+      for (let i = 0; i < omenCardId.length; i++) sum += omenCardId.charCodeAt(i);
+      for (let i = 0; i < tileId.length; i++) sum += tileId.charCodeAt(i);
+      hauntId = list[sum % list.length]!.id;
+    }
+  }
+
+  const hauntDef = content.hauntsById[hauntId] ?? content.haunts[0];
+  const traitorRule = hauntDef?.traitorRule ?? { kind: 'trigger' };
+
+  let traitorSeat: SeatId | null = null;
+  const livingSeats = state.turnOrder.filter(
+    (s) => state.players[s] && !state.players[s]!.isDead && !state.players[s]!.removed,
+  );
+
+  switch (traitorRule.kind) {
+    case 'trigger':
+      traitorSeat = revealerSeat;
+      break;
+    case 'none':
+      traitorSeat = null;
+      break;
+    case 'holder': {
+      const holder = livingSeats.find((s) => {
+        const p = state.players[s]!;
+        return p.items.includes(traitorRule.cardId) || p.omens.includes(traitorRule.cardId);
+      });
+      traitorSeat = holder ?? revealerSeat;
+      break;
+    }
+    case 'highest': {
+      let bestVal = -Infinity;
+      let bestSeat: SeatId | null = null;
+      for (const s of livingSeats) {
+        const val = traitValue(state, s, traitorRule.trait, content);
+        if (val > bestVal) {
+          bestVal = val;
+          bestSeat = s;
+        }
+      }
+      traitorSeat = bestSeat ?? revealerSeat;
+      break;
+    }
+    case 'lowest': {
+      let worstVal = Infinity;
+      let worstSeat: SeatId | null = null;
+      for (const s of livingSeats) {
+        const val = traitValue(state, s, traitorRule.trait, content);
+        if (val < worstVal) {
+          worstVal = val;
+          worstSeat = s;
+        }
+      }
+      traitorSeat = worstSeat ?? revealerSeat;
+      break;
+    }
+  }
+
+  const nextPlayers = { ...state.players };
+  if (traitorSeat && nextPlayers[traitorSeat]) {
+    nextPlayers[traitorSeat] = {
+      ...nextPlayers[traitorSeat]!,
+      isTraitor: true,
+    };
+  }
+
+  const nextState: GameState = {
+    ...state,
+    phase: 'haunt',
+    players: nextPlayers,
+    haunt: {
+      hauntId,
+      traitorSeat,
+      revealed: true,
+      acknowledged: [],
+    },
+  };
+
+  const events: GameEvent[] = [
+    { t: 'haunt_begun', hauntId, traitor: traitorSeat },
+  ];
+
+  return { state: nextState, events };
+}
+
+function useItem(
+  state: GameState,
+  seat: SeatId,
+  cardId: CardId,
+  target: TargetRef | undefined,
+  content: Content,
+): ReduceResult {
+  if (!['explore', 'haunt'].includes(state.phase)) {
+    return fail('WRONG_PHASE', `Cannot use items during ${state.phase}`);
+  }
+  if (state.activeSeat !== seat) return fail('NOT_YOUR_TURN', 'It is not your turn');
+  const player = state.players[seat];
+  if (!player || player.isDead) return fail('ILLEGAL_MOVE', 'Cannot use items');
+  const hasCard = player.items.includes(cardId) || player.omens.includes(cardId);
+  if (!hasCard) return fail('ILLEGAL_MOVE', `Player does not have card ${cardId}`);
+
+  const card = content.cardsById[cardId];
+  if (!card) return fail('ILLEGAL_MOVE', `Card ${cardId} does not exist`);
+
+  let nextState = state;
+  const events: GameEvent[] = [];
+
+  if (card.onUse && card.onUse.length > 0) {
+    const outcome = runEffects(
+      nextState,
+      card.onUse,
+      {
+        actor: seat,
+        chosen: target ? (target.kind === 'seat' ? target.seatId : target.monsterId) : undefined,
+      },
+      content,
+    );
+    nextState = outcome.state;
+    events.push(...outcome.events);
+  }
+
+  if (!card.keepInPlay) {
+    const nextItems = nextState.players[seat]!.items.filter((id) => id !== cardId);
+    const nextOmens = nextState.players[seat]!.omens.filter((id) => id !== cardId);
+    const deckKind = card.deck;
+    const nextDeck = {
+      ...nextState.decks[deckKind],
+      inPlay: nextState.decks[deckKind].inPlay.filter((id) => id !== cardId),
+      discard: [...nextState.decks[deckKind].discard, cardId],
+    };
+    nextState = {
+      ...nextState,
+      decks: { ...nextState.decks, [deckKind]: nextDeck },
+      players: {
+        ...nextState.players,
+        [seat]: { ...nextState.players[seat]!, items: nextItems, omens: nextOmens },
+      },
+    };
+  }
+
+  events.push({ t: 'log', text: `${player.name} used ${card.name}.` });
+  return { state: nextState, events };
+}
+
+function dropItems(
+  state: GameState,
+  seat: SeatId,
+  cardIds: CardId[],
+  _content: Content,
+): ReduceResult {
+  if (!['explore', 'haunt'].includes(state.phase)) {
+    return fail('WRONG_PHASE', `Cannot drop items during ${state.phase}`);
+  }
+  if (state.activeSeat !== seat) return fail('NOT_YOUR_TURN', 'It is not your turn');
+  const player = state.players[seat];
+  if (!player || player.isDead || player.location === null) {
+    return fail('ILLEGAL_MOVE', 'Cannot drop items');
+  }
+  const currentLoc = player.location;
+  const nextItems = player.items.filter((id) => !cardIds.includes(id));
+  const nextOmens = player.omens.filter((id) => !cardIds.includes(id));
+
+  const tile = state.board.placed[currentLoc]!;
+  const existingDropped = (
+    typeof tile.flags['dropped'] === 'string' ? tile.flags['dropped'].split(',') : []
+  ).filter(Boolean);
+  const newDropped = [...existingDropped, ...cardIds];
+
+  const nextState: GameState = {
+    ...state,
+    board: {
+      ...state.board,
+      placed: {
+        ...state.board.placed,
+        [currentLoc]: {
+          ...tile,
+          flags: { ...tile.flags, dropped: newDropped.join(',') },
+        },
+      },
+    },
+    players: {
+      ...state.players,
+      [seat]: { ...player, items: nextItems, omens: nextOmens },
+    },
+  };
+  return {
+    state: nextState,
+    events: [{ t: 'log', text: `${player.name} dropped ${cardIds.length} item(s).` }],
+  };
+}
+
+function attack(
+  state: GameState,
+  seat: SeatId,
+  target: TargetRef,
+  trait: Trait | undefined,
+  content: Content,
+): ReduceResult {
+  if (state.phase !== 'haunt') {
+    return fail('WRONG_PHASE', 'Can only attack during haunt phase');
+  }
+  if (state.activeSeat !== seat) return fail('NOT_YOUR_TURN', 'It is not your turn');
+  const player = state.players[seat];
+  if (!player || player.isDead || player.location === null) {
+    return fail('ILLEGAL_MOVE', 'Cannot attack');
+  }
+  if (player.hasAttackedThisTurn) {
+    return fail('ILLEGAL_MOVE', 'Already attacked this turn');
+  }
+  if (target.kind !== 'seat') {
+    return fail('ILLEGAL_MOVE', 'Monster attacks not yet implemented');
+  }
+  const targetSeat = target.seatId;
+  if (targetSeat === seat) return fail('ILLEGAL_MOVE', 'Cannot attack yourself');
+  const targetPlayer = state.players[targetSeat];
+  if (!targetPlayer || targetPlayer.isDead || targetPlayer.removed) {
+    return fail('ILLEGAL_MOVE', 'Target is not a living opponent');
+  }
+  if (targetPlayer.location !== player.location) {
+    return fail('ILLEGAL_MOVE', 'Target is not in the same room');
+  }
+  const rng = state.rng;
+  if (!rng) return fail('INVARIANT_VIOLATION', 'Missing RNG');
+
+  const attackTrait = trait ?? 'might';
+  const attackerDice = Math.max(1, traitValue(state, seat, attackTrait, content));
+  const defenderDice = Math.max(1, traitValue(state, targetSeat, attackTrait, content));
+
+  const [attDice, attTotal, rng1] = rollDice(rng, attackerDice);
+  const [defDice, defTotal, rng2] = rollDice(rng1, defenderDice);
+
+  const diff = Math.abs(attTotal - defTotal);
+  let winner: 'attacker' | 'defender' | 'tie' = 'tie';
+  if (attTotal > defTotal) winner = 'attacker';
+  else if (defTotal > attTotal) winner = 'defender';
+
+  const events: GameEvent[] = [
+    { t: 'rolled', seat, dice: attDice, total: attTotal, reason: 'attack' },
+    { t: 'rolled', seat: targetSeat, dice: defDice, total: defTotal, reason: 'defense' },
+    {
+      t: 'attacked',
+      seat,
+      target,
+      result: {
+        attackerTotal: attTotal,
+        defenderTotal: defTotal,
+        winner,
+        damage: diff,
+      },
+    },
+  ];
+
+  const nextPlayers = {
+    ...state.players,
+    [seat]: { ...player, hasAttackedThisTurn: true },
+  };
+
+  if (winner === 'attacker' && diff > 0) {
+    const currentIdx = targetPlayer.traits[attackTrait];
+    const newIdx = Math.max(0, currentIdx - diff);
+    const isDead = newIdx === 0;
+    nextPlayers[targetSeat] = {
+      ...targetPlayer,
+      traits: { ...targetPlayer.traits, [attackTrait]: newIdx },
+      isDead: targetPlayer.isDead || isDead,
+    };
+    events.push({
+      t: 'trait_changed',
+      seat: targetSeat,
+      trait: attackTrait,
+      from: currentIdx,
+      to: newIdx,
+    });
+    if (isDead && !targetPlayer.isDead) {
+      events.push({ t: 'died', seat: targetSeat });
+    }
+  } else if (winner === 'defender' && diff > 0) {
+    const currentIdx = player.traits[attackTrait];
+    const newIdx = Math.max(0, currentIdx - diff);
+    const isDead = newIdx === 0;
+    nextPlayers[seat] = {
+      ...nextPlayers[seat]!,
+      traits: { ...nextPlayers[seat]!.traits, [attackTrait]: newIdx },
+      isDead: player.isDead || isDead,
+    };
+    events.push({
+      t: 'trait_changed',
+      seat,
+      trait: attackTrait,
+      from: currentIdx,
+      to: newIdx,
+    });
+    if (isDead && !player.isDead) {
+      events.push({ t: 'died', seat });
+    }
+  }
+
+  let nextState: GameState = {
+    ...state,
+    rng: rng2,
+    players: nextPlayers,
+  };
+
+  const checkHeroesLiving = Object.values(nextPlayers).filter(
+    (p) => !p.isTraitor && !p.isDead && !p.removed,
+  );
+  const checkTraitorLiving = Object.values(nextPlayers).filter(
+    (p) => p.isTraitor && !p.isDead && !p.removed,
+  );
+
+  if (checkHeroesLiving.length === 0) {
+    const traitorWinners = Object.values(nextPlayers)
+      .filter((p) => p.isTraitor)
+      .map((p) => p.seatId);
+    const result = {
+      outcome: 'traitor' as const,
+      winners: traitorWinners.length > 0 ? traitorWinners : [seat],
+      reason: 'All heroes have died.',
+    };
+    nextState = {
+      ...nextState,
+      phase: 'game_over',
+      result,
+    };
+    events.push({ t: 'game_over', result });
+  } else if (state.haunt?.traitorSeat && checkTraitorLiving.length === 0) {
+    const heroWinners = checkHeroesLiving.map((p) => p.seatId);
+    const result = {
+      outcome: 'heroes' as const,
+      winners: heroWinners,
+      reason: 'The traitor has been slain.',
+    };
+    nextState = {
+      ...nextState,
+      phase: 'game_over',
+      result,
+    };
+    events.push({ t: 'game_over', result });
+  }
+
+  return { state: nextState, events };
 }

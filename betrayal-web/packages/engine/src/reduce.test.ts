@@ -753,12 +753,11 @@ describe('the remove-player vote', () => {
 
 describe('unimplemented actions', () => {
   it('are rejected cleanly rather than silently ignored', () => {
-    // MOVE_THROUGH and ROTATE_TILE are implemented as of M2; USE_ITEM is
-    // still a later milestone, so it is the example here now.
+    // USE_ITEM, DROP, ATTACK are implemented; ROOM_ACTION is the example here now.
     const g = startedGame();
     const r = reduce(
       g.state,
-      { t: 'USE_ITEM', seat: g.state.activeSeat!, cardId: 'card.does_not_exist' },
+      { t: 'ROOM_ACTION', seat: g.state.activeSeat!, actionId: 'inspect' },
       content,
     );
     expect(r.error?.code).toBe('UNKNOWN_ACTION');

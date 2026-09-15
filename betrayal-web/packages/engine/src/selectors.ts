@@ -184,6 +184,26 @@ export function getLegalActions(
         for (const dir of getOpenDoorways(state, seat, content)) {
           actions.push({ t: 'MOVE_THROUGH', seat, dir });
         }
+        for (const itemId of player.items) {
+          actions.push({ t: 'USE_ITEM', seat, cardId: itemId });
+        }
+        if (state.phase === 'haunt' && !player.hasAttackedThisTurn && player.location) {
+          for (const other of Object.values(state.players)) {
+            if (
+              other.seatId !== seat &&
+              !other.isDead &&
+              !other.removed &&
+              other.location === player.location
+            ) {
+              actions.push({
+                t: 'ATTACK',
+                seat,
+                target: { kind: 'seat', seatId: other.seatId },
+                trait: 'might',
+              });
+            }
+          }
+        }
         actions.push({ t: 'END_TURN', seat });
       }
       break;

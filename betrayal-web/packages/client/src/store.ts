@@ -9,6 +9,7 @@
 
 import { create } from 'zustand';
 import type {
+  CardId,
   GameAction,
   GameState,
   PublicSeat,
@@ -26,6 +27,20 @@ export type Screen = 'home' | 'lobby' | 'game';
 
 /** How many lines to retain. Beyond this the oldest are dropped. */
 const LOG_LIMIT = 200;
+
+export interface CardDrawInfo {
+  seat: SeatId;
+  cardId: CardId;
+  deck: string;
+}
+
+export interface RollInfo {
+  seat?: SeatId;
+  dice: number[];
+  total: number;
+  reason: string;
+  hauntRoll?: { needed: number; triggered: boolean };
+}
 
 interface Store {
   screen: Screen;
@@ -47,6 +62,9 @@ interface Store {
   /** Seat token from `welcome`, held until `room` reveals the code. */
   heldToken: string | null;
 
+  activeCardDraw: CardDrawInfo | null;
+  activeRoll: RollInfo | null;
+
   conn: Connection | null;
 
   init: () => Promise<void>;
@@ -56,6 +74,8 @@ interface Store {
   send: (action: GameAction) => void;
   sendChat: (text: string) => void;
   dismissError: () => void;
+  dismissCardDraw: () => void;
+  dismissRoll: () => void;
 }
 
 let logId = 0;
@@ -78,6 +98,9 @@ export const useStore = create<Store>((set, get) => ({
   error: null,
   pendingSeq: null,
   heldToken: null,
+
+  activeCardDraw: null,
+  activeRoll: null,
 
   conn: null,
 
@@ -145,6 +168,14 @@ export const useStore = create<Store>((set, get) => ({
   dismissError() {
     set({ error: null });
   },
+
+  dismissCardDraw() {
+    set({ activeCardDraw: null });
+  },
+
+  dismissRoll() {
+    set({ activeRoll: null });
+  },
 }));
 
 type Set = (partial: Partial<Store> | ((s: Store) => Partial<Store>)) => void;
@@ -197,10 +228,30 @@ function handle(msg: ServerMessage, set: Set, get: Get): void {
       const { state, seats, content } = get();
       const ctx = contextFrom(state, seats, content);
       const at = Date.now();
+
+      let activeCardDraw: CardDrawInfo | null = null;
+      let activeRoll: RollInfo | null = null;
+
+      for (const e of msg.events) {
+        if (e.t === 'drew_card') {
+          activeCardDraw = { seat: e.seat, cardId: e.cardId, deck: e.deck };
+        } else if (e.t === 'rolled') {
+          activeRoll = { seat: e.seat, dice: e.dice, total: e.total, reason: e.reason };
+        } else if (e.t === 'haunt_roll') {
+          const current: RollInfo = activeRoll ?? { dice: [], total: e.total, reason: 'haunt_roll' };
+          activeRoll = {
+            ...current,
+            hauntRoll: { needed: e.needed, triggered: e.triggered },
+          };
+        }
+      }
+
       set((s) => ({
         log: [...s.log, ...msg.events.map((e) => entryFor(e, ctx, logId++, at))].slice(
           -LOG_LIMIT,
         ),
+        ...(activeCardDraw ? { activeCardDraw } : {}),
+        ...(activeRoll ? { activeRoll } : {}),
       }));
       break;
     }

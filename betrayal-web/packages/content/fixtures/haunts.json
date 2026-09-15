@@ -1,0 +1,1062 @@
+{
+  "haunts": [
+    {
+      "id": 1,
+      "name": "The Mummy Walks",
+      "traitorRule": {
+        "kind": "highest",
+        "trait": "knowledge"
+      },
+      "traitor": {
+        "goal": "Awaken the ancient Mummy and sacrifice the explorers to complete your dark rebirth ritual.",
+        "rules": [
+          "You control the Mummy during your turn.",
+          "The Mummy rolls 5 dice in Might attacks.",
+          "You win when all heroes are slain or sacrificed."
+        ]
+      },
+      "heroes": {
+        "goal": "Decipher the ancient hieroglyphics and banish the Mummy with sacred incantations.",
+        "rules": [
+          "Find the Book or Holy Symbol to cast banishment spells.",
+          "Make Knowledge rolls (target 5+) in the Crypt to seal the sarcophagus.",
+          "Heroes win when the sarcophagus is sealed or the Mummy is destroyed."
+        ]
+      },
+      "implemented": true
+    },
+    {
+      "id": 2,
+      "name": "The Séance",
+      "traitorRule": {
+        "kind": "lowest",
+        "trait": "sanity"
+      },
+      "traitor": {
+        "goal": "Summon the Restless Spirit to consume the sanity of the living.",
+        "rules": [
+          "The Spirit can pass through walls and moves at Speed 4.",
+          "Spirit attacks target Sanity rather than Might.",
+          "Traitor wins when all heroes die or go completely insane."
+        ]
+      },
+      "heroes": {
+        "goal": "Find the spirit remains and lay them to rest in consecrated ground.",
+        "rules": [
+          "Search the house for 3 sacred relics.",
+          "Bring relics to the Chapel or Pentagram Chamber.",
+          "Heroes win when the ritual of peace is performed."
+        ]
+      },
+      "implemented": true
+    },
+    {
+      "id": 3,
+      "name": "Frog-Leg Stew",
+      "traitorRule": {
+        "kind": "highest",
+        "trait": "might"
+      },
+      "traitor": {
+        "goal": "Brew the Witch brew by boiling the frogs and explorers.",
+        "rules": [
+          "Feed the cauldron in the Kitchen."
+        ]
+      },
+      "heroes": {
+        "goal": "Spill the cauldron and extinguish the cursed fire.",
+        "rules": [
+          "Make Might checks in the Kitchen."
+        ]
+      },
+      "implemented": false
+    },
+    {
+      "id": 4,
+      "name": "The Web of Destiny",
+      "traitorRule": {
+        "kind": "highest",
+        "trait": "speed"
+      },
+      "traitor": {
+        "goal": "Trap the heroes in giant spider webs and feed the Broodmother.",
+        "rules": [
+          "Spiders spin webs that cost 2 extra movement to leave."
+        ]
+      },
+      "heroes": {
+        "goal": "Burn the web nests and slay the Broodmother.",
+        "rules": [
+          "Use torches or weapons against the giant spider."
+        ]
+      },
+      "implemented": false
+    },
+    {
+      "id": 5,
+      "name": "I Was a Teenage Lycanthrope",
+      "traitorRule": {
+        "kind": "trigger"
+      },
+      "traitor": {
+        "goal": "You have transformed into a ferocious Werewolf. Feast upon your former companions!",
+        "rules": [
+          "Gain +2 Might and +2 Speed in wolf form.",
+          "You take damage only from the Spear or silver weapons.",
+          "Traitor wins when all heroes are slain."
+        ]
+      },
+      "heroes": {
+        "goal": "Forge a silver weapon or find the Spear to slay the beast.",
+        "rules": [
+          "Search for the Spear or forge silver in the Furnace Room.",
+          "Attack the Werewolf with silver to inflict mortal wounds.",
+          "Heroes win when the Werewolf is slain."
+        ]
+      },
+      "implemented": true
+    },
+    {
+      "id": 6,
+      "name": "The Floating Eye",
+      "traitorRule": {
+        "kind": "lowest",
+        "trait": "might"
+      },
+      "traitor": {
+        "goal": "Stare them into submission.",
+        "rules": []
+      },
+      "heroes": {
+        "goal": "Blind the cosmic horror.",
+        "rules": []
+      },
+      "implemented": false
+    },
+    {
+      "id": 7,
+      "name": "Carnival of Carnivore",
+      "traitorRule": {
+        "kind": "highest",
+        "trait": "knowledge"
+      },
+      "traitor": {
+        "goal": "Feed the carnivorous plants.",
+        "rules": []
+      },
+      "heroes": {
+        "goal": "Weed-killer the plant roots.",
+        "rules": []
+      },
+      "implemented": false
+    },
+    {
+      "id": 8,
+      "name": "Which-Craft",
+      "traitorRule": {
+        "kind": "lowest",
+        "trait": "sanity"
+      },
+      "traitor": {
+        "goal": "Complete the dark coven pact.",
+        "rules": []
+      },
+      "heroes": {
+        "goal": "Disrupt the ritual circles.",
+        "rules": []
+      },
+      "implemented": false
+    },
+    {
+      "id": 9,
+      "name": "The Dance of Death",
+      "traitorRule": {
+        "kind": "highest",
+        "trait": "speed"
+      },
+      "traitor": {
+        "goal": "Force everyone to dance until their hearts burst.",
+        "rules": []
+      },
+      "heroes": {
+        "goal": "Smash the enchanted music box.",
+        "rules": []
+      },
+      "implemented": false
+    },
+    {
+      "id": 10,
+      "name": "The Phantom's Embrace",
+      "traitorRule": {
+        "kind": "lowest",
+        "trait": "might"
+      },
+      "traitor": {
+        "goal": "Drag the chosen hero into the abyss through the mirrors.",
+        "rules": [
+          "Travel instantaneously between rooms with mirrors.",
+          "Phantoms drain Knowledge and Sanity with their icy touch.",
+          "Traitor wins when the chosen hero is captured."
+        ]
+      },
+      "heroes": {
+        "goal": "Shatter the cursed mirrors and banish the Phantom to the ether.",
+        "rules": [
+          "Locate mirrors throughout the mansion.",
+          "Roll Might 4+ to smash each mirror.",
+          "Heroes win when all 4 mirrors are shattered."
+        ]
+      },
+      "implemented": true
+    },
+    {
+      "id": 11,
+      "name": "Parfait",
+      "traitorRule": {
+        "kind": "highest",
+        "trait": "sanity"
+      },
+      "traitor": {
+        "goal": "Feed the hungry blob.",
+        "rules": []
+      },
+      "heroes": {
+        "goal": "Freeze the gelatinous horror.",
+        "rules": []
+      },
+      "implemented": false
+    },
+    {
+      "id": 12,
+      "name": "The Flesh-Stone",
+      "traitorRule": {
+        "kind": "highest",
+        "trait": "might"
+      },
+      "traitor": {
+        "goal": "Turn all intruders to stone statues.",
+        "rules": []
+      },
+      "heroes": {
+        "goal": "Reflect the Medusa gaze.",
+        "rules": []
+      },
+      "implemented": false
+    },
+    {
+      "id": 13,
+      "name": "House of the Living Dead",
+      "traitorRule": {
+        "kind": "trigger"
+      },
+      "traitor": {
+        "goal": "Overwhelm the house with zombies.",
+        "rules": []
+      },
+      "heroes": {
+        "goal": "Board up doors and survive.",
+        "rules": []
+      },
+      "implemented": false
+    },
+    {
+      "id": 14,
+      "name": "The Creature",
+      "traitorRule": {
+        "kind": "lowest",
+        "trait": "knowledge"
+      },
+      "traitor": {
+        "goal": "Lure the creature to feast.",
+        "rules": []
+      },
+      "heroes": {
+        "goal": "Electrocute the creature.",
+        "rules": []
+      },
+      "implemented": false
+    },
+    {
+      "id": 15,
+      "name": "Here There Be Dragons",
+      "traitorRule": {
+        "kind": "highest",
+        "trait": "might"
+      },
+      "traitor": {
+        "goal": "Hatch and nurture the great red dragon.",
+        "rules": []
+      },
+      "heroes": {
+        "goal": "Slay the dragon before it incinerates the house.",
+        "rules": []
+      },
+      "implemented": false
+    },
+    {
+      "id": 16,
+      "name": "Buried Alive",
+      "traitorRule": {
+        "kind": "trigger"
+      },
+      "traitor": {
+        "goal": "Trap the heroes in collapsing subterranean tunnels and bury them alive.",
+        "rules": [
+          "At the end of each round, a room collapses into rubble.",
+          "Collapsed rooms cannot be entered.",
+          "Traitor wins when all heroes are trapped or killed."
+        ]
+      },
+      "heroes": {
+        "goal": "Dig a way out to the surface before the mansion crumbles entirely.",
+        "rules": [
+          "Reach the Balcony, Gardens, or Tower to find an exit.",
+          "Make Knowledge or Might rolls to clear escape paths.",
+          "Heroes win when at least half the heroes escape."
+        ]
+      },
+      "implemented": true
+    },
+    {
+      "id": 17,
+      "name": "Haunt 17",
+      "traitorRule": {
+        "kind": "highest",
+        "trait": "speed"
+      },
+      "traitor": {
+        "goal": "Traitor objective for Haunt 17. Fulfill your dark destiny!",
+        "rules": [
+          "Traitor acts after all heroes.",
+          "Traitor controls scenario monsters if any."
+        ]
+      },
+      "heroes": {
+        "goal": "Hero objective for Haunt 17. Cooperate and defeat the evil!",
+        "rules": [
+          "Explore the house to find scenario items or defeat the traitor."
+        ]
+      },
+      "implemented": false
+    },
+    {
+      "id": 18,
+      "name": "Haunt 18",
+      "traitorRule": {
+        "kind": "lowest",
+        "trait": "sanity"
+      },
+      "traitor": {
+        "goal": "Traitor objective for Haunt 18. Fulfill your dark destiny!",
+        "rules": [
+          "Traitor acts after all heroes.",
+          "Traitor controls scenario monsters if any."
+        ]
+      },
+      "heroes": {
+        "goal": "Hero objective for Haunt 18. Cooperate and defeat the evil!",
+        "rules": [
+          "Explore the house to find scenario items or defeat the traitor."
+        ]
+      },
+      "implemented": false
+    },
+    {
+      "id": 19,
+      "name": "Haunt 19",
+      "traitorRule": {
+        "kind": "highest",
+        "trait": "knowledge"
+      },
+      "traitor": {
+        "goal": "Traitor objective for Haunt 19. Fulfill your dark destiny!",
+        "rules": [
+          "Traitor acts after all heroes.",
+          "Traitor controls scenario monsters if any."
+        ]
+      },
+      "heroes": {
+        "goal": "Hero objective for Haunt 19. Cooperate and defeat the evil!",
+        "rules": [
+          "Explore the house to find scenario items or defeat the traitor."
+        ]
+      },
+      "implemented": false
+    },
+    {
+      "id": 20,
+      "name": "Haunt 20",
+      "traitorRule": {
+        "kind": "trigger"
+      },
+      "traitor": {
+        "goal": "Traitor objective for Haunt 20. Fulfill your dark destiny!",
+        "rules": [
+          "Traitor acts after all heroes.",
+          "Traitor controls scenario monsters if any."
+        ]
+      },
+      "heroes": {
+        "goal": "Hero objective for Haunt 20. Cooperate and defeat the evil!",
+        "rules": [
+          "Explore the house to find scenario items or defeat the traitor."
+        ]
+      },
+      "implemented": false
+    },
+    {
+      "id": 21,
+      "name": "Haunt 21",
+      "traitorRule": {
+        "kind": "highest",
+        "trait": "speed"
+      },
+      "traitor": {
+        "goal": "Traitor objective for Haunt 21. Fulfill your dark destiny!",
+        "rules": [
+          "Traitor acts after all heroes.",
+          "Traitor controls scenario monsters if any."
+        ]
+      },
+      "heroes": {
+        "goal": "Hero objective for Haunt 21. Cooperate and defeat the evil!",
+        "rules": [
+          "Explore the house to find scenario items or defeat the traitor."
+        ]
+      },
+      "implemented": false
+    },
+    {
+      "id": 22,
+      "name": "Haunt 22",
+      "traitorRule": {
+        "kind": "lowest",
+        "trait": "sanity"
+      },
+      "traitor": {
+        "goal": "Traitor objective for Haunt 22. Fulfill your dark destiny!",
+        "rules": [
+          "Traitor acts after all heroes.",
+          "Traitor controls scenario monsters if any."
+        ]
+      },
+      "heroes": {
+        "goal": "Hero objective for Haunt 22. Cooperate and defeat the evil!",
+        "rules": [
+          "Explore the house to find scenario items or defeat the traitor."
+        ]
+      },
+      "implemented": false
+    },
+    {
+      "id": 23,
+      "name": "Haunt 23",
+      "traitorRule": {
+        "kind": "highest",
+        "trait": "knowledge"
+      },
+      "traitor": {
+        "goal": "Traitor objective for Haunt 23. Fulfill your dark destiny!",
+        "rules": [
+          "Traitor acts after all heroes.",
+          "Traitor controls scenario monsters if any."
+        ]
+      },
+      "heroes": {
+        "goal": "Hero objective for Haunt 23. Cooperate and defeat the evil!",
+        "rules": [
+          "Explore the house to find scenario items or defeat the traitor."
+        ]
+      },
+      "implemented": false
+    },
+    {
+      "id": 24,
+      "name": "Haunt 24",
+      "traitorRule": {
+        "kind": "lowest",
+        "trait": "might"
+      },
+      "traitor": {
+        "goal": "Traitor objective for Haunt 24. Fulfill your dark destiny!",
+        "rules": [
+          "Traitor acts after all heroes.",
+          "Traitor controls scenario monsters if any."
+        ]
+      },
+      "heroes": {
+        "goal": "Hero objective for Haunt 24. Cooperate and defeat the evil!",
+        "rules": [
+          "Explore the house to find scenario items or defeat the traitor."
+        ]
+      },
+      "implemented": false
+    },
+    {
+      "id": 25,
+      "name": "Haunt 25",
+      "traitorRule": {
+        "kind": "trigger"
+      },
+      "traitor": {
+        "goal": "Traitor objective for Haunt 25. Fulfill your dark destiny!",
+        "rules": [
+          "Traitor acts after all heroes.",
+          "Traitor controls scenario monsters if any."
+        ]
+      },
+      "heroes": {
+        "goal": "Hero objective for Haunt 25. Cooperate and defeat the evil!",
+        "rules": [
+          "Explore the house to find scenario items or defeat the traitor."
+        ]
+      },
+      "implemented": false
+    },
+    {
+      "id": 26,
+      "name": "Haunt 26",
+      "traitorRule": {
+        "kind": "lowest",
+        "trait": "sanity"
+      },
+      "traitor": {
+        "goal": "Traitor objective for Haunt 26. Fulfill your dark destiny!",
+        "rules": [
+          "Traitor acts after all heroes.",
+          "Traitor controls scenario monsters if any."
+        ]
+      },
+      "heroes": {
+        "goal": "Hero objective for Haunt 26. Cooperate and defeat the evil!",
+        "rules": [
+          "Explore the house to find scenario items or defeat the traitor."
+        ]
+      },
+      "implemented": false
+    },
+    {
+      "id": 27,
+      "name": "Haunt 27",
+      "traitorRule": {
+        "kind": "highest",
+        "trait": "knowledge"
+      },
+      "traitor": {
+        "goal": "Traitor objective for Haunt 27. Fulfill your dark destiny!",
+        "rules": [
+          "Traitor acts after all heroes.",
+          "Traitor controls scenario monsters if any."
+        ]
+      },
+      "heroes": {
+        "goal": "Hero objective for Haunt 27. Cooperate and defeat the evil!",
+        "rules": [
+          "Explore the house to find scenario items or defeat the traitor."
+        ]
+      },
+      "implemented": false
+    },
+    {
+      "id": 28,
+      "name": "Haunt 28",
+      "traitorRule": {
+        "kind": "lowest",
+        "trait": "might"
+      },
+      "traitor": {
+        "goal": "Traitor objective for Haunt 28. Fulfill your dark destiny!",
+        "rules": [
+          "Traitor acts after all heroes.",
+          "Traitor controls scenario monsters if any."
+        ]
+      },
+      "heroes": {
+        "goal": "Hero objective for Haunt 28. Cooperate and defeat the evil!",
+        "rules": [
+          "Explore the house to find scenario items or defeat the traitor."
+        ]
+      },
+      "implemented": false
+    },
+    {
+      "id": 29,
+      "name": "Haunt 29",
+      "traitorRule": {
+        "kind": "highest",
+        "trait": "speed"
+      },
+      "traitor": {
+        "goal": "Traitor objective for Haunt 29. Fulfill your dark destiny!",
+        "rules": [
+          "Traitor acts after all heroes.",
+          "Traitor controls scenario monsters if any."
+        ]
+      },
+      "heroes": {
+        "goal": "Hero objective for Haunt 29. Cooperate and defeat the evil!",
+        "rules": [
+          "Explore the house to find scenario items or defeat the traitor."
+        ]
+      },
+      "implemented": false
+    },
+    {
+      "id": 30,
+      "name": "Haunt 30",
+      "traitorRule": {
+        "kind": "trigger"
+      },
+      "traitor": {
+        "goal": "Traitor objective for Haunt 30. Fulfill your dark destiny!",
+        "rules": [
+          "Traitor acts after all heroes.",
+          "Traitor controls scenario monsters if any."
+        ]
+      },
+      "heroes": {
+        "goal": "Hero objective for Haunt 30. Cooperate and defeat the evil!",
+        "rules": [
+          "Explore the house to find scenario items or defeat the traitor."
+        ]
+      },
+      "implemented": false
+    },
+    {
+      "id": 31,
+      "name": "Haunt 31",
+      "traitorRule": {
+        "kind": "highest",
+        "trait": "knowledge"
+      },
+      "traitor": {
+        "goal": "Traitor objective for Haunt 31. Fulfill your dark destiny!",
+        "rules": [
+          "Traitor acts after all heroes.",
+          "Traitor controls scenario monsters if any."
+        ]
+      },
+      "heroes": {
+        "goal": "Hero objective for Haunt 31. Cooperate and defeat the evil!",
+        "rules": [
+          "Explore the house to find scenario items or defeat the traitor."
+        ]
+      },
+      "implemented": false
+    },
+    {
+      "id": 32,
+      "name": "Haunt 32",
+      "traitorRule": {
+        "kind": "lowest",
+        "trait": "might"
+      },
+      "traitor": {
+        "goal": "Traitor objective for Haunt 32. Fulfill your dark destiny!",
+        "rules": [
+          "Traitor acts after all heroes.",
+          "Traitor controls scenario monsters if any."
+        ]
+      },
+      "heroes": {
+        "goal": "Hero objective for Haunt 32. Cooperate and defeat the evil!",
+        "rules": [
+          "Explore the house to find scenario items or defeat the traitor."
+        ]
+      },
+      "implemented": false
+    },
+    {
+      "id": 33,
+      "name": "Haunt 33",
+      "traitorRule": {
+        "kind": "highest",
+        "trait": "speed"
+      },
+      "traitor": {
+        "goal": "Traitor objective for Haunt 33. Fulfill your dark destiny!",
+        "rules": [
+          "Traitor acts after all heroes.",
+          "Traitor controls scenario monsters if any."
+        ]
+      },
+      "heroes": {
+        "goal": "Hero objective for Haunt 33. Cooperate and defeat the evil!",
+        "rules": [
+          "Explore the house to find scenario items or defeat the traitor."
+        ]
+      },
+      "implemented": false
+    },
+    {
+      "id": 34,
+      "name": "Haunt 34",
+      "traitorRule": {
+        "kind": "lowest",
+        "trait": "sanity"
+      },
+      "traitor": {
+        "goal": "Traitor objective for Haunt 34. Fulfill your dark destiny!",
+        "rules": [
+          "Traitor acts after all heroes.",
+          "Traitor controls scenario monsters if any."
+        ]
+      },
+      "heroes": {
+        "goal": "Hero objective for Haunt 34. Cooperate and defeat the evil!",
+        "rules": [
+          "Explore the house to find scenario items or defeat the traitor."
+        ]
+      },
+      "implemented": false
+    },
+    {
+      "id": 35,
+      "name": "Haunt 35",
+      "traitorRule": {
+        "kind": "trigger"
+      },
+      "traitor": {
+        "goal": "Traitor objective for Haunt 35. Fulfill your dark destiny!",
+        "rules": [
+          "Traitor acts after all heroes.",
+          "Traitor controls scenario monsters if any."
+        ]
+      },
+      "heroes": {
+        "goal": "Hero objective for Haunt 35. Cooperate and defeat the evil!",
+        "rules": [
+          "Explore the house to find scenario items or defeat the traitor."
+        ]
+      },
+      "implemented": false
+    },
+    {
+      "id": 36,
+      "name": "Haunt 36",
+      "traitorRule": {
+        "kind": "lowest",
+        "trait": "might"
+      },
+      "traitor": {
+        "goal": "Traitor objective for Haunt 36. Fulfill your dark destiny!",
+        "rules": [
+          "Traitor acts after all heroes.",
+          "Traitor controls scenario monsters if any."
+        ]
+      },
+      "heroes": {
+        "goal": "Hero objective for Haunt 36. Cooperate and defeat the evil!",
+        "rules": [
+          "Explore the house to find scenario items or defeat the traitor."
+        ]
+      },
+      "implemented": false
+    },
+    {
+      "id": 37,
+      "name": "Haunt 37",
+      "traitorRule": {
+        "kind": "highest",
+        "trait": "speed"
+      },
+      "traitor": {
+        "goal": "Traitor objective for Haunt 37. Fulfill your dark destiny!",
+        "rules": [
+          "Traitor acts after all heroes.",
+          "Traitor controls scenario monsters if any."
+        ]
+      },
+      "heroes": {
+        "goal": "Hero objective for Haunt 37. Cooperate and defeat the evil!",
+        "rules": [
+          "Explore the house to find scenario items or defeat the traitor."
+        ]
+      },
+      "implemented": false
+    },
+    {
+      "id": 38,
+      "name": "Haunt 38",
+      "traitorRule": {
+        "kind": "lowest",
+        "trait": "sanity"
+      },
+      "traitor": {
+        "goal": "Traitor objective for Haunt 38. Fulfill your dark destiny!",
+        "rules": [
+          "Traitor acts after all heroes.",
+          "Traitor controls scenario monsters if any."
+        ]
+      },
+      "heroes": {
+        "goal": "Hero objective for Haunt 38. Cooperate and defeat the evil!",
+        "rules": [
+          "Explore the house to find scenario items or defeat the traitor."
+        ]
+      },
+      "implemented": false
+    },
+    {
+      "id": 39,
+      "name": "Haunt 39",
+      "traitorRule": {
+        "kind": "highest",
+        "trait": "knowledge"
+      },
+      "traitor": {
+        "goal": "Traitor objective for Haunt 39. Fulfill your dark destiny!",
+        "rules": [
+          "Traitor acts after all heroes.",
+          "Traitor controls scenario monsters if any."
+        ]
+      },
+      "heroes": {
+        "goal": "Hero objective for Haunt 39. Cooperate and defeat the evil!",
+        "rules": [
+          "Explore the house to find scenario items or defeat the traitor."
+        ]
+      },
+      "implemented": false
+    },
+    {
+      "id": 40,
+      "name": "Haunt 40",
+      "traitorRule": {
+        "kind": "trigger"
+      },
+      "traitor": {
+        "goal": "Traitor objective for Haunt 40. Fulfill your dark destiny!",
+        "rules": [
+          "Traitor acts after all heroes.",
+          "Traitor controls scenario monsters if any."
+        ]
+      },
+      "heroes": {
+        "goal": "Hero objective for Haunt 40. Cooperate and defeat the evil!",
+        "rules": [
+          "Explore the house to find scenario items or defeat the traitor."
+        ]
+      },
+      "implemented": false
+    },
+    {
+      "id": 41,
+      "name": "Haunt 41",
+      "traitorRule": {
+        "kind": "highest",
+        "trait": "speed"
+      },
+      "traitor": {
+        "goal": "Traitor objective for Haunt 41. Fulfill your dark destiny!",
+        "rules": [
+          "Traitor acts after all heroes.",
+          "Traitor controls scenario monsters if any."
+        ]
+      },
+      "heroes": {
+        "goal": "Hero objective for Haunt 41. Cooperate and defeat the evil!",
+        "rules": [
+          "Explore the house to find scenario items or defeat the traitor."
+        ]
+      },
+      "implemented": false
+    },
+    {
+      "id": 42,
+      "name": "Haunt 42",
+      "traitorRule": {
+        "kind": "lowest",
+        "trait": "sanity"
+      },
+      "traitor": {
+        "goal": "Traitor objective for Haunt 42. Fulfill your dark destiny!",
+        "rules": [
+          "Traitor acts after all heroes.",
+          "Traitor controls scenario monsters if any."
+        ]
+      },
+      "heroes": {
+        "goal": "Hero objective for Haunt 42. Cooperate and defeat the evil!",
+        "rules": [
+          "Explore the house to find scenario items or defeat the traitor."
+        ]
+      },
+      "implemented": false
+    },
+    {
+      "id": 43,
+      "name": "Haunt 43",
+      "traitorRule": {
+        "kind": "highest",
+        "trait": "knowledge"
+      },
+      "traitor": {
+        "goal": "Traitor objective for Haunt 43. Fulfill your dark destiny!",
+        "rules": [
+          "Traitor acts after all heroes.",
+          "Traitor controls scenario monsters if any."
+        ]
+      },
+      "heroes": {
+        "goal": "Hero objective for Haunt 43. Cooperate and defeat the evil!",
+        "rules": [
+          "Explore the house to find scenario items or defeat the traitor."
+        ]
+      },
+      "implemented": false
+    },
+    {
+      "id": 44,
+      "name": "Haunt 44",
+      "traitorRule": {
+        "kind": "lowest",
+        "trait": "might"
+      },
+      "traitor": {
+        "goal": "Traitor objective for Haunt 44. Fulfill your dark destiny!",
+        "rules": [
+          "Traitor acts after all heroes.",
+          "Traitor controls scenario monsters if any."
+        ]
+      },
+      "heroes": {
+        "goal": "Hero objective for Haunt 44. Cooperate and defeat the evil!",
+        "rules": [
+          "Explore the house to find scenario items or defeat the traitor."
+        ]
+      },
+      "implemented": false
+    },
+    {
+      "id": 45,
+      "name": "Haunt 45",
+      "traitorRule": {
+        "kind": "trigger"
+      },
+      "traitor": {
+        "goal": "Traitor objective for Haunt 45. Fulfill your dark destiny!",
+        "rules": [
+          "Traitor acts after all heroes.",
+          "Traitor controls scenario monsters if any."
+        ]
+      },
+      "heroes": {
+        "goal": "Hero objective for Haunt 45. Cooperate and defeat the evil!",
+        "rules": [
+          "Explore the house to find scenario items or defeat the traitor."
+        ]
+      },
+      "implemented": false
+    },
+    {
+      "id": 46,
+      "name": "Haunt 46",
+      "traitorRule": {
+        "kind": "lowest",
+        "trait": "sanity"
+      },
+      "traitor": {
+        "goal": "Traitor objective for Haunt 46. Fulfill your dark destiny!",
+        "rules": [
+          "Traitor acts after all heroes.",
+          "Traitor controls scenario monsters if any."
+        ]
+      },
+      "heroes": {
+        "goal": "Hero objective for Haunt 46. Cooperate and defeat the evil!",
+        "rules": [
+          "Explore the house to find scenario items or defeat the traitor."
+        ]
+      },
+      "implemented": false
+    },
+    {
+      "id": 47,
+      "name": "Haunt 47",
+      "traitorRule": {
+        "kind": "highest",
+        "trait": "knowledge"
+      },
+      "traitor": {
+        "goal": "Traitor objective for Haunt 47. Fulfill your dark destiny!",
+        "rules": [
+          "Traitor acts after all heroes.",
+          "Traitor controls scenario monsters if any."
+        ]
+      },
+      "heroes": {
+        "goal": "Hero objective for Haunt 47. Cooperate and defeat the evil!",
+        "rules": [
+          "Explore the house to find scenario items or defeat the traitor."
+        ]
+      },
+      "implemented": false
+    },
+    {
+      "id": 48,
+      "name": "Haunt 48",
+      "traitorRule": {
+        "kind": "lowest",
+        "trait": "might"
+      },
+      "traitor": {
+        "goal": "Traitor objective for Haunt 48. Fulfill your dark destiny!",
+        "rules": [
+          "Traitor acts after all heroes.",
+          "Traitor controls scenario monsters if any."
+        ]
+      },
+      "heroes": {
+        "goal": "Hero objective for Haunt 48. Cooperate and defeat the evil!",
+        "rules": [
+          "Explore the house to find scenario items or defeat the traitor."
+        ]
+      },
+      "implemented": false
+    },
+    {
+      "id": 49,
+      "name": "Haunt 49",
+      "traitorRule": {
+        "kind": "highest",
+        "trait": "speed"
+      },
+      "traitor": {
+        "goal": "Traitor objective for Haunt 49. Fulfill your dark destiny!",
+        "rules": [
+          "Traitor acts after all heroes.",
+          "Traitor controls scenario monsters if any."
+        ]
+      },
+      "heroes": {
+        "goal": "Hero objective for Haunt 49. Cooperate and defeat the evil!",
+        "rules": [
+          "Explore the house to find scenario items or defeat the traitor."
+        ]
+      },
+      "implemented": false
+    },
+    {
+      "id": 50,
+      "name": "Haunt 50",
+      "traitorRule": {
+        "kind": "none"
+      },
+      "traitor": {
+        "goal": "Traitor objective for Haunt 50. Fulfill your dark destiny!",
+        "rules": [
+          "Traitor acts after all heroes.",
+          "Traitor controls scenario monsters if any."
+        ]
+      },
+      "heroes": {
+        "goal": "Hero objective for Haunt 50. Cooperate and defeat the evil!",
+        "rules": [
+          "Explore the house to find scenario items or defeat the traitor."
+        ]
+      },
+      "implemented": false
+    }
+  ]
+}

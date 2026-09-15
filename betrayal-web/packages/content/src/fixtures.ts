@@ -5,6 +5,8 @@
 
 import charactersJson from '../fixtures/characters.json' with { type: 'json' };
 import tilesJson from '../fixtures/tiles.json' with { type: 'json' };
+import cardsJson from '../fixtures/cards.json' with { type: 'json' };
+import hauntsJson from '../fixtures/haunts.json' with { type: 'json' };
 import { buildContent } from './load.js';
 import type { Content } from './schemas.js';
 
@@ -13,6 +15,9 @@ let cached: Content | null = null;
 export function fixtureContent(): Content {
   // One file per part, merged into the single object the schema validates —
   // the same shape the server assembles from CONTENT_PARTS on disk.
-  cached ??= buildContent({ ...charactersJson, ...tilesJson }, 'fixtures');
+  cached ??= buildContent(
+    { ...charactersJson, ...tilesJson, ...cardsJson, ...hauntsJson },
+    'fixtures',
+  );
   return cached;
 }

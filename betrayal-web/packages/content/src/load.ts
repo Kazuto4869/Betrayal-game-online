@@ -8,8 +8,11 @@
 import {
   ContentFileSchema,
   FloorSchema,
+  type Card,
   type Content,
   type ContentFile,
+  type DeckKind,
+  type Haunt,
   type Tile,
 } from './schemas.js';
 import { hashContent } from './hash.js';
@@ -20,7 +23,7 @@ import { hashContent } from './hash.js';
  * link has to agree with the house's landings. Adding a part here is what
  * makes the server look for it in CONTENT_DIR.
  */
-export const CONTENT_PARTS = ['characters', 'tiles'] as const;
+export const CONTENT_PARTS = ['characters', 'tiles', 'cards', 'haunts'] as const;
 
 export class ContentError extends Error {
   constructor(
@@ -55,12 +58,34 @@ export function buildContent(raw: unknown, source = 'unknown'): Content {
   const tilesById: Record<string, Tile> = {};
   for (const t of file.tiles) tilesById[t.id] = t;
 
+  const cards = file.cards ?? [];
+  const cardsById: Record<string, Card> = {};
+  const cardsByDeck: Record<DeckKind, Card[]> = { item: [], event: [], omen: [] };
+  const deckCards: Record<DeckKind, string[]> = { item: [], event: [], omen: [] };
+  for (const c of cards) {
+    cardsById[c.id] = c;
+    cardsByDeck[c.deck]?.push(c);
+    deckCards[c.deck]?.push(c.id);
+  }
+
+  const haunts = file.haunts ?? [];
+  const hauntsById: Record<number, Haunt> = {};
+  for (const h of haunts) {
+    hauntsById[h.id] = h;
+  }
+
   return {
     hash: hashContent(file),
     characters: file.characters,
     charactersById,
     tiles: file.tiles,
     tilesById,
+    cards,
+    cardsById,
+    cardsByDeck,
+    deckCards,
+    haunts,
+    hauntsById,
     house: file.house,
     deckTiles: buildTileDeck(file),
   };
