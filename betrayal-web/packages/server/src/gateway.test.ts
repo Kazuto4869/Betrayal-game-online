@@ -257,10 +257,10 @@ describe('a full M0 game', () => {
   it('starts, passes turns, and survives a reconnect', async () => {
     const { host, ben, cal, room } = await threePlayerGame();
 
-    // Pick colour-distinct characters. Fixture ids are stable.
-    host.action({ t: 'CHOOSE_CHAR', seat: 'seat_0', charId: 'char.green_a' });
-    ben.action({ t: 'CHOOSE_CHAR', seat: 'seat_1', charId: 'char.red_a' });
-    cal.action({ t: 'CHOOSE_CHAR', seat: 'seat_2', charId: 'char.blue_a' });
+    // Pick colour-distinct characters.
+    host.action({ t: 'CHOOSE_CHAR', seat: 'seat_0', charId: 'char.peter_akimoto' });
+    ben.action({ t: 'CHOOSE_CHAR', seat: 'seat_1', charId: 'char.ox_bellows' });
+    cal.action({ t: 'CHOOSE_CHAR', seat: 'seat_2', charId: 'char.vivian_lopez' });
 
     await host.waitForState((m) =>
       Object.values(m.state.players).every((p) => p.charId !== null),
@@ -322,9 +322,9 @@ describe('host transfer over the wire', () => {
     cal.send({ t: 'join', code: room.code });
     await cal.next('welcome', (m) => m.seatId === 'seat_2');
 
-    host.action({ t: 'CHOOSE_CHAR', seat: 'seat_0', charId: 'char.green_a' });
-    ben.action({ t: 'CHOOSE_CHAR', seat: 'seat_1', charId: 'char.red_a' });
-    cal.action({ t: 'CHOOSE_CHAR', seat: 'seat_2', charId: 'char.blue_a' });
+    host.action({ t: 'CHOOSE_CHAR', seat: 'seat_0', charId: 'char.peter_akimoto' });
+    ben.action({ t: 'CHOOSE_CHAR', seat: 'seat_1', charId: 'char.ox_bellows' });
+    cal.action({ t: 'CHOOSE_CHAR', seat: 'seat_2', charId: 'char.vivian_lopez' });
     await ben.waitForState((m) =>
       Object.values(m.state.players).every((p) => p.charId !== null),
     );
@@ -370,9 +370,9 @@ describe('the turn clock over the wire', () => {
     cal.send({ t: 'join', code: room.code });
     await cal.next('welcome', (m) => m.seatId === 'seat_2');
 
-    host.action({ t: 'CHOOSE_CHAR', seat: 'seat_0', charId: 'char.green_a' });
-    ben.action({ t: 'CHOOSE_CHAR', seat: 'seat_1', charId: 'char.red_a' });
-    cal.action({ t: 'CHOOSE_CHAR', seat: 'seat_2', charId: 'char.blue_a' });
+    host.action({ t: 'CHOOSE_CHAR', seat: 'seat_0', charId: 'char.peter_akimoto' });
+    ben.action({ t: 'CHOOSE_CHAR', seat: 'seat_1', charId: 'char.ox_bellows' });
+    cal.action({ t: 'CHOOSE_CHAR', seat: 'seat_2', charId: 'char.vivian_lopez' });
     await host.waitForState((m) =>
       Object.values(m.state.players).every((p) => p.charId !== null),
     );
@@ -527,9 +527,9 @@ describe('the remove-player vote over the wire', () => {
     cal.close();
     await host.waitForState((m) => m.state.players['seat_2']?.connected === false);
 
-    host.action({ t: 'CHOOSE_CHAR', seat: 'seat_0', charId: 'char.green_a' });
-    ben.action({ t: 'CHOOSE_CHAR', seat: 'seat_1', charId: 'char.red_a' });
-    dot.action({ t: 'CHOOSE_CHAR', seat: 'seat_3', charId: 'char.blue_a' });
+    host.action({ t: 'CHOOSE_CHAR', seat: 'seat_0', charId: 'char.peter_akimoto' });
+    ben.action({ t: 'CHOOSE_CHAR', seat: 'seat_1', charId: 'char.ox_bellows' });
+    dot.action({ t: 'CHOOSE_CHAR', seat: 'seat_3', charId: 'char.vivian_lopez' });
     await host.waitForState((m) => m.state.players['seat_3']?.charId !== null);
 
     host.action({ t: 'START_GAME', seat: 'seat_0' });
@@ -605,9 +605,9 @@ describe('crash recovery', () => {
     b.send({ t: 'join', code: room.code });
     await b.next('welcome', (m) => m.seatId === 'seat_1');
 
-    c.action({ t: 'CHOOSE_CHAR', seat: 'seat_0', charId: 'char.green_a' });
+    c.action({ t: 'CHOOSE_CHAR', seat: 'seat_0', charId: 'char.peter_akimoto' });
     const beforeCrash = await c.waitForState(
-      (m) => m.state.players['seat_0']?.charId === 'char.green_a',
+      (m) => m.state.players['seat_0']?.charId === 'char.peter_akimoto',
     );
     const versionBefore = beforeCrash.state.version;
 
@@ -619,7 +619,7 @@ describe('crash recovery', () => {
     const second = await startServer();
     const recovered = second.rooms.get(room.code);
     expect(recovered, 'room should be recovered from its log').toBeDefined();
-    expect(recovered!.state.players['seat_0']?.charId).toBe('char.green_a');
+    expect(recovered!.state.players['seat_0']?.charId).toBe('char.peter_akimoto');
     // Recovery replays the log, then logs a DISCONNECT per seat (the process
     // died, so nobody is connected). Version therefore advances past the
     // pre-crash value rather than matching it exactly.

@@ -1,0 +1,888 @@
+{
+  "tiles": [
+    {
+      "id": "tile.entrance_hall",
+      "name": "Entrance Hall",
+      "doors": {
+        "n": true,
+        "e": false,
+        "s": true,
+        "w": true
+      },
+      "floors": [
+        "ground"
+      ],
+      "symbol": null,
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": []
+    },
+    {
+      "id": "tile.foyer",
+      "name": "Foyer",
+      "doors": {
+        "n": true,
+        "e": true,
+        "s": true,
+        "w": true
+      },
+      "floors": [
+        "ground"
+      ],
+      "symbol": null,
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": []
+    },
+    {
+      "id": "tile.grand_staircase",
+      "name": "Grand Staircase",
+      "doors": {
+        "n": false,
+        "e": false,
+        "s": false,
+        "w": true
+      },
+      "floors": [
+        "ground"
+      ],
+      "symbol": null,
+      "copies": 1,
+      "staticLinks": [
+        {
+          "kind": "to_tile",
+          "target": "tile.upper_landing",
+          "twoWay": true
+        }
+      ],
+      "onEnter": []
+    },
+    {
+      "id": "tile.servants_quarters",
+      "name": "Servant's Quarters",
+      "doors": {
+        "n": true,
+        "e": true,
+        "s": true,
+        "w": true
+      },
+      "floors": [
+        "basement",
+        "upper"
+      ],
+      "symbol": "omen",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": []
+    },
+    {
+      "id": "tile.storeroom",
+      "name": "Storeroom",
+      "doors": {
+        "n": true,
+        "e": false,
+        "s": false,
+        "w": false
+      },
+      "floors": [
+        "basement",
+        "upper"
+      ],
+      "symbol": "item",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": []
+    },
+    {
+      "id": "tile.operating_laboratory",
+      "name": "Operating Laboratory",
+      "doors": {
+        "n": false,
+        "e": true,
+        "s": true,
+        "w": false
+      },
+      "floors": [
+        "basement",
+        "upper"
+      ],
+      "symbol": "event",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": []
+    },
+    {
+      "id": "tile.research_laboratory",
+      "name": "Research Laboratory",
+      "doors": {
+        "n": true,
+        "e": false,
+        "s": true,
+        "w": false
+      },
+      "floors": [
+        "basement",
+        "upper"
+      ],
+      "symbol": "event",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": []
+    },
+    {
+      "id": "tile.stairs_from_basement",
+      "name": "Stairs from Basement",
+      "doors": {
+        "n": true,
+        "e": false,
+        "s": true,
+        "w": false
+      },
+      "floors": [
+        "basement"
+      ],
+      "symbol": null,
+      "copies": 1,
+      "staticLinks": [
+        {
+          "kind": "to_tile",
+          "target": "tile.foyer",
+          "twoWay": true
+        }
+      ],
+      "onEnter": []
+    },
+    {
+      "id": "tile.underground_lake",
+      "name": "Underground Lake",
+      "doors": {
+        "n": true,
+        "e": true,
+        "s": false,
+        "w": false
+      },
+      "floors": [
+        "basement"
+      ],
+      "symbol": "event",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": []
+    },
+    {
+      "id": "tile.wine_cellar",
+      "name": "Wine Cellar",
+      "doors": {
+        "n": true,
+        "e": false,
+        "s": true,
+        "w": false
+      },
+      "floors": [
+        "basement"
+      ],
+      "symbol": "item",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": []
+    },
+    {
+      "id": "tile.balcony",
+      "name": "Balcony",
+      "doors": {
+        "n": true,
+        "e": false,
+        "s": true,
+        "w": false
+      },
+      "floors": [
+        "upper"
+      ],
+      "symbol": "omen",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": []
+    },
+    {
+      "id": "tile.master_bedroom",
+      "name": "Master Bedroom",
+      "doors": {
+        "n": true,
+        "e": false,
+        "s": false,
+        "w": true
+      },
+      "floors": [
+        "upper"
+      ],
+      "symbol": "omen",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": []
+    },
+    {
+      "id": "tile.bedroom",
+      "name": "Bedroom",
+      "doors": {
+        "n": false,
+        "e": true,
+        "s": false,
+        "w": true
+      },
+      "floors": [
+        "upper"
+      ],
+      "symbol": "event",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": []
+    },
+    {
+      "id": "tile.coal_chute",
+      "name": "Coal Chute",
+      "doors": {
+        "n": true,
+        "e": false,
+        "s": false,
+        "w": false
+      },
+      "floors": [
+        "ground"
+      ],
+      "symbol": null,
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": []
+    },
+    {
+      "id": "tile.gardens",
+      "name": "Gardens",
+      "doors": {
+        "n": true,
+        "e": false,
+        "s": true,
+        "w": false
+      },
+      "floors": [
+        "ground"
+      ],
+      "symbol": "event",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": []
+    },
+    {
+      "id": "tile.ballroom",
+      "name": "Ballroom",
+      "doors": {
+        "n": true,
+        "e": true,
+        "s": true,
+        "w": true
+      },
+      "floors": [
+        "ground"
+      ],
+      "symbol": "event",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": []
+    },
+    {
+      "id": "tile.dining_room",
+      "name": "Dining Room",
+      "doors": {
+        "n": true,
+        "e": true,
+        "s": false,
+        "w": false
+      },
+      "floors": [
+        "ground"
+      ],
+      "symbol": "omen",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": []
+    },
+    {
+      "id": "tile.patio",
+      "name": "Patio",
+      "doors": {
+        "n": true,
+        "e": false,
+        "s": true,
+        "w": true
+      },
+      "floors": [
+        "ground"
+      ],
+      "symbol": "event",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": []
+    },
+    {
+      "id": "tile.kitchen",
+      "name": "Kitchen",
+      "doors": {
+        "n": true,
+        "e": true,
+        "s": false,
+        "w": false
+      },
+      "floors": [
+        "basement",
+        "ground"
+      ],
+      "symbol": "omen",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": []
+    },
+    {
+      "id": "tile.abandoned_room",
+      "name": "Abandoned Room",
+      "doors": {
+        "n": true,
+        "e": true,
+        "s": true,
+        "w": true
+      },
+      "floors": [
+        "basement",
+        "ground"
+      ],
+      "symbol": "omen",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": []
+    },
+    {
+      "id": "tile.conservatory",
+      "name": "Conservatory",
+      "doors": {
+        "n": true,
+        "e": false,
+        "s": false,
+        "w": false
+      },
+      "floors": [
+        "ground",
+        "upper"
+      ],
+      "symbol": "event",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": []
+    },
+    {
+      "id": "tile.charred_room",
+      "name": "Charred Room",
+      "doors": {
+        "n": true,
+        "e": true,
+        "s": true,
+        "w": true
+      },
+      "floors": [
+        "ground",
+        "upper"
+      ],
+      "symbol": "omen",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": []
+    },
+    {
+      "id": "tile.bloody_room",
+      "name": "Bloody Room",
+      "doors": {
+        "n": true,
+        "e": true,
+        "s": true,
+        "w": true
+      },
+      "floors": [
+        "ground",
+        "upper"
+      ],
+      "symbol": "item",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": []
+    },
+    {
+      "id": "tile.organ_room",
+      "name": "Organ Room",
+      "doors": {
+        "n": false,
+        "e": false,
+        "s": true,
+        "w": true
+      },
+      "floors": [
+        "basement",
+        "ground",
+        "upper"
+      ],
+      "symbol": "event",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": []
+    },
+    {
+      "id": "tile.statuary_corridor",
+      "name": "Statuary Corridor",
+      "doors": {
+        "n": true,
+        "e": false,
+        "s": true,
+        "w": false
+      },
+      "floors": [
+        "basement",
+        "ground",
+        "upper"
+      ],
+      "symbol": "event",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": []
+    },
+    {
+      "id": "tile.creaky_hallway",
+      "name": "Creaky Hallway",
+      "doors": {
+        "n": true,
+        "e": true,
+        "s": true,
+        "w": true
+      },
+      "floors": [
+        "basement",
+        "ground",
+        "upper"
+      ],
+      "symbol": null,
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": []
+    },
+    {
+      "id": "tile.dusty_hallway",
+      "name": "Dusty Hallway",
+      "doors": {
+        "n": true,
+        "e": true,
+        "s": true,
+        "w": true
+      },
+      "floors": [
+        "basement",
+        "ground",
+        "upper"
+      ],
+      "symbol": null,
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": []
+    },
+    {
+      "id": "tile.game_room",
+      "name": "Game Room",
+      "doors": {
+        "n": true,
+        "e": false,
+        "s": true,
+        "w": true
+      },
+      "floors": [
+        "basement",
+        "ground",
+        "upper"
+      ],
+      "symbol": "event",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": []
+    },
+    {
+      "id": "tile.tower",
+      "name": "Tower",
+      "doors": {
+        "n": false,
+        "e": true,
+        "s": false,
+        "w": true
+      },
+      "floors": [
+        "upper"
+      ],
+      "symbol": "event",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": []
+    },
+    {
+      "id": "tile.gallery",
+      "name": "Gallery",
+      "doors": {
+        "n": true,
+        "e": false,
+        "s": true,
+        "w": false
+      },
+      "floors": [
+        "upper"
+      ],
+      "symbol": "omen",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": []
+    },
+    {
+      "id": "tile.catacombs",
+      "name": "Catacombs",
+      "doors": {
+        "n": true,
+        "e": false,
+        "s": true,
+        "w": false
+      },
+      "floors": [
+        "basement"
+      ],
+      "symbol": "omen",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": []
+    },
+    {
+      "id": "tile.chasm",
+      "name": "Chasm",
+      "doors": {
+        "n": false,
+        "e": true,
+        "s": false,
+        "w": true
+      },
+      "floors": [
+        "basement"
+      ],
+      "symbol": null,
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": []
+    },
+    {
+      "id": "tile.junk_room",
+      "name": "Junk Room",
+      "doors": {
+        "n": true,
+        "e": true,
+        "s": true,
+        "w": true
+      },
+      "floors": [
+        "basement",
+        "ground",
+        "upper"
+      ],
+      "symbol": "omen",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": []
+    },
+    {
+      "id": "tile.chapel",
+      "name": "Chapel",
+      "doors": {
+        "n": true,
+        "e": false,
+        "s": false,
+        "w": false
+      },
+      "floors": [
+        "ground",
+        "upper"
+      ],
+      "symbol": "event",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": []
+    },
+    {
+      "id": "tile.gymnasium",
+      "name": "Gymnasium",
+      "doors": {
+        "n": false,
+        "e": true,
+        "s": true,
+        "w": false
+      },
+      "floors": [
+        "basement",
+        "upper"
+      ],
+      "symbol": "omen",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": []
+    },
+    {
+      "id": "tile.the_pentagram_chamber",
+      "name": "The Pentagram Chamber",
+      "doors": {
+        "n": false,
+        "e": true,
+        "s": false,
+        "w": false
+      },
+      "floors": [
+        "basement"
+      ],
+      "symbol": "omen",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": []
+    },
+    {
+      "id": "tile.library",
+      "name": "Library",
+      "doors": {
+        "n": false,
+        "e": false,
+        "s": true,
+        "w": true
+      },
+      "floors": [
+        "ground",
+        "upper"
+      ],
+      "symbol": "event",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": []
+    },
+    {
+      "id": "tile.attic",
+      "name": "Attic",
+      "doors": {
+        "n": false,
+        "e": false,
+        "s": true,
+        "w": false
+      },
+      "floors": [
+        "upper"
+      ],
+      "symbol": "event",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": []
+    },
+    {
+      "id": "tile.furnace_room",
+      "name": "Furnace Room",
+      "doors": {
+        "n": true,
+        "e": false,
+        "s": true,
+        "w": true
+      },
+      "floors": [
+        "basement"
+      ],
+      "symbol": "omen",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": []
+    },
+    {
+      "id": "tile.graveyard",
+      "name": "Graveyard",
+      "doors": {
+        "n": false,
+        "e": false,
+        "s": true,
+        "w": false
+      },
+      "floors": [
+        "ground"
+      ],
+      "symbol": "event",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": []
+    },
+    {
+      "id": "tile.larder",
+      "name": "Larder",
+      "doors": {
+        "n": true,
+        "e": false,
+        "s": true,
+        "w": false
+      },
+      "floors": [
+        "basement"
+      ],
+      "symbol": "item",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": []
+    },
+    {
+      "id": "tile.crypt",
+      "name": "Crypt",
+      "doors": {
+        "n": true,
+        "e": false,
+        "s": false,
+        "w": false
+      },
+      "floors": [
+        "basement"
+      ],
+      "symbol": "event",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": []
+    },
+    {
+      "id": "tile.the_vault",
+      "name": "The Vault",
+      "doors": {
+        "n": true,
+        "e": false,
+        "s": false,
+        "w": false
+      },
+      "floors": [
+        "basement",
+        "upper"
+      ],
+      "symbol": "event",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": []
+    },
+    {
+      "id": "tile.upper_landing",
+      "name": "Upper Landing",
+      "doors": {
+        "n": true,
+        "e": true,
+        "s": true,
+        "w": true
+      },
+      "floors": [
+        "upper"
+      ],
+      "symbol": null,
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": []
+    },
+    {
+      "id": "tile.basement_landing",
+      "name": "Basement Landing",
+      "doors": {
+        "n": true,
+        "e": true,
+        "s": true,
+        "w": true
+      },
+      "floors": [
+        "basement"
+      ],
+      "symbol": null,
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": []
+    },
+    {
+      "id": "tile.collapsed_room",
+      "name": "Collapsed Room",
+      "doors": {
+        "n": true,
+        "e": true,
+        "s": true,
+        "w": true
+      },
+      "floors": [
+        "ground",
+        "upper"
+      ],
+      "symbol": "event",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": []
+    },
+    {
+      "id": "tile.mystic_elevator",
+      "name": "Mystic Elevator",
+      "doors": {
+        "n": true,
+        "e": true,
+        "s": true,
+        "w": true
+      },
+      "floors": [
+        "basement",
+        "ground",
+        "upper"
+      ],
+      "symbol": null,
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": []
+    }
+  ],
+  "house": {
+    "layout": [
+      {
+        "tileId": "tile.entrance_hall",
+        "floor": "ground",
+        "x": 0,
+        "y": 2,
+        "rotation": 0
+      },
+      {
+        "tileId": "tile.foyer",
+        "floor": "ground",
+        "x": 0,
+        "y": 1,
+        "rotation": 0
+      },
+      {
+        "tileId": "tile.grand_staircase",
+        "floor": "ground",
+        "x": 0,
+        "y": 0,
+        "rotation": 270
+      },
+      {
+        "tileId": "tile.upper_landing",
+        "floor": "upper",
+        "x": 0,
+        "y": 0,
+        "rotation": 0
+      },
+      {
+        "tileId": "tile.basement_landing",
+        "floor": "basement",
+        "x": 0,
+        "y": 0,
+        "rotation": 0
+      }
+    ],
+    "startTile": "tile.entrance_hall",
+    "landings": {
+      "basement": "tile.basement_landing",
+      "ground": "tile.entrance_hall",
+      "upper": "tile.upper_landing"
+    }
+  }
+}

@@ -1,0 +1,660 @@
+{
+  "cards": [
+    {
+      "id": "item.adrenaline_shot",
+      "deck": "item",
+      "name": "Adrenaline Shot",
+      "text": "Before you take a turn, you can use this to gain +4 Speed until end of turn.",
+      "flavor": "A glass syringe filled with a pungent, glowing amber fluid.",
+      "keepInPlay": true,
+      "isWeapon": false,
+      "isCompanion": false,
+      "onUse": [{ "e": "trait", "who": "actor", "trait": "speed", "delta": 2 }]
+    },
+    {
+      "id": "item.amulet_of_the_ages",
+      "deck": "item",
+      "name": "Amulet of the Ages",
+      "text": "Gain +1 to Might, Speed, Sanity, and Knowledge while you carry this.",
+      "flavor": "Ancient silver etched with symbols of power that hum against your chest.",
+      "keepInPlay": true,
+      "isWeapon": false,
+      "isCompanion": false,
+      "onDraw": [
+        { "e": "trait", "who": "actor", "trait": "might", "delta": 1 },
+        { "e": "trait", "who": "actor", "trait": "speed", "delta": 1 },
+        { "e": "trait", "who": "actor", "trait": "sanity", "delta": 1 },
+        { "e": "trait", "who": "actor", "trait": "knowledge", "delta": 1 }
+      ]
+    },
+    {
+      "id": "item.angel_feather",
+      "deck": "item",
+      "name": "Angel Feather",
+      "text": "You may declare any die roll result before rolling.",
+      "flavor": "Pure white, miraculously unsoiled by the dust and decay around you.",
+      "keepInPlay": true,
+      "isWeapon": false,
+      "isCompanion": false
+    },
+    {
+      "id": "item.armor",
+      "deck": "item",
+      "name": "Armor",
+      "text": "Reduces physical damage taken by 1 step.",
+      "flavor": "Heavy iron plates that clank with every step.",
+      "keepInPlay": true,
+      "isWeapon": false,
+      "isCompanion": false
+    },
+    {
+      "id": "item.axe",
+      "deck": "item",
+      "name": "Axe",
+      "text": "Weapon: Roll 1 additional Might die when attacking.",
+      "flavor": "Heavy, razor-sharp, with a dark stain along the blade that won't wash off.",
+      "keepInPlay": true,
+      "isWeapon": true,
+      "isCompanion": false
+    },
+    {
+      "id": "item.bell",
+      "deck": "item",
+      "name": "Bell",
+      "text": "Ring the brass bell once per turn to calm your nerves and gain 1 Sanity.",
+      "flavor": "Its pure, resonant tone cuts through the gloom.",
+      "keepInPlay": true,
+      "isWeapon": false,
+      "isCompanion": false,
+      "onUse": [{ "e": "trait", "who": "actor", "trait": "sanity", "delta": 1 }]
+    },
+    {
+      "id": "item.blood_dagger",
+      "deck": "item",
+      "name": "Blood Dagger",
+      "text": "Weapon: +2 Speed on attack, but takes a toll on your mind.",
+      "flavor": "A wicked obsidian blade that seems thirsty for blood.",
+      "keepInPlay": true,
+      "isWeapon": true,
+      "isCompanion": false
+    },
+    {
+      "id": "item.bottle",
+      "deck": "item",
+      "name": "Bottle",
+      "text": "An unlabeled draught. Roll 1 die on use: 2=gain 2 steps, 1=gain 1 step, 0=lose 1 step.",
+      "flavor": "Dark bubbling liquid that smells faintly of almonds.",
+      "keepInPlay": true,
+      "isWeapon": false,
+      "isCompanion": false,
+      "onUse": [{ "e": "trait", "who": "actor", "trait": "might", "delta": 1 }]
+    },
+    {
+      "id": "item.candle",
+      "deck": "item",
+      "name": "Candle",
+      "text": "Illuminates dark chambers. Grants +1 to searches and line-of-sight rolls.",
+      "flavor": "A steady yellow flame that burns without melting the tallow.",
+      "keepInPlay": true,
+      "isWeapon": false,
+      "isCompanion": false
+    },
+    {
+      "id": "item.dark_dice",
+      "deck": "item",
+      "name": "Dark Dice",
+      "text": "Carved from blackened bone. Roll to gamble on trait changes.",
+      "flavor": "They land with unnatural weight, whispering secrets of misfortune.",
+      "keepInPlay": true,
+      "isWeapon": false,
+      "isCompanion": false
+    },
+    {
+      "id": "item.dynamite",
+      "deck": "item",
+      "name": "Dynamite",
+      "text": "Throw into a room to deal 4 dice of physical damage to all creatures within.",
+      "flavor": "Three red sticks tied with cord and a short fuse.",
+      "keepInPlay": true,
+      "isWeapon": true,
+      "isCompanion": false
+    },
+    {
+      "id": "item.healing_salve",
+      "deck": "item",
+      "name": "Healing Salve",
+      "text": "Restore up to 2 steps to any trait.",
+      "flavor": "A pungent herbal paste that immediately numbs pain and stops bleeding.",
+      "keepInPlay": true,
+      "isWeapon": false,
+      "isCompanion": false,
+      "onUse": [
+        { "e": "trait", "who": "actor", "trait": "might", "delta": 1 },
+        { "e": "trait", "who": "actor", "trait": "speed", "delta": 1 }
+      ]
+    },
+    {
+      "id": "item.idol",
+      "deck": "item",
+      "name": "Idol",
+      "text": "A grotesque statuette that radiates uncanny power.",
+      "flavor": "The idol's eyes seem to follow you everywhere you turn.",
+      "keepInPlay": true,
+      "isWeapon": false,
+      "isCompanion": false
+    },
+    {
+      "id": "item.lucky_stone",
+      "deck": "item",
+      "name": "Lucky Stone",
+      "text": "Add +1 to any die roll you make.",
+      "flavor": "Smooth jade that feels pleasantly cool in your palm.",
+      "keepInPlay": true,
+      "isWeapon": false,
+      "isCompanion": false
+    },
+    {
+      "id": "item.medical_kit",
+      "deck": "item",
+      "name": "Medical Kit",
+      "text": "Restore 1 step to a physical trait (Speed or Might) each turn.",
+      "flavor": "Bandages, antiseptic, and surgical tools in a leather case.",
+      "keepInPlay": true,
+      "isWeapon": false,
+      "isCompanion": false,
+      "onUse": [{ "e": "trait", "who": "actor", "trait": "might", "delta": 1 }]
+    },
+    {
+      "id": "item.music_box",
+      "deck": "item",
+      "name": "Music Box",
+      "text": "Wind the key to play a haunting lullaby. Enemies must test Sanity or pause.",
+      "flavor": "Inlaid with mother-of-pearl, playing a bittersweet melody.",
+      "keepInPlay": true,
+      "isWeapon": false,
+      "isCompanion": false
+    },
+    {
+      "id": "item.pickpocket_gloves",
+      "deck": "item",
+      "name": "Pickpocket's Gloves",
+      "text": "Allows you to take an item from another explorer in your room.",
+      "flavor": "Supple black leather that moves like a second skin.",
+      "keepInPlay": true,
+      "isWeapon": false,
+      "isCompanion": false
+    },
+    {
+      "id": "item.puzzle_box",
+      "deck": "item",
+      "name": "Puzzle Box",
+      "text": "Test Knowledge 6+ to open it. Inside you find 2 items.",
+      "flavor": "Intricate sliding wooden panels with geometric carvings.",
+      "keepInPlay": true,
+      "isWeapon": false,
+      "isCompanion": false
+    },
+    {
+      "id": "item.rabbits_foot",
+      "deck": "item",
+      "name": "Rabbit's Foot",
+      "text": "Reroll 1 die of your choice on any roll once per turn.",
+      "flavor": "Frayed grey fur on a tarnished brass chain.",
+      "keepInPlay": true,
+      "isWeapon": false,
+      "isCompanion": false
+    },
+    {
+      "id": "item.revolver",
+      "deck": "item",
+      "name": "Revolver",
+      "text": "Ranged weapon: Attack an enemy in line-of-sight using Speed instead of Might.",
+      "flavor": "A heavy steel six-shooter, fully loaded with lead bullets.",
+      "keepInPlay": true,
+      "isWeapon": true,
+      "isCompanion": false
+    },
+    {
+      "id": "item.sacrificial_dagger",
+      "deck": "item",
+      "name": "Sacrificial Dagger",
+      "text": "Weapon: Roll +2 Might dice when attacking.",
+      "flavor": "Wavy kris blade engraved with sinister occult glyphs.",
+      "keepInPlay": true,
+      "isWeapon": true,
+      "isCompanion": false
+    },
+    {
+      "id": "item.smelling_salts",
+      "deck": "item",
+      "name": "Smelling Salts",
+      "text": "Wake a stunned explorer or restore 1 Sanity.",
+      "flavor": "A small glass vial that clears the fog from your mind with sharp ammonia fumes.",
+      "keepInPlay": true,
+      "isWeapon": false,
+      "isCompanion": false,
+      "onUse": [{ "e": "trait", "who": "actor", "trait": "sanity", "delta": 1 }]
+    },
+    {
+      "id": "omen.bite",
+      "deck": "omen",
+      "name": "Bite",
+      "text": "Sharp fangs sink into your flesh! Take 1 die physical damage; make a Haunt roll.",
+      "flavor": "Something scuttled out of the shadows and clamped onto your ankle.",
+      "keepInPlay": true,
+      "isWeapon": false,
+      "isCompanion": false,
+      "onDraw": [{ "e": "trait", "who": "actor", "trait": "might", "delta": -1 }]
+    },
+    {
+      "id": "omen.book",
+      "deck": "omen",
+      "name": "Book",
+      "text": "Ancient tome bound in aged calfskin. Gain 2 Knowledge; make a Haunt roll.",
+      "flavor": "The pages describe rituals in languages thought lost millennia ago.",
+      "keepInPlay": true,
+      "isWeapon": false,
+      "isCompanion": false,
+      "onDraw": [{ "e": "trait", "who": "actor", "trait": "knowledge", "delta": 2 }]
+    },
+    {
+      "id": "omen.crystal_ball",
+      "deck": "omen",
+      "name": "Crystal Ball",
+      "text": "Gaze into the swirling mists within to glimpse what comes next. Make a Haunt roll.",
+      "flavor": "Cold quartz that swirls with ghostly figures and weeping faces.",
+      "keepInPlay": true,
+      "isWeapon": false,
+      "isCompanion": false
+    },
+    {
+      "id": "omen.dog",
+      "deck": "omen",
+      "name": "Dog",
+      "text": "A friendly companion. Gain +1 Might and +1 Sanity. Make a Haunt roll.",
+      "flavor": "A mangy golden retriever trotting happily out from under a table.",
+      "keepInPlay": true,
+      "isWeapon": false,
+      "isCompanion": true,
+      "onDraw": [
+        { "e": "trait", "who": "actor", "trait": "might", "delta": 1 },
+        { "e": "trait", "who": "actor", "trait": "sanity", "delta": 1 }
+      ]
+    },
+    {
+      "id": "omen.girl",
+      "deck": "omen",
+      "name": "Girl",
+      "text": "A frightened child hiding in the shadows. Gain +1 Sanity and +1 Knowledge. Make a Haunt roll.",
+      "flavor": "She clutches your sleeve in silence, terrified of the house.",
+      "keepInPlay": true,
+      "isWeapon": false,
+      "isCompanion": true,
+      "onDraw": [
+        { "e": "trait", "who": "actor", "trait": "sanity", "delta": 1 },
+        { "e": "trait", "who": "actor", "trait": "knowledge", "delta": 1 }
+      ]
+    },
+    {
+      "id": "omen.holy_symbol",
+      "deck": "omen",
+      "name": "Holy Symbol",
+      "text": "A consecrated icon. Gain +2 Sanity. Make a Haunt roll.",
+      "flavor": "Warmth spreads through your fingers as you clutch the cross.",
+      "keepInPlay": true,
+      "isWeapon": false,
+      "isCompanion": false,
+      "onDraw": [{ "e": "trait", "who": "actor", "trait": "sanity", "delta": 2 }]
+    },
+    {
+      "id": "omen.madman",
+      "deck": "omen",
+      "name": "Madman",
+      "text": "A wild-eyed hermit joins you. Gain +2 Might, but lose 1 Sanity. Make a Haunt roll.",
+      "flavor": "He gibbers prophecies of doom while violently brandishing a club.",
+      "keepInPlay": true,
+      "isWeapon": false,
+      "isCompanion": true,
+      "onDraw": [
+        { "e": "trait", "who": "actor", "trait": "might", "delta": 2 },
+        { "e": "trait", "who": "actor", "trait": "sanity", "delta": -1 }
+      ]
+    },
+    {
+      "id": "omen.mask",
+      "deck": "omen",
+      "name": "Mask",
+      "text": "A porcelain theater mask that whispers to you. Make a Haunt roll.",
+      "flavor": "A tragic visage that seems almost alive as shadows shift across it.",
+      "keepInPlay": true,
+      "isWeapon": false,
+      "isCompanion": false
+    },
+    {
+      "id": "omen.medallion",
+      "deck": "omen",
+      "name": "Medallion",
+      "text": "Inscribed with warding sigils that protect against evil rooms. Make a Haunt roll.",
+      "flavor": "Heavy bronze that glows softly in the presence of malevolence.",
+      "keepInPlay": true,
+      "isWeapon": false,
+      "isCompanion": false
+    },
+    {
+      "id": "omen.ring",
+      "deck": "omen",
+      "name": "Ring",
+      "text": "A band of obsidian. You may attack enemies using Sanity. Make a Haunt roll.",
+      "flavor": "The stone pulses like a slow heartbeat against your skin.",
+      "keepInPlay": true,
+      "isWeapon": true,
+      "isCompanion": false
+    },
+    {
+      "id": "omen.skull",
+      "deck": "omen",
+      "name": "Skull",
+      "text": "A human cranium glowing with sickly light. Lose 1 Sanity; make a Haunt roll.",
+      "flavor": "Its hollow eye sockets seem fixed on yours with grim malice.",
+      "keepInPlay": true,
+      "isWeapon": false,
+      "isCompanion": false,
+      "onDraw": [{ "e": "trait", "who": "actor", "trait": "sanity", "delta": -1 }]
+    },
+    {
+      "id": "omen.spear",
+      "deck": "omen",
+      "name": "Spear",
+      "text": "Weapon: Roll +2 additional Might dice when attacking. Make a Haunt roll.",
+      "flavor": "A bronze tip that has tasted royal blood in centuries past.",
+      "keepInPlay": true,
+      "isWeapon": true,
+      "isCompanion": false
+    },
+    {
+      "id": "omen.spirit_board",
+      "deck": "omen",
+      "name": "Spirit Board",
+      "text": "A wooden talking board with planchette. Make a Haunt roll.",
+      "flavor": "The planchette slides smoothly across letters without any human hand touching it.",
+      "keepInPlay": true,
+      "isWeapon": false,
+      "isCompanion": false
+    },
+    {
+      "id": "event.something_slimy",
+      "deck": "event",
+      "name": "Something Slimy",
+      "text": "Something cold and gelatinous brushes against your legs! Lose 1 Speed.",
+      "flavor": "A foul-smelling mucus coats your boots as you scramble back.",
+      "keepInPlay": false,
+      "isWeapon": false,
+      "isCompanion": false,
+      "onDraw": [{ "e": "trait", "who": "actor", "trait": "speed", "delta": -1 }]
+    },
+    {
+      "id": "event.burning_man",
+      "deck": "event",
+      "name": "Burning Man",
+      "text": "A figure engulfed in raging flames rushes screaming past you! Lose 1 Sanity.",
+      "flavor": "The heat scorches your eyebrows, yet leaves no ash upon the floor.",
+      "keepInPlay": false,
+      "isWeapon": false,
+      "isCompanion": false,
+      "onDraw": [{ "e": "trait", "who": "actor", "trait": "sanity", "delta": -1 }]
+    },
+    {
+      "id": "event.whoops",
+      "deck": "event",
+      "name": "Whoops!",
+      "text": "You trip over a broken floorboard and tumble painfully. Lose 1 Speed.",
+      "flavor": "Wood splinters beneath your boots as you crash to the ground.",
+      "keepInPlay": false,
+      "isWeapon": false,
+      "isCompanion": false,
+      "onDraw": [{ "e": "trait", "who": "actor", "trait": "speed", "delta": -1 }]
+    },
+    {
+      "id": "event.smoke",
+      "deck": "event",
+      "name": "Smoke",
+      "text": "Thick acrid smoke fills your lungs. Lose 1 Might from coughing violently.",
+      "flavor": "Black soot clings to your throat and stings your tearful eyes.",
+      "keepInPlay": false,
+      "isWeapon": false,
+      "isCompanion": false,
+      "onDraw": [{ "e": "trait", "who": "actor", "trait": "might", "delta": -1 }]
+    },
+    {
+      "id": "event.skeletons",
+      "deck": "event",
+      "name": "Skeletons",
+      "text": "Skeletal hands reach out from the walls trying to pull you into the dark! Lose 1 Might.",
+      "flavor": "Dry bones rattle with sickening clatter all around you.",
+      "keepInPlay": false,
+      "isWeapon": false,
+      "isCompanion": false,
+      "onDraw": [{ "e": "trait", "who": "actor", "trait": "might", "delta": -1 }]
+    },
+    {
+      "id": "event.spider",
+      "deck": "event",
+      "name": "Spider",
+      "text": "A hairy spider the size of a dinner plate bites into your shoulder! Lose 1 Might.",
+      "flavor": "Venom burns like acid through your veins.",
+      "keepInPlay": false,
+      "isWeapon": false,
+      "isCompanion": false,
+      "onDraw": [{ "e": "trait", "who": "actor", "trait": "might", "delta": -1 }]
+    },
+    {
+      "id": "event.angry_being",
+      "deck": "event",
+      "name": "Angry Being",
+      "text": "A furious specter bellows in rage, chilling you to the bone. Lose 1 Sanity.",
+      "flavor": "Its hollow scream reverberates inside your skull.",
+      "keepInPlay": false,
+      "isWeapon": false,
+      "isCompanion": false,
+      "onDraw": [{ "e": "trait", "who": "actor", "trait": "sanity", "delta": -1 }]
+    },
+    {
+      "id": "event.hideous_shriek",
+      "deck": "event",
+      "name": "Hideous Shriek",
+      "text": "An ear-splitting shriek pierces the dark corridors! Lose 1 Sanity.",
+      "flavor": "You clap your hands over your bleeding ears, trembling.",
+      "keepInPlay": false,
+      "isWeapon": false,
+      "isCompanion": false,
+      "onDraw": [{ "e": "trait", "who": "actor", "trait": "sanity", "delta": -1 }]
+    },
+    {
+      "id": "event.something_hidden",
+      "deck": "event",
+      "name": "Something Hidden",
+      "text": "You notice a secret hollow in the paneling containing ancient research! Gain 1 Knowledge.",
+      "flavor": "Mouldering manuscripts describe the history of this accursed estate.",
+      "keepInPlay": false,
+      "isWeapon": false,
+      "isCompanion": false,
+      "onDraw": [{ "e": "trait", "who": "actor", "trait": "knowledge", "delta": 1 }]
+    },
+    {
+      "id": "event.locked_safe",
+      "deck": "event",
+      "name": "Locked Safe",
+      "text": "An iron safe embedded in the brickwork. Studying its mechanism yields 1 Knowledge.",
+      "flavor": "Tumblers click in heavy sequence beneath your careful touch.",
+      "keepInPlay": false,
+      "isWeapon": false,
+      "isCompanion": false,
+      "onDraw": [{ "e": "trait", "who": "actor", "trait": "knowledge", "delta": 1 }]
+    },
+    {
+      "id": "event.disquieting_sounds",
+      "deck": "event",
+      "name": "Disquieting Sounds",
+      "text": "Wet footsteps shuffle behind you, stopping whenever you pause. Lose 1 Sanity.",
+      "flavor": "You spin around with flashlight raised, but only shadows stare back.",
+      "keepInPlay": false,
+      "isWeapon": false,
+      "isCompanion": false,
+      "onDraw": [{ "e": "trait", "who": "actor", "trait": "sanity", "delta": -1 }]
+    },
+    {
+      "id": "event.image_in_mirror",
+      "deck": "event",
+      "name": "Image in the Mirror",
+      "text": "Your reflection turns and laughs cruelly before decaying into dust. Lose 1 Sanity.",
+      "flavor": "The glass shivers, showing horrors that have not yet occurred.",
+      "keepInPlay": false,
+      "isWeapon": false,
+      "isCompanion": false,
+      "onDraw": [{ "e": "trait", "who": "actor", "trait": "sanity", "delta": -1 }]
+    },
+    {
+      "id": "event.groundskeeper",
+      "deck": "event",
+      "name": "Groundskeeper",
+      "text": "A hulking phantom in muddy overalls strikes with a rusty shovel! Lose 1 Might.",
+      "flavor": "He dissolves into autumn leaves as his blade clatters on the stone.",
+      "keepInPlay": false,
+      "isWeapon": false,
+      "isCompanion": false,
+      "onDraw": [{ "e": "trait", "who": "actor", "trait": "might", "delta": -1 }]
+    },
+    {
+      "id": "event.mist_from_walls",
+      "deck": "event",
+      "name": "Mist from the Walls",
+      "text": "Freezing mist seeps through cracks, numbing your legs. Lose 1 Speed.",
+      "flavor": "Frost crystallizes across the floorboards in intricate spiderwebs.",
+      "keepInPlay": false,
+      "isWeapon": false,
+      "isCompanion": false,
+      "onDraw": [{ "e": "trait", "who": "actor", "trait": "speed", "delta": -1 }]
+    },
+    {
+      "id": "event.the_voice",
+      "deck": "event",
+      "name": "The Voice",
+      "text": "A sweet, disembodied whisper shares hidden truths of the house. Gain 1 Knowledge.",
+      "flavor": "Secrets of the architecture and ancient architects flow into your thoughts.",
+      "keepInPlay": false,
+      "isWeapon": false,
+      "isCompanion": false,
+      "onDraw": [{ "e": "trait", "who": "actor", "trait": "knowledge", "delta": 1 }]
+    },
+    {
+      "id": "event.phone_call",
+      "deck": "event",
+      "name": "Phone Call",
+      "text": "An antique rotary phone rings. A dead loved one whispers your name. Lose 1 Sanity.",
+      "flavor": "The cord has been cut clean through, yet the bell still tolls.",
+      "keepInPlay": false,
+      "isWeapon": false,
+      "isCompanion": false,
+      "onDraw": [{ "e": "trait", "who": "actor", "trait": "sanity", "delta": -1 }]
+    },
+    {
+      "id": "event.rotten",
+      "deck": "event",
+      "name": "Rotten",
+      "text": "Foul fungal stench fills the room. You retch violently, losing 1 Might.",
+      "flavor": "Black mold drips down the peeling floral wallpaper.",
+      "keepInPlay": false,
+      "isWeapon": false,
+      "isCompanion": false,
+      "onDraw": [{ "e": "trait", "who": "actor", "trait": "might", "delta": -1 }]
+    },
+    {
+      "id": "event.the_walls",
+      "deck": "event",
+      "name": "The Walls",
+      "text": "Blood begins weeping from the plaster seams, staining your clothes. Lose 1 Sanity.",
+      "flavor": "Warm red rivulets streak down the painted portraits.",
+      "keepInPlay": false,
+      "isWeapon": false,
+      "isCompanion": false,
+      "onDraw": [{ "e": "trait", "who": "actor", "trait": "sanity", "delta": -1 }]
+    },
+    {
+      "id": "event.hanged_men",
+      "deck": "event",
+      "name": "Hanged Men",
+      "text": "Gallows ropes swing from the ceiling with shadowy figures. Lose 1 Sanity.",
+      "flavor": "Hemp creaks against timber in a breeze that shouldn't exist indoors.",
+      "keepInPlay": false,
+      "isWeapon": false,
+      "isCompanion": false,
+      "onDraw": [{ "e": "trait", "who": "actor", "trait": "sanity", "delta": -1 }]
+    },
+    {
+      "id": "event.funeral",
+      "deck": "event",
+      "name": "Funeral",
+      "text": "You see mourners gathered around a mahogany casket bearing your own photo. Lose 1 Sanity.",
+      "flavor": "Black veils turn in unison to stare through you with empty eyes.",
+      "keepInPlay": false,
+      "isWeapon": false,
+      "isCompanion": false,
+      "onDraw": [{ "e": "trait", "who": "actor", "trait": "sanity", "delta": -1 }]
+    },
+    {
+      "id": "event.creepy_crawlies",
+      "deck": "event",
+      "name": "Creepy Crawlies",
+      "text": "Thousands of centipedes and beetles drop from the ceiling onto you! Lose 1 Sanity.",
+      "flavor": "Tiny pincers and tickling legs swarm through your collar and hair.",
+      "keepInPlay": false,
+      "isWeapon": false,
+      "isCompanion": false,
+      "onDraw": [{ "e": "trait", "who": "actor", "trait": "sanity", "delta": -1 }]
+    },
+    {
+      "id": "event.closet_door",
+      "deck": "event",
+      "name": "Closet Door",
+      "text": "A cupboard door swings open, revealing a stash of old medical supplies! Gain 1 Might.",
+      "flavor": "Salves and bandages preserved in amber apothecary jars.",
+      "keepInPlay": false,
+      "isWeapon": false,
+      "isCompanion": false,
+      "onDraw": [{ "e": "trait", "who": "actor", "trait": "might", "delta": 1 }]
+    },
+    {
+      "id": "event.bloody_vision",
+      "deck": "event",
+      "name": "Bloody Vision",
+      "text": "The entire room suddenly appears drenched in fresh arterial blood, then vanishes. Lose 1 Sanity.",
+      "flavor": "Metallic copper taste fills your mouth as you gasp in terror.",
+      "keepInPlay": false,
+      "isWeapon": false,
+      "isCompanion": false,
+      "onDraw": [{ "e": "trait", "who": "actor", "trait": "sanity", "delta": -1 }]
+    },
+    {
+      "id": "event.night_view",
+      "deck": "event",
+      "name": "Night View",
+      "text": "A window reveals the majestic moonlit estate, calming your racing heart. Gain 1 Sanity.",
+      "flavor": "Silver moonlight cuts through the gloom, giving you renewed hope.",
+      "keepInPlay": false,
+      "isWeapon": false,
+      "isCompanion": false,
+      "onDraw": [{ "e": "trait", "who": "actor", "trait": "sanity", "delta": 1 }]
+    },
+    {
+      "id": "event.ground_tremors",
+      "deck": "event",
+      "name": "Ground Tremors",
+      "text": "The foundations shake violently as if something massive is stirring beneath. Lose 1 Speed.",
+      "flavor": "Plaster dust rains down as stones grind against each other.",
+      "keepInPlay": false,
+      "isWeapon": false,
+      "isCompanion": false,
+      "onDraw": [{ "e": "trait", "who": "actor", "trait": "speed", "delta": -1 }]
+    }
+  ]
+}

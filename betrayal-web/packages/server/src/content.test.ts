@@ -51,9 +51,7 @@ describe('GET /api/content', () => {
     expect(rebuilt.hash).toBe(raw.hash);
     expect(rebuilt.tiles.length).toBeGreaterThan(0);
     expect(rebuilt.house.startTile).toBeTruthy();
-    // Server protocol tests choose the committed placeholder explorer IDs.
-    // Keep their content source isolated from a developer's local migration.
-    expect(rebuilt.characters.some((character) => character.id === 'char.green_a')).toBe(
+    expect(rebuilt.characters.some((character) => character.id === 'char.peter_akimoto')).toBe(
       true,
     );
   });

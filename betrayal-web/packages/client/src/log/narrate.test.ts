@@ -134,21 +134,21 @@ describe('narrate', () => {
   });
 
   it('renders a trait change as PRINTED values, not track indices', () => {
-    // The whole point: "Might 4" is a slot number and means nothing to a
+    // The whole point: "Speed 4" is a slot number and means nothing to a
     // player. The printed value is what is on the card.
     const from = 5;
     const to = 3;
     const text = narrate(
-      { t: 'trait_changed', seat: ANA, trait: 'might', from, to },
+      { t: 'trait_changed', seat: ANA, trait: 'speed', from, to },
       ctx(),
     );
     expect(text).toBe(
-      `Ana's Might fell from ${ANA_CHAR.tracks.might[from]} to ${ANA_CHAR.tracks.might[to]}`,
+      `Ana's Speed fell from ${ANA_CHAR.tracks.speed[from]} to ${ANA_CHAR.tracks.speed[to]}`,
     );
     // Guard against the printed values coincidentally equalling the indices,
     // which would make the assertion above pass for the wrong reason — the
     // D1 family. If the fixture ever makes them equal, this fails loudly.
-    expect(String(ANA_CHAR.tracks.might[from])).not.toBe(String(from));
+    expect(String(ANA_CHAR.tracks.speed[from])).not.toBe(String(from));
   });
 
   it('calls index 0 the skull rather than a value', () => {

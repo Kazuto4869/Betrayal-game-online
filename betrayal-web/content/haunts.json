@@ -1,0 +1,1239 @@
+{
+  "haunts": [
+    {
+      "id": 1,
+      "name": "The Mummy Walks",
+      "traitorRule": {
+        "kind": "highest",
+        "trait": "knowledge"
+      },
+      "traitor": {
+        "goal": "Awaken the ancient Mummy and sacrifice the explorers to complete your dark rebirth ritual.",
+        "rules": [
+          "You control the Mummy during your turn.",
+          "The Mummy rolls 5 dice in Might attacks and cannot be permanently harmed by normal attacks.",
+          "Traitor wins when all heroes are slain or sacrificed."
+        ]
+      },
+      "heroes": {
+        "goal": "Decipher the ancient hieroglyphics and banish the Mummy with sacred incantations.",
+        "rules": [
+          "Find the Book or Holy Symbol to cast banishment spells.",
+          "Make Knowledge rolls (target 5+) in the Crypt or sarcophagus room to seal it.",
+          "Heroes win when the sarcophagus is sealed or the Mummy is destroyed."
+        ]
+      },
+      "implemented": true
+    },
+    {
+      "id": 2,
+      "name": "The Séance",
+      "traitorRule": {
+        "kind": "lowest",
+        "trait": "sanity"
+      },
+      "traitor": {
+        "goal": "Summon the Restless Spirit to consume the sanity of the living.",
+        "rules": [
+          "The Spirit can pass through walls and moves at Speed 4.",
+          "Spirit attacks target Sanity rather than Might.",
+          "Traitor wins when all heroes die or succumb to complete madness."
+        ]
+      },
+      "heroes": {
+        "goal": "Find the spirit's mortal remains and lay them to rest in consecrated ground.",
+        "rules": [
+          "Search the house for the Spirit Board and holy relics.",
+          "Bring relics to the Chapel or Pentagram Chamber.",
+          "Heroes win when the ritual of peace is performed."
+        ]
+      },
+      "implemented": true
+    },
+    {
+      "id": 3,
+      "name": "Frog-Leg Stew",
+      "traitorRule": {
+        "kind": "highest",
+        "trait": "might"
+      },
+      "traitor": {
+        "goal": "Brew the Witch's brew by tossing frogs and heroes into the bubbling cauldron.",
+        "rules": [
+          "Feed ingredients and captured heroes into the cauldron in the Kitchen.",
+          "Traitor wins when the cauldron is fully stirred and boiled."
+        ]
+      },
+      "heroes": {
+        "goal": "Spill the cauldron, extinguish the cursed fire, and defeat the Witch.",
+        "rules": [
+          "Make Might checks (target 5+) in the Kitchen to tip over the cauldron.",
+          "Heroes win when the cauldron is spilled or the Witch is slain."
+        ]
+      },
+      "implemented": true
+    },
+    {
+      "id": 4,
+      "name": "The Web of Destiny",
+      "traitorRule": {
+        "kind": "highest",
+        "trait": "speed"
+      },
+      "traitor": {
+        "goal": "Trap the heroes in giant spider webs and feed the ravenous Broodmother.",
+        "rules": [
+          "Giant spiders spin webs across doorways that cost 2 extra movement to cross.",
+          "Spiders make Speed-based attacks that paralyze victims.",
+          "Traitor wins when all heroes are webbed and devoured."
+        ]
+      },
+      "heroes": {
+        "goal": "Burn the web nests and slay the Broodmother.",
+        "rules": [
+          "Find fire or weapons to clear webbed rooms.",
+          "Attack the Broodmother with Might rolls.",
+          "Heroes win when the Broodmother spider is destroyed."
+        ]
+      },
+      "implemented": true
+    },
+    {
+      "id": 5,
+      "name": "I Was a Teenage Lycanthrope",
+      "traitorRule": {
+        "kind": "trigger"
+      },
+      "traitor": {
+        "goal": "You have transformed into a ferocious Werewolf. Feast upon your former companions!",
+        "rules": [
+          "Gain +2 Might and +2 Speed in wolf form.",
+          "You take damage only from the Spear or silver weapons.",
+          "Traitor wins when all heroes are slain."
+        ]
+      },
+      "heroes": {
+        "goal": "Forge a silver weapon or find the Spear to slay the ravenous beast.",
+        "rules": [
+          "Search for the Spear or forge silver bullets/weapons in the Furnace Room.",
+          "Attack the Werewolf with silver to inflict mortal wounds.",
+          "Heroes win when the Werewolf is slain."
+        ]
+      },
+      "implemented": true
+    },
+    {
+      "id": 6,
+      "name": "The Floating Eye",
+      "traitorRule": {
+        "kind": "lowest",
+        "trait": "might"
+      },
+      "traitor": {
+        "goal": "Awaken the gigantic cosmic Eye from beyond the stars and stare the mortals into madness.",
+        "rules": [
+          "The Floating Eye levitates through open doorways and floors.",
+          "The Eye makes Sanity gaze attacks across lines of sight.",
+          "Traitor wins when all heroes are dead or driven mad."
+        ]
+      },
+      "heroes": {
+        "goal": "Blind the cosmic horror by reflecting its hypnotic gaze back upon itself.",
+        "rules": [
+          "Locate mirrors and bright light sources.",
+          "Make Knowledge or Sanity checks to aim the beam into the Eye.",
+          "Heroes win when the Eye is blinded and banished."
+        ]
+      },
+      "implemented": true
+    },
+    {
+      "id": 7,
+      "name": "Carnival of Carnivore",
+      "traitorRule": {
+        "kind": "highest",
+        "trait": "knowledge"
+      },
+      "traitor": {
+        "goal": "Cultivate monstrous carnivorous vines to choke the mansion and digest the intruders.",
+        "rules": [
+          "Vines spread one room each turn, blocking movement.",
+          "Explorers in vine-choked rooms take physical damage.",
+          "Traitor wins when vines conquer the house or heroes are digested."
+        ]
+      },
+      "heroes": {
+        "goal": "Synthesize weed-killer herbicide and destroy the central root bulb.",
+        "rules": [
+          "Gather chemical components in the Research Lab or Conservatory.",
+          "Spray the root bulb in the Gardens or Conservatory.",
+          "Heroes win when the root bulb is eradicated."
+        ]
+      },
+      "implemented": true
+    },
+    {
+      "id": 8,
+      "name": "Which-Craft",
+      "traitorRule": {
+        "kind": "lowest",
+        "trait": "sanity"
+      },
+      "traitor": {
+        "goal": "Complete the dark coven pact by summoning demonic familiars.",
+        "rules": [
+          "Familiars hunt heroes and drain their life force.",
+          "Traitor gains bonus defense while inside the Pentagram Chamber.",
+          "Traitor wins when the ritual reaches full power."
+        ]
+      },
+      "heroes": {
+        "goal": "Disrupt the ritual circles and unbind the demonic pact.",
+        "rules": [
+          "Collect candles and sacred salt throughout the rooms.",
+          "Disrupt ritual glyphs with Sanity/Knowledge rolls.",
+          "Heroes win when 3 ritual circles are cleansed."
+        ]
+      },
+      "implemented": true
+    },
+    {
+      "id": 9,
+      "name": "The Dance of Death",
+      "traitorRule": {
+        "kind": "highest",
+        "trait": "speed"
+      },
+      "traitor": {
+        "goal": "Play the bewitching music to force the heroes into a fatal, never-ending dance.",
+        "rules": [
+          "Heroes who hear the music must make Sanity rolls or dance uncontrollably.",
+          "Dancing drains Speed and Might each turn.",
+          "Traitor wins when all explorers collapse from exhaustion."
+        ]
+      },
+      "heroes": {
+        "goal": "Find earplugs and smash the enchanted music box or organ.",
+        "rules": [
+          "Make Knowledge checks to muffle the music.",
+          "Smash the enchanted instrument with Might rolls in the Ballroom.",
+          "Heroes win when the instrument is silenced forever."
+        ]
+      },
+      "implemented": true
+    },
+    {
+      "id": 10,
+      "name": "The Phantom's Embrace",
+      "traitorRule": {
+        "kind": "lowest",
+        "trait": "might"
+      },
+      "traitor": {
+        "goal": "Drag the chosen hero into the shadow realm through the cursed mirrors.",
+        "rules": [
+          "Travel instantaneously between rooms containing mirrors.",
+          "Phantom touch drains Knowledge and Sanity.",
+          "Traitor wins when the marked hero is pulled into the abyss."
+        ]
+      },
+      "heroes": {
+        "goal": "Shatter the cursed mirrors and banish the Phantom to the ether.",
+        "rules": [
+          "Locate mirrors throughout the mansion.",
+          "Roll Might 4+ to shatter each mirror.",
+          "Heroes win when all 4 mirrors are destroyed."
+        ]
+      },
+      "implemented": true
+    },
+    {
+      "id": 11,
+      "name": "Parfait",
+      "traitorRule": {
+        "kind": "highest",
+        "trait": "sanity"
+      },
+      "traitor": {
+        "goal": "Unleash a ravenous, ever-growing gelatinous blob that dissolves everything.",
+        "rules": [
+          "The Blob expands into adjacent rooms each round.",
+          "Explorers touched by the Blob suffer severe acid damage.",
+          "Traitor wins when the mansion is consumed."
+        ]
+      },
+      "heroes": {
+        "goal": "Freeze the gelatinous horror or blow it to pieces with explosives.",
+        "rules": [
+          "Find coolant chemicals or fire extinguishers.",
+          "Expose the Blob to extreme cold or detonation.",
+          "Heroes win when the core of the Blob freezes and shatters."
+        ]
+      },
+      "implemented": true
+    },
+    {
+      "id": 12,
+      "name": "The Flesh-Stone",
+      "traitorRule": {
+        "kind": "highest",
+        "trait": "might"
+      },
+      "traitor": {
+        "goal": "Use Medusa's ancient gaze to turn all living intruders into eternal stone statues.",
+        "rules": [
+          "Petrifying gaze forces explorers to make Might saves or lose Speed.",
+          "When Speed hits 0, the hero becomes permanently petrified.",
+          "Traitor wins when all heroes become statues."
+        ]
+      },
+      "heroes": {
+        "goal": "Use polished shields and mirrors to reflect the Gorgon's petrifying gaze.",
+        "rules": [
+          "Find reflective surfaces or shields.",
+          "Corner the Gorgon and reflect its gaze with a Might/Speed roll.",
+          "Heroes win when the Gorgon petrifies itself or is beheaded."
+        ]
+      },
+      "implemented": true
+    },
+    {
+      "id": 13,
+      "name": "House of the Living Dead",
+      "traitorRule": {
+        "kind": "trigger"
+      },
+      "traitor": {
+        "goal": "Raise a horde of flesh-eating zombies from the graveyard and overrun the mansion.",
+        "rules": [
+          "Spawn 2 zombies each turn from the Graveyard and Crypt.",
+          "Zombies attack with Might 4 and can grab explorers.",
+          "Traitor wins when all heroes are eaten."
+        ]
+      },
+      "heroes": {
+        "goal": "Board up windows and doorways, then incinerate the zombie source.",
+        "rules": [
+          "Barricade rooms using wood planks.",
+          "Find kerosene and torches to burn the zombie nests.",
+          "Heroes win when the master corpse is burned."
+        ]
+      },
+      "implemented": true
+    },
+    {
+      "id": 14,
+      "name": "The Creature",
+      "traitorRule": {
+        "kind": "lowest",
+        "trait": "knowledge"
+      },
+      "traitor": {
+        "goal": "Reanimate the Frankenstein monster with lightning and command it to crush the intruders.",
+        "rules": [
+          "The Creature has Might 7 and cannot be stunned easily.",
+          "Traitor channels laboratory power to energize the beast.",
+          "Traitor wins when all heroes are crushed."
+        ]
+      },
+      "heroes": {
+        "goal": "Short-circuit the lightning generators and de-activate the monster.",
+        "rules": [
+          "Cut circuit cables in the Operating Laboratory or Furnace Room.",
+          "Make Knowledge checks to reverse the electrical flow.",
+          "Heroes win when the generators explode, neutralizing the creature."
+        ]
+      },
+      "implemented": true
+    },
+    {
+      "id": 15,
+      "name": "Here There Be Dragons",
+      "traitorRule": {
+        "kind": "highest",
+        "trait": "might"
+      },
+      "traitor": {
+        "goal": "Hatch the great Dragon in the subterranean depths and incinerate the mansion.",
+        "rules": [
+          "The Dragon breathes fire that damages entire rooms.",
+          "The Dragon is armored against ordinary blows.",
+          "Traitor wins when heroes are reduced to ashes."
+        ]
+      },
+      "heroes": {
+        "goal": "Find the legendary Dragonbane weapon and pierce the beast's weak underbelly.",
+        "rules": [
+          "Search the Armory and Vault for the sacred spear or heavy ballista.",
+          "Roll Might/Speed to strike the single missing scale.",
+          "Heroes win when the Dragon collapses."
+        ]
+      },
+      "implemented": true
+    },
+    {
+      "id": 16,
+      "name": "Buried Alive",
+      "traitorRule": {
+        "kind": "trigger"
+      },
+      "traitor": {
+        "goal": "Entomb an explorer alive beneath the foundation before the air runs out.",
+        "rules": [
+          "A buried victim loses 1 Sanity or Might each turn they remain trapped.",
+          "Traitor defends the burial site with traps and weapons.",
+          "Traitor wins if the buried victim suffocates."
+        ]
+      },
+      "heroes": {
+        "goal": "Locate the hidden grave and dig out the trapped companion before it is too late.",
+        "rules": [
+          "Follow acoustic clues to find the buried coffin.",
+          "Make Might checks to dig through the rubble and pry open the lid.",
+          "Heroes win when the trapped explorer is rescued."
+        ]
+      },
+      "implemented": true
+    },
+    {
+      "id": 17,
+      "name": "The Phantom",
+      "traitorRule": {
+        "kind": "lowest",
+        "trait": "sanity"
+      },
+      "traitor": {
+        "goal": "A ghostly Phantom terrorizes the opera halls and corridors, demanding absolute obedience.",
+        "rules": [
+          "The Phantom vanishes into thin air when struck, reappearing in darkness.",
+          "Traitor cuts lights to plunge the mansion into blackness.",
+          "Traitor wins when all heroes are eliminated."
+        ]
+      },
+      "heroes": {
+        "goal": "Illuminate the house and rip off the Phantom's mask to break the curse.",
+        "rules": [
+          "Restore lighting and light chandeliers across the house.",
+          "Corner the Phantom in a bright room and make a Might check.",
+          "Heroes win when the mask is removed."
+        ]
+      },
+      "implemented": true
+    },
+    {
+      "id": 18,
+      "name": "King Rat",
+      "traitorRule": {
+        "kind": "highest",
+        "trait": "speed"
+      },
+      "traitor": {
+        "goal": "Command a swarm of diseased plague rats to overwhelm and infect the house.",
+        "rules": [
+          "Rat swarms move quickly and deal plague poison damage.",
+          "Plagued heroes lose 1 Might at the start of each turn.",
+          "Traitor wins when all heroes succumb to the Black Death."
+        ]
+      },
+      "heroes": {
+        "goal": "Synthesize an antidote and exterminate King Rat.",
+        "rules": [
+          "Find antidote herbs in the Larder or Conservatory.",
+          "Administer cure to diseased companions.",
+          "Slay King Rat with Might or fire attacks."
+        ]
+      },
+      "implemented": true
+    },
+    {
+      "id": 19,
+      "name": "A Friend for the End of the World",
+      "traitorRule": {
+        "kind": "none"
+      },
+      "traitor": {
+        "goal": "There is no traitor! The house is collapsing into an interdimensional vortex.",
+        "rules": [
+          "Every round, rooms fall into the void.",
+          "All players must work together to escape."
+        ]
+      },
+      "heroes": {
+        "goal": "Find the dimensional anchor and stabilize the reality rip before everyone falls into oblivion.",
+        "rules": [
+          "Assemble 3 stabilization runes from disparate floors.",
+          "Activate the dimensional anchor in the Entrance Hall.",
+          "All living explorers win by escaping through the front doors."
+        ]
+      },
+      "implemented": true
+    },
+    {
+      "id": 20,
+      "name": "Ghost Bride",
+      "traitorRule": {
+        "kind": "lowest",
+        "trait": "might"
+      },
+      "traitor": {
+        "goal": "Force a living explorer into an eternal spectral marriage in the Chapel.",
+        "rules": [
+          "The Ghost Bride entrances heroes with wedding music.",
+          "Traitor drags the groom/bride toward the altar.",
+          "Traitor wins when the unholy wedding vows are completed."
+        ]
+      },
+      "heroes": {
+        "goal": "Find the lost wedding ring and return it to the true grave to lay the bride to rest.",
+        "rules": [
+          "Search the master bedroom and vaults for the lost heirloom.",
+          "Carry the heirloom to the crypt and recite the funeral rite.",
+          "Heroes win when the Ghost Bride finds peace."
+        ]
+      },
+      "implemented": true
+    },
+    {
+      "id": 21,
+      "name": "House of the Puppet Master",
+      "traitorRule": {
+        "kind": "highest",
+        "trait": "knowledge"
+      },
+      "traitor": {
+        "goal": "Attach puppet strings to the explorers and make them slaughter one another.",
+        "rules": [
+          "Control an explorer's movements with puppet strings each turn.",
+          "Puppet Master stays hidden in the secret workshop.",
+          "Traitor wins when the puppet show leaves no survivors."
+        ]
+      },
+      "heroes": {
+        "goal": "Cut the puppet strings and burn the Puppet Master's workshop.",
+        "rules": [
+          "Use sharp blades to sever strings attached to companions.",
+          "Locate the Puppet Master's workshop and burn the marionettes.",
+          "Heroes win when the master strings are severed."
+        ]
+      },
+      "implemented": true
+    },
+    {
+      "id": 22,
+      "name": "The Abyss Gazes Back",
+      "traitorRule": {
+        "kind": "lowest",
+        "trait": "sanity"
+      },
+      "traitor": {
+        "goal": "Open the Abyssal Portal in the basement to consume reality.",
+        "rules": [
+          "Dark tendrils erupt from cracks in the floor.",
+          "Sanity rolls required to look at the portal.",
+          "Traitor wins when the portal opens completely."
+        ]
+      },
+      "heroes": {
+        "goal": "Collect celestial runes to seal the Abyssal Rift.",
+        "rules": [
+          "Find runes in the Attic, Chapel, and Library.",
+          "Place runes on the boundary of the Chasm or Pentagram Chamber.",
+          "Heroes win when the rift is permanently sealed."
+        ]
+      },
+      "implemented": true
+    },
+    {
+      "id": 23,
+      "name": "Tentacles!",
+      "traitorRule": {
+        "kind": "highest",
+        "trait": "might"
+      },
+      "traitor": {
+        "goal": "Awaken the subterranean kraken whose giant tentacles smash through the floors.",
+        "rules": [
+          "Tentacles spawn in 4 different rooms and crush intruders.",
+          "Tentacles can grab explorers and squeeze them for Might damage.",
+          "Traitor wins when all heroes are pulled under."
+        ]
+      },
+      "heroes": {
+        "goal": "Sever the tentacles and poison the central beast.",
+        "rules": [
+          "Attack tentacles with weapons (target 4+ Might to sever).",
+          "Dump toxic chemicals down the well or coal chute.",
+          "Heroes win when all active tentacles are severed."
+        ]
+      },
+      "implemented": true
+    },
+    {
+      "id": 24,
+      "name": "Fly Away Home",
+      "traitorRule": {
+        "kind": "highest",
+        "trait": "speed"
+      },
+      "traitor": {
+        "goal": "Summon a swarm of mutated killer bats that blot out the sky.",
+        "rules": [
+          "Bat swarms blind explorers and attack from above.",
+          "Bats heal the traitor when they feed on heroes.",
+          "Traitor wins when all heroes are drained of blood."
+        ]
+      },
+      "heroes": {
+        "goal": "Assemble high-frequency sonic emitters to disperse the swarm.",
+        "rules": [
+          "Find electronic tubes and radio components in the attic.",
+          "Build the sonic whistle in the Workshop or Tower.",
+          "Heroes win when the sonic pulse drives the swarm away."
+        ]
+      },
+      "implemented": true
+    },
+    {
+      "id": 25,
+      "name": "Voodoo",
+      "traitorRule": {
+        "kind": "lowest",
+        "trait": "knowledge"
+      },
+      "traitor": {
+        "goal": "Craft voodoo dolls representing each explorer and torture them from afar.",
+        "rules": [
+          "Traitor inflicts damage by stabbing needles into dolls.",
+          "Traitor stays protected by voodoo warding totems.",
+          "Traitor wins when all explorer dolls are destroyed."
+        ]
+      },
+      "heroes": {
+        "goal": "Sneak into the witch doctor's lair and recover your personal effigies.",
+        "rules": [
+          "Search the traitor's sanctum for the voodoo dolls.",
+          "Cleanse dolls with holy water from the Chapel.",
+          "Heroes win when all dolls are retrieved and purified."
+        ]
+      },
+      "implemented": true
+    },
+    {
+      "id": 26,
+      "name": "Pay the Piper",
+      "traitorRule": {
+        "kind": "highest",
+        "trait": "speed"
+      },
+      "traitor": {
+        "goal": "Play the Pied Piper's flute to lure explorers into the bottomless pit.",
+        "rules": [
+          "Charmed heroes are forced to walk toward the Chasm each round.",
+          "Traitor moves at high speed and cannot be intercepted easily.",
+          "Traitor wins when all heroes plunge into the chasm."
+        ]
+      },
+      "heroes": {
+        "goal": "Deafen yourselves or snap the enchanted pipe.",
+        "rules": [
+          "Stuff ears with wax or cloth to resist the tune.",
+          "Ambush the Piper and disarm the flute.",
+          "Heroes win when the flute is broken in half."
+        ]
+      },
+      "implemented": true
+    },
+    {
+      "id": 27,
+      "name": "Amok",
+      "traitorRule": {
+        "kind": "highest",
+        "trait": "might"
+      },
+      "traitor": {
+        "goal": "A psychotic frenzy overtakes you. Slay everyone in sight with a blood-soaked axe!",
+        "rules": [
+          "Gain +3 Might and immunity to fear effects.",
+          "Cleave attack hits multiple heroes in the same room.",
+          "Traitor wins when no heroes draw breath."
+        ]
+      },
+      "heroes": {
+        "goal": "Set a cunning trap or lure the madman into a reinforced cage.",
+        "rules": [
+          "Construct a snare trap in the Kitchen or Basement.",
+          "Lure the berserker into the trap with Speed rolls.",
+          "Heroes win when the berserker is trapped and neutralized."
+        ]
+      },
+      "implemented": true
+    },
+    {
+      "id": 28,
+      "name": "Ring of Fire",
+      "traitorRule": {
+        "kind": "lowest",
+        "trait": "speed"
+      },
+      "traitor": {
+        "goal": "Ignite magical hellfire that spreads from room to room, trapping the mortals.",
+        "rules": [
+          "Fire spreads to 1 adjacent room every round.",
+          "Entering or ending a turn in a burning room deals fire damage.",
+          "Traitor wins when the house burns down with heroes inside."
+        ]
+      },
+      "heroes": {
+        "goal": "Activate the house sprinkler system or breach the water cistern.",
+        "rules": [
+          "Reach the water valve in the Basement or Boiler Room.",
+          "Make Might checks to turn the rusted iron wheel.",
+          "Heroes win when the deluge extinguishes the inferno."
+        ]
+      },
+      "implemented": true
+    },
+    {
+      "id": 29,
+      "name": "Frankenstein's Legacy",
+      "traitorRule": {
+        "kind": "highest",
+        "trait": "knowledge"
+      },
+      "traitor": {
+        "goal": "Harvest vital organs from the explorers to build the ultimate resurrected monstrosity.",
+        "rules": [
+          "Harvested organs grant permanent stat boosts to the Traitor.",
+          "Summon reanimated flesh-golems to pin down victims.",
+          "Traitor wins when the masterwork is completed."
+        ]
+      },
+      "heroes": {
+        "goal": "Destroy the preservation vats and destroy the surgical notes.",
+        "rules": [
+          "Smash glass vats in the Operating Laboratory.",
+          "Burn the anatomical manuscripts in the Furnace.",
+          "Heroes win when the lab is ruined and the monster dismantled."
+        ]
+      },
+      "implemented": true
+    },
+    {
+      "id": 30,
+      "name": "Tomb of Dracula",
+      "traitorRule": {
+        "kind": "highest",
+        "trait": "sanity"
+      },
+      "traitor": {
+        "goal": "Awaken Count Dracula from his stone crypt and offer the explorers as his blood banquet.",
+        "rules": [
+          "Dracula turns into mist to move freely across floors.",
+          "Dracula bites victims to drain Might and turn them into thralls.",
+          "Traitor wins when all heroes are converted or bled dry."
+        ]
+      },
+      "heroes": {
+        "goal": "Carve wooden stakes, find garlic, and drive a stake through Dracula's heart.",
+        "rules": [
+          "Find wooden furniture and fashion stakes with a knife.",
+          "Corner Dracula in his coffin in the Crypt or Vault.",
+          "Roll Might 5+ to drive the stake home and slay the vampire king."
+        ]
+      },
+      "implemented": true
+    },
+    {
+      "id": 31,
+      "name": "Airborne",
+      "traitorRule": {
+        "kind": "none"
+      },
+      "traitor": {
+        "goal": "There is no traitor! The entire mansion has detached from earth and is flying into a storm!",
+        "rules": [
+          "Violent turbulence throws explorers across rooms.",
+          "Rooms periodically break off into the clouds.",
+          "All players must cooperate to bring the house down safely."
+        ]
+      },
+      "heroes": {
+        "goal": "Reach the attic pilot controls and deploy parachutes or land the mansion.",
+        "rules": [
+          "Navigate the collapsing upper floor against gale winds.",
+          "Make Knowledge checks to calibrate the altitude levers.",
+          "Heroes win when the house touches down safely."
+        ]
+      },
+      "implemented": true
+    },
+    {
+      "id": 32,
+      "name": "Lost",
+      "traitorRule": {
+        "kind": "lowest",
+        "trait": "knowledge"
+      },
+      "traitor": {
+        "goal": "Shift the architectural geometry of the house into an infinite, shifting labyrinth.",
+        "rules": [
+          "Scramble room connections and trap doors.",
+          "Minotaurs stalk the labyrinth corridors.",
+          "Traitor wins when explorers starve in the maze."
+        ]
+      },
+      "heroes": {
+        "goal": "Map the shifting walls and discover the golden key to the true exit.",
+        "rules": [
+          "Leave breadcrumb markers in discovered rooms.",
+          "Make Knowledge checks to deduce the true center of the maze.",
+          "Heroes win when they unlock the grand exit door."
+        ]
+      },
+      "implemented": true
+    },
+    {
+      "id": 33,
+      "name": "An Apparition",
+      "traitorRule": {
+        "kind": "lowest",
+        "trait": "sanity"
+      },
+      "traitor": {
+        "goal": "Command phantom apparitions that manifest the worst nightmares of each explorer.",
+        "rules": [
+          "Apparitions attack the specific lowest trait of each hero.",
+          "Apparitions cannot be touched by physical weapons.",
+          "Traitor wins when all heroes perish in sheer terror."
+        ]
+      },
+      "heroes": {
+        "goal": "Overcome personal phobias and light the sanctuary beacon.",
+        "rules": [
+          "Make Sanity rolls to face down spectral apparitions.",
+          "Light the consecrated incense burners in the Chapel.",
+          "Heroes win when the light banishes the nightmare mist."
+        ]
+      },
+      "implemented": true
+    },
+    {
+      "id": 34,
+      "name": "The Star-Sickness",
+      "traitorRule": {
+        "kind": "trigger"
+      },
+      "traitor": {
+        "goal": "You are infected by an extraterrestrial spore. Infect the rest of humanity!",
+        "rules": [
+          "Spore attacks transmit alien infection.",
+          "Infected heroes turn into alien thralls upon death.",
+          "Traitor wins when all explorers are assimilated."
+        ]
+      },
+      "heroes": {
+        "goal": "Sterilize the alien spore pods with concentrated ultraviolet radiation.",
+        "rules": [
+          "Assemble UV spotlights in the Laboratory or Tower.",
+          "Burn the alien hive cluster before spores burst.",
+          "Heroes win when the star spores are completely eradicated."
+        ]
+      },
+      "implemented": true
+    },
+    {
+      "id": 35,
+      "name": "Small Fears",
+      "traitorRule": {
+        "kind": "highest",
+        "trait": "might"
+      },
+      "traitor": {
+        "goal": "Shrink the explorers to the size of insects with an arcane shrink ray.",
+        "rules": [
+          "Tiny explorers move 1 room per turn and take double damage.",
+          "Traitor's pet cat and mice become colossal predators.",
+          "Traitor wins when the tiny pests are squashed."
+        ]
+      },
+      "heroes": {
+        "goal": "Climb the laboratory table and reverse the polarity of the shrink ray.",
+        "rules": [
+          "Scale chair legs and ropes using Speed rolls.",
+          "Rewire the shrink ray capacitors with Knowledge rolls.",
+          "Heroes win when they restore their normal size and capture the traitor."
+        ]
+      },
+      "implemented": true
+    },
+    {
+      "id": 36,
+      "name": "Better with Bacon",
+      "traitorRule": {
+        "kind": "highest",
+        "trait": "speed"
+      },
+      "traitor": {
+        "goal": "Feed the legendary Hog of Calydon until it grows large enough to devour the world.",
+        "rules": [
+          "The Giant Hog rams through walls, creating new openings.",
+          "Hog charge inflicts massive crushing Might damage.",
+          "Traitor wins when the Hog consumes all explorers."
+        ]
+      },
+      "heroes": {
+        "goal": "Craft an irresistible bait trap and lure the boar into the incinerator.",
+        "rules": [
+          "Gather truffles and food supplies from the Kitchen.",
+          "Lure the beast into the Furnace Room with bait.",
+          "Heroes win when the great hog is trapped in the furnace."
+        ]
+      },
+      "implemented": true
+    },
+    {
+      "id": 37,
+      "name": "Checkmate",
+      "traitorRule": {
+        "kind": "highest",
+        "trait": "knowledge"
+      },
+      "traitor": {
+        "goal": "Trap the heroes in a life-sized chess duel where every captured piece is an execution.",
+        "rules": [
+          "Floor tiles turn into black and white chessboard squares.",
+          "Traitor moves animated stone knights and rooks.",
+          "Traitor wins when the Hero King is checkmated."
+        ]
+      },
+      "heroes": {
+        "goal": "Outmaneuver the animated chess pieces and capture the Traitor's Queen.",
+        "rules": [
+          "Move according to chessboard movement rules.",
+          "Make Knowledge checks to formulate winning gambits.",
+          "Heroes win when the opposing King/Queen is cornered and struck down."
+        ]
+      },
+      "implemented": true
+    },
+    {
+      "id": 38,
+      "name": "The Heir",
+      "traitorRule": {
+        "kind": "lowest",
+        "trait": "sanity"
+      },
+      "traitor": {
+        "goal": "You are the true heir of this cursed estate. Eliminate the witnesses to claim your dark inheritance.",
+        "rules": [
+          "You possess master keys to all secret doors and trapdoors.",
+          "Family ghosts aid you in tracking intruders.",
+          "Traitor wins when all trespassers are eliminated."
+        ]
+      },
+      "heroes": {
+        "goal": "Find the true last will and testament proving the traitor is an imposter.",
+        "rules": [
+          "Search the master safe in the Library or Vault.",
+          "Crack the safe combination with Knowledge rolls.",
+          "Heroes win when the true will is revealed and the imposter stripped of power."
+        ]
+      },
+      "implemented": true
+    },
+    {
+      "id": 39,
+      "name": "The Cursed Hidden Room",
+      "traitorRule": {
+        "kind": "none"
+      },
+      "traitor": {
+        "goal": "No traitor! A sealed cursed chamber has opened, releasing ancient miasma.",
+        "rules": [
+          "Poisonous fumes leak into the house floor by floor.",
+          "All players take toxic gas damage unless filtered."
+        ]
+      },
+      "heroes": {
+        "goal": "Find the missing keystones and re-seal the vault before the poisonous gas suffocates everyone.",
+        "rules": [
+          "Locate 3 heavy stone keystones hidden across the floors.",
+          "Carry keystones to the hidden room entrance.",
+          "Heroes win when the cursed doorway is cemented shut."
+        ]
+      },
+      "implemented": true
+    },
+    {
+      "id": 40,
+      "name": "The Creature from the Lake",
+      "traitorRule": {
+        "kind": "highest",
+        "trait": "might"
+      },
+      "traitor": {
+        "goal": "Awaken the amphibious Gill-Man from the submerged basement caverns.",
+        "rules": [
+          "Basement flooded with dark murky water.",
+          "Gill-Man drags victims underwater to drown them.",
+          "Traitor wins when all heroes drown."
+        ]
+      },
+      "heroes": {
+        "goal": "Pump out the flood water and electrocute the amphibian monster.",
+        "rules": [
+          "Start the emergency drainage pump in the Boiler Room.",
+          "Rig electrical cables into the standing water.",
+          "Heroes win when the aquatic creature is shocked into submission."
+        ]
+      },
+      "implemented": true
+    },
+    {
+      "id": 41,
+      "name": "The Feast",
+      "traitorRule": {
+        "kind": "lowest",
+        "trait": "might"
+      },
+      "traitor": {
+        "goal": "Serve a lavish banquet poisoned with cursed flesh to turn guests into cannibals.",
+        "rules": [
+          "Tempted heroes must make Sanity checks or eat the cursed food.",
+          "Cannibal heroes switch sides to join the traitor.",
+          "Traitor wins when all heroes partake or die."
+        ]
+      },
+      "heroes": {
+        "goal": "Destroy the poisoned banquet table and administer emetics to infected friends.",
+        "rules": [
+          "Overturn the banquet table in the Dining Room with Might checks.",
+          "Brew medicinal charcoal antidotes in the Kitchen.",
+          "Heroes win when the cursed feast is ruined and survivors saved."
+        ]
+      },
+      "implemented": true
+    },
+    {
+      "id": 42,
+      "name": "The Worm Ouroboros",
+      "traitorRule": {
+        "kind": "highest",
+        "trait": "knowledge"
+      },
+      "traitor": {
+        "goal": "Summon the World Serpent beneath the foundation to swallow time itself.",
+        "rules": [
+          "The giant worm body loops through rooms, crushing doors.",
+          "Time loops cause previous turn events to repeat.",
+          "Traitor wins when the serpent swallows its tail."
+        ]
+      },
+      "heroes": {
+        "goal": "Sever the ouroboros loop with an ancient temporal blade.",
+        "rules": [
+          "Find the chronal dagger in the Gallery or Vault.",
+          "Strike the serpent's junction node with precise timing.",
+          "Heroes win when the cosmic loop breaks and the worm dissolves."
+        ]
+      },
+      "implemented": true
+    },
+    {
+      "id": 43,
+      "name": "The Albert",
+      "traitorRule": {
+        "kind": "lowest",
+        "trait": "speed"
+      },
+      "traitor": {
+        "goal": "Summon the clockwork automaton 'Albert' to mechanically purge all organic life.",
+        "rules": [
+          "Albert possesses heavy steel plating and piston-driven strikes.",
+          "Steam valves vent scalding clouds that obscure vision.",
+          "Traitor wins when all flesh is eliminated."
+        ]
+      },
+      "heroes": {
+        "goal": "Jam Albert's internal brass gear train with crowbars and wrenches.",
+        "rules": [
+          "Find heavy metal tools in the Workshop.",
+          "Make Speed checks to dodge steam and insert gears.",
+          "Heroes win when Albert's mainspring snaps."
+        ]
+      },
+      "implemented": true
+    },
+    {
+      "id": 44,
+      "name": "The Golem",
+      "traitorRule": {
+        "kind": "highest",
+        "trait": "sanity"
+      },
+      "traitor": {
+        "goal": "Animate an indestructible clay Golem with an ancient Hebrew parchment scroll.",
+        "rules": [
+          "The Golem ignores normal weapon attacks completely.",
+          "Golem punches destroy barriers and inflict crushing wounds.",
+          "Traitor wins when the intruders are battered to dust."
+        ]
+      },
+      "heroes": {
+        "goal": "Erase the sacred letter 'Emet' (Truth) on the Golem's forehead to turn it to 'Met' (Death).",
+        "rules": [
+          "Climb the Golem or distract it with bright mirrors.",
+          "Make a delicate Speed or Knowledge check to wipe the clay letter.",
+          "Heroes win when the Golem collapses into harmless mud."
+        ]
+      },
+      "implemented": true
+    },
+    {
+      "id": 45,
+      "name": "The Evil Fog",
+      "traitorRule": {
+        "kind": "none"
+      },
+      "traitor": {
+        "goal": "No traitor! A crimson sentient mist creeps in through broken windows.",
+        "rules": [
+          "The Evil Fog dissolves the skin of anyone caught within it.",
+          "The Fog expands each round from the Ground floor."
+        ]
+      },
+      "heroes": {
+        "goal": "Seal all exterior vents and power up the furnace blowers to vent the fog outside.",
+        "rules": [
+          "Board up broken windows on the ground floor.",
+          "Stoke the coal furnace to create positive air pressure.",
+          "Heroes win when the toxic fog is expelled from the house."
+        ]
+      },
+      "implemented": true
+    },
+    {
+      "id": 46,
+      "name": "The Crimson Lake",
+      "traitorRule": {
+        "kind": "lowest",
+        "trait": "sanity"
+      },
+      "traitor": {
+        "goal": "Bleed the house walls until the rooms fill with a lake of blood.",
+        "rules": [
+          "Rooms flood with blood, reducing movement and vision.",
+          "Blood leech swarms latch onto heroes.",
+          "Traitor wins when the mansion sinks into the crimson tide."
+        ]
+      },
+      "heroes": {
+        "goal": "Open the drainage spillways and consecrate the source.",
+        "rules": [
+          "Locate emergency drainage valves in the Basement.",
+          "Drop holy salt into the wellspring to purify the liquid.",
+          "Heroes win when the blood drains away."
+        ]
+      },
+      "implemented": true
+    },
+    {
+      "id": 47,
+      "name": "Worms",
+      "traitorRule": {
+        "kind": "highest",
+        "trait": "might"
+      },
+      "traitor": {
+        "goal": "Release carnivorous burrowing worms that erupt through floorboards.",
+        "rules": [
+          "Worms burrow under floor tiles, leaving sinkholes behind.",
+          "Worm bites inject neurotoxins that paralyze heroes.",
+          "Traitor wins when all explorers are dragged subterranean."
+        ]
+      },
+      "heroes": {
+        "goal": "Electrify the floor grids or deploy sound thumper lures.",
+        "rules": [
+          "Set up rhythmic thumpers to confuse the worms.",
+          "Shock the soil with generator cables.",
+          "Heroes win when the subterranean swarm retreats."
+        ]
+      },
+      "implemented": true
+    },
+    {
+      "id": 48,
+      "name": "Stacked Like Cordwood",
+      "traitorRule": {
+        "kind": "lowest",
+        "trait": "might"
+      },
+      "traitor": {
+        "goal": "A masked slasher stalks the mansion with a chainsaw. Stack their bodies in the shed!",
+        "rules": [
+          "Slasher moves fast and is relentless.",
+          "Chainsaw attacks cleave through doors and flesh.",
+          "Traitor wins when all heroes are stacked in the meat locker."
+        ]
+      },
+      "heroes": {
+        "goal": "Find weapons, set an ambush, and unmask the psychotic slasher.",
+        "rules": [
+          "Arm yourselves with axes, guns, or heavy furniture.",
+          "Ambush the killer in a dead-end corridor with coordinated rolls.",
+          "Heroes win when the slasher is defeated once and for all."
+        ]
+      },
+      "implemented": true
+    },
+    {
+      "id": 49,
+      "name": "You Wear It Well",
+      "traitorRule": {
+        "kind": "highest",
+        "trait": "speed"
+      },
+      "traitor": {
+        "goal": "You are a shapeshifting skin-thief. Steal the identities and faces of the explorers!",
+        "rules": [
+          "Skin-thief can disguise themselves as any living player.",
+          "Surprise backstab attacks deal devastating stealth damage.",
+          "Traitor wins when all true explorers are replaced by skins."
+        ]
+      },
+      "heroes": {
+        "goal": "Devise a secret passphrase or blood test to unmask the shapeshifting imposter.",
+        "rules": [
+          "Establish private code words between confirmed players.",
+          "Test blood samples with hot wire in the Laboratory.",
+          "Heroes win when the true skin-walker is identified and destroyed."
+        ]
+      },
+      "implemented": true
+    },
+    {
+      "id": 50,
+      "name": "Treasure!",
+      "traitorRule": {
+        "kind": "none"
+      },
+      "traitor": {
+        "goal": "There is no traitor! A hidden pirate hoard has been uncovered, but greedy spirits protect it.",
+        "rules": [
+          "Ghost pirates defend the treasure chests with spectral cutlasses.",
+          "Explorers compete or cooperate to secure the loot and escape."
+        ]
+      },
+      "heroes": {
+        "goal": "Crack the secret vault chests, defeat the ghost pirates, and escape with the gold!",
+        "rules": [
+          "Pick the iron chest locks with Knowledge/Speed rolls.",
+          "Defend against waves of ghostly buccaneers.",
+          "All surviving explorers win by carrying the treasure out the front door."
+        ]
+      },
+      "implemented": true
+    }
+  ]
+}
