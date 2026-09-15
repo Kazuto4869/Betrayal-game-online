@@ -29,9 +29,25 @@ export function InventoryTray() {
         )
       : [];
 
+  // Monsters in the same room for attack
+  const monstersInRoom =
+    state.phase === 'haunt' && isMyTurn && !player.hasAttackedThisTurn && player.location
+      ? Object.values(state.monsters ?? {}).filter(
+          (m) => !m.isDead && m.location === player.location,
+        )
+      : [];
+
+  // Tokens in the same room for interaction
+  const tokensInRoom =
+    isMyTurn && player.location
+      ? (state.tokens ?? []).filter(
+          (t) => t.location === player.location && !t.flags['completed'],
+        )
+      : [];
+
   return (
     <div className="inventory-tray">
-      {opponentsInRoom.length > 0 && (
+      {(opponentsInRoom.length > 0 || monstersInRoom.length > 0) && (
         <div className="combat-panel">
           <div className="combat-panel__header">⚔️ Combat Opportunities:</div>
           <div className="combat-panel__targets">
@@ -51,6 +67,67 @@ export function InventoryTray() {
                 }
               >
                 Attack {target.name}
+              </button>
+            ))}
+            {monstersInRoom.map((monster) => (
+              <button
+                key={monster.id}
+                type="button"
+                className="btn btn--danger btn--small"
+                disabled={pending}
+                onClick={() =>
+                  send({
+                    t: 'ATTACK',
+                    seat: seatId,
+                    target: { kind: 'monster', monsterId: monster.id },
+                    trait: 'might',
+                  })
+                }
+              >
+                Attack 👾 {monster.def} {monster.flags['stunned'] ? '(Stunned)' : ''}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {tokensInRoom.length > 0 && (
+        <div
+          className="token-panel"
+          style={{
+            margin: '8px 0',
+            padding: '8px',
+            background: 'rgba(168, 85, 247, 0.1)',
+            borderRadius: '6px',
+            border: '1px solid rgba(168, 85, 247, 0.3)',
+          }}
+        >
+          <div
+            style={{
+              fontSize: '13px',
+              fontWeight: 'bold',
+              color: '#c084fc',
+              marginBottom: '6px',
+            }}
+          >
+            🪙 Room Objectives & Tokens:
+          </div>
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+            {tokensInRoom.map((token) => (
+              <button
+                key={token.id}
+                type="button"
+                className="btn btn--small btn--primary"
+                disabled={pending}
+                onClick={() =>
+                  send({
+                    t: 'ROOM_ACTION',
+                    seat: seatId,
+                    actionId: 'interact_token',
+                  })
+                }
+              >
+                Interact with {token.token}
               </button>
             ))}
           </div>

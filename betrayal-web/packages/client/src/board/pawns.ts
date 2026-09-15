@@ -72,6 +72,36 @@ export function pawnsFromState(
     all.push(pawn);
   }
 
+  for (const monster of Object.values(state.monsters ?? {})) {
+    if (monster.isDead || monster.location === null) continue;
+    const placed = state.board.placed[monster.location];
+    if (!placed) continue;
+
+    const pawn: Pawn = {
+      placedId: placed.id,
+      colour: 'red',
+      initial: '👾',
+      isMe: false,
+    };
+    byFloor[placed.floor].push(pawn);
+    all.push(pawn);
+  }
+
+  for (const token of state.tokens ?? []) {
+    if (token.location === null) continue;
+    const placed = state.board.placed[token.location];
+    if (!placed) continue;
+
+    const pawn: Pawn = {
+      placedId: placed.id,
+      colour: 'purple',
+      initial: '🪙',
+      isMe: false,
+    };
+    byFloor[placed.floor].push(pawn);
+    all.push(pawn);
+  }
+
   return { byFloor, all };
 }
 

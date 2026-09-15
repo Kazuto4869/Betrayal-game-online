@@ -54,8 +54,15 @@ export class Connection {
 
   connect(): void {
     this.closedByUs = false;
-    const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const ws = new WebSocket(`${proto}//${location.host}${WS_PATH}`);
+    const envWs = (import.meta as unknown as { env?: Record<string, string> }).env?.VITE_WS_URL;
+    let url: string;
+    if (envWs) {
+      url = envWs.endsWith(WS_PATH) ? envWs : `${envWs.replace(/\/$/, '')}${WS_PATH}`;
+    } else {
+      const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+      url = `${proto}//${location.host}${WS_PATH}`;
+    }
+    const ws = new WebSocket(url);
     this.ws = ws;
 
     ws.onopen = () => {

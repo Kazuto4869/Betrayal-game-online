@@ -27,6 +27,8 @@ import {
   type GameAction,
   type GameEvent,
   type GameState,
+  type MonsterId,
+  type MonsterState,
   type PendingPrompt,
   type PlacedId,
   type PlacedTile,
@@ -37,6 +39,7 @@ import {
   type RuleErrorCode,
   type SeatId,
   type TargetRef,
+  type TokenState,
   type Trait,
 } from '@bahoth/shared';
 import type { Character, Content } from '@bahoth/content';
@@ -151,8 +154,9 @@ function dispatch(state: GameState, action: GameAction, content: Content): Reduc
       return dropItems(state, action.seat, action.cardIds, content);
     case 'ATTACK':
       return attack(state, action.seat, action.target, action.trait, content);
-    case 'TRADE':
     case 'ROOM_ACTION':
+      return roomAction(state, action.seat, action.actionId, content);
+    case 'TRADE':
     case 'ASSIGN_DAMAGE':
       return fail(
         'UNKNOWN_ACTION',
@@ -1323,10 +1327,73 @@ function triggerHaunt(
     };
   }
 
+  const nextMonsters: Record<MonsterId, MonsterState> = { ...state.monsters };
+  const nextTokens: TokenState[] = [...state.tokens];
+
+  const hauntLoc =
+    (traitorSeat ? nextPlayers[traitorSeat]?.location : null) ??
+    nextPlayers[revealerSeat]?.location ??
+    null;
+
+  if (hauntId === 1) {
+    nextMonsters['monster.mummy'] = {
+      id: 'monster.mummy',
+      def: 'The Mummy',
+      location: hauntLoc,
+      isDead: false,
+      flags: { might: 5, speed: 3, sanity: 4, stunned: false },
+    };
+    nextTokens.push({
+      id: 'token.sarcophagus',
+      token: 'Sarcophagus',
+      location: hauntLoc,
+      flags: { opened: false },
+    });
+  } else if (hauntId === 2) {
+    nextMonsters['monster.spirit'] = {
+      id: 'monster.spirit',
+      def: 'Restless Spirit',
+      location: hauntLoc,
+      isDead: false,
+      flags: { might: 3, speed: 4, sanity: 5, stunned: false },
+    };
+    nextTokens.push({
+      id: 'token.spirit_board',
+      token: 'Spirit Board',
+      location: nextPlayers[revealerSeat]?.location ?? hauntLoc,
+      flags: { active: true },
+    });
+  } else if (hauntId === 5) {
+    nextMonsters['monster.werewolf'] = {
+      id: 'monster.werewolf',
+      def: 'Werewolf',
+      location: hauntLoc,
+      isDead: false,
+      flags: { might: 6, speed: 4, sanity: 3, stunned: false },
+    };
+  } else {
+    const mId = `monster.haunt_${hauntId}`;
+    nextMonsters[mId] = {
+      id: mId,
+      def: hauntDef?.name ?? 'Haunt Monster',
+      location: hauntLoc,
+      isDead: false,
+      flags: { might: 4, speed: 3, sanity: 4, stunned: false },
+    };
+    nextTokens.push({
+      id: `token.haunt_${hauntId}`,
+      token: 'Ritual Objective',
+      location: hauntLoc,
+      flags: {},
+    });
+  }
+
   const nextState: GameState = {
     ...state,
     phase: 'haunt',
     players: nextPlayers,
+    monsters: nextMonsters,
+    tokens: nextTokens,
     haunt: {
       hauntId,
       traitorSeat,
@@ -1337,6 +1404,10 @@ function triggerHaunt(
 
   const events: GameEvent[] = [
     { t: 'haunt_begun', hauntId, traitor: traitorSeat },
+    {
+      t: 'log',
+      text: `Haunt #${hauntId}: "${hauntDef?.name ?? 'The Haunt'}" has begun! Monsters and tokens have appeared in the house.`,
+    },
   ];
 
   return { state: nextState, events };
@@ -1448,6 +1519,46 @@ function dropItems(
   };
 }
 
+function roomAction(
+  state: GameState,
+  seat: SeatId,
+  actionId: string,
+  _content: Content,
+): ReduceResult {
+  if (!['explore', 'haunt'].includes(state.phase)) {
+    return fail('WRONG_PHASE', `Cannot perform room action during ${state.phase}`);
+  }
+  if (state.activeSeat !== seat) return fail('NOT_YOUR_TURN', 'It is not your turn');
+  const player = state.players[seat];
+  if (!player || player.isDead || player.location === null) {
+    return fail('ILLEGAL_MOVE', 'Cannot perform room action');
+  }
+
+  const tokenIndex = state.tokens.findIndex(
+    (t) => t.location === player.location && !t.flags['completed'],
+  );
+  if (tokenIndex !== -1) {
+    const token = state.tokens[tokenIndex]!;
+    const updatedTokens = [...state.tokens];
+    updatedTokens[tokenIndex] = {
+      ...token,
+      flags: { ...token.flags, completed: true },
+    };
+    const events: GameEvent[] = [
+      { t: 'log', text: `${player.name} interacted with ${token.token}!` },
+    ];
+    return {
+      state: {
+        ...state,
+        tokens: updatedTokens,
+      },
+      events,
+    };
+  }
+
+  return fail('ILLEGAL_MOVE', `No room action "${actionId}" available here`);
+}
+
 function attack(
   state: GameState,
   seat: SeatId,
@@ -1466,24 +1577,43 @@ function attack(
   if (player.hasAttackedThisTurn) {
     return fail('ILLEGAL_MOVE', 'Already attacked this turn');
   }
-  if (target.kind !== 'seat') {
-    return fail('ILLEGAL_MOVE', 'Monster attacks not yet implemented');
-  }
-  const targetSeat = target.seatId;
-  if (targetSeat === seat) return fail('ILLEGAL_MOVE', 'Cannot attack yourself');
-  const targetPlayer = state.players[targetSeat];
-  if (!targetPlayer || targetPlayer.isDead || targetPlayer.removed) {
-    return fail('ILLEGAL_MOVE', 'Target is not a living opponent');
-  }
-  if (targetPlayer.location !== player.location) {
-    return fail('ILLEGAL_MOVE', 'Target is not in the same room');
-  }
-  const rng = state.rng;
-  if (!rng) return fail('INVARIANT_VIOLATION', 'Missing RNG');
 
   const attackTrait = trait ?? 'might';
   const attackerDice = Math.max(1, traitValue(state, seat, attackTrait, content));
-  const defenderDice = Math.max(1, traitValue(state, targetSeat, attackTrait, content));
+  const rng = state.rng;
+  if (!rng) return fail('INVARIANT_VIOLATION', 'Missing RNG');
+
+  let defenderDice = 1;
+  let targetPlayer: PlayerState | null = null;
+  let targetMonster: MonsterState | null = null;
+
+  if (target.kind === 'seat') {
+    const targetSeat = target.seatId;
+    if (targetSeat === seat) return fail('ILLEGAL_MOVE', 'Cannot attack yourself');
+    targetPlayer = state.players[targetSeat] ?? null;
+    if (!targetPlayer || targetPlayer.isDead || targetPlayer.removed) {
+      return fail('ILLEGAL_MOVE', 'Target is not a living opponent');
+    }
+    if (targetPlayer.location !== player.location) {
+      return fail('ILLEGAL_MOVE', 'Target is not in the same room');
+    }
+    defenderDice = Math.max(1, traitValue(state, targetSeat, attackTrait, content));
+  } else {
+    targetMonster = state.monsters[target.monsterId] ?? null;
+    if (!targetMonster || targetMonster.isDead) {
+      return fail('ILLEGAL_MOVE', 'Target monster does not exist or is dead');
+    }
+    if (targetMonster.location !== player.location) {
+      return fail('ILLEGAL_MOVE', 'Monster is not in the same room');
+    }
+    const monsterStat =
+      typeof targetMonster.flags[attackTrait] === 'number'
+        ? (targetMonster.flags[attackTrait] as number)
+        : typeof targetMonster.flags['might'] === 'number'
+          ? (targetMonster.flags['might'] as number)
+          : 4;
+    defenderDice = Math.max(1, monsterStat);
+  }
 
   const [attDice, attTotal, rng1] = rollDice(rng, attackerDice);
   const [defDice, defTotal, rng2] = rollDice(rng1, defenderDice);
@@ -1495,7 +1625,13 @@ function attack(
 
   const events: GameEvent[] = [
     { t: 'rolled', seat, dice: attDice, total: attTotal, reason: 'attack' },
-    { t: 'rolled', seat: targetSeat, dice: defDice, total: defTotal, reason: 'defense' },
+    {
+      t: 'rolled',
+      seat: target.kind === 'seat' ? target.seatId : seat,
+      dice: defDice,
+      total: defTotal,
+      reason: target.kind === 'seat' ? 'defense' : 'monster_defense',
+    },
     {
       t: 'attacked',
       seat,
@@ -1513,44 +1649,96 @@ function attack(
     ...state.players,
     [seat]: { ...player, hasAttackedThisTurn: true },
   };
+  const nextMonsters = { ...state.monsters };
 
-  if (winner === 'attacker' && diff > 0) {
-    const currentIdx = targetPlayer.traits[attackTrait];
-    const newIdx = Math.max(0, currentIdx - diff);
-    const isDead = newIdx === 0;
-    nextPlayers[targetSeat] = {
-      ...targetPlayer,
-      traits: { ...targetPlayer.traits, [attackTrait]: newIdx },
-      isDead: targetPlayer.isDead || isDead,
-    };
-    events.push({
-      t: 'trait_changed',
-      seat: targetSeat,
-      trait: attackTrait,
-      from: currentIdx,
-      to: newIdx,
-    });
-    if (isDead && !targetPlayer.isDead) {
-      events.push({ t: 'died', seat: targetSeat });
+  if (target.kind === 'seat' && targetPlayer) {
+    const targetSeat = target.seatId;
+    if (winner === 'attacker' && diff > 0) {
+      const currentIdx = targetPlayer.traits[attackTrait];
+      const newIdx = Math.max(0, currentIdx - diff);
+      const isDead = newIdx === 0;
+      nextPlayers[targetSeat] = {
+        ...targetPlayer,
+        traits: { ...targetPlayer.traits, [attackTrait]: newIdx },
+        isDead: targetPlayer.isDead || isDead,
+      };
+      events.push({
+        t: 'trait_changed',
+        seat: targetSeat,
+        trait: attackTrait,
+        from: currentIdx,
+        to: newIdx,
+      });
+      if (isDead && !targetPlayer.isDead) {
+        events.push({ t: 'died', seat: targetSeat });
+      }
+    } else if (winner === 'defender' && diff > 0) {
+      const currentIdx = player.traits[attackTrait];
+      const newIdx = Math.max(0, currentIdx - diff);
+      const isDead = newIdx === 0;
+      nextPlayers[seat] = {
+        ...nextPlayers[seat]!,
+        traits: { ...nextPlayers[seat]!.traits, [attackTrait]: newIdx },
+        isDead: player.isDead || isDead,
+      };
+      events.push({
+        t: 'trait_changed',
+        seat,
+        trait: attackTrait,
+        from: currentIdx,
+        to: newIdx,
+      });
+      if (isDead && !player.isDead) {
+        events.push({ t: 'died', seat });
+      }
     }
-  } else if (winner === 'defender' && diff > 0) {
-    const currentIdx = player.traits[attackTrait];
-    const newIdx = Math.max(0, currentIdx - diff);
-    const isDead = newIdx === 0;
-    nextPlayers[seat] = {
-      ...nextPlayers[seat]!,
-      traits: { ...nextPlayers[seat]!.traits, [attackTrait]: newIdx },
-      isDead: player.isDead || isDead,
-    };
-    events.push({
-      t: 'trait_changed',
-      seat,
-      trait: attackTrait,
-      from: currentIdx,
-      to: newIdx,
-    });
-    if (isDead && !player.isDead) {
-      events.push({ t: 'died', seat });
+  } else if (target.kind === 'monster' && targetMonster) {
+    if (winner === 'attacker' && diff > 0) {
+      const wasStunned = Boolean(targetMonster.flags['stunned']);
+      if (wasStunned || diff >= 4) {
+        nextMonsters[target.monsterId] = {
+          ...targetMonster,
+          isDead: true,
+          location: null,
+          flags: { ...targetMonster.flags, stunned: false },
+        };
+        events.push({
+          t: 'log',
+          text: `${player.name} dealt a fatal blow to ${targetMonster.def} and defeated it!`,
+        });
+      } else {
+        nextMonsters[target.monsterId] = {
+          ...targetMonster,
+          flags: { ...targetMonster.flags, stunned: true },
+        };
+        events.push({
+          t: 'log',
+          text: `${player.name} struck ${targetMonster.def}, stunning it!`,
+        });
+      }
+    } else if (winner === 'defender' && diff > 0) {
+      const currentIdx = player.traits[attackTrait];
+      const newIdx = Math.max(0, currentIdx - diff);
+      const isDead = newIdx === 0;
+      nextPlayers[seat] = {
+        ...nextPlayers[seat]!,
+        traits: { ...nextPlayers[seat]!.traits, [attackTrait]: newIdx },
+        isDead: player.isDead || isDead,
+      };
+      events.push({
+        t: 'trait_changed',
+        seat,
+        trait: attackTrait,
+        from: currentIdx,
+        to: newIdx,
+      });
+      events.push({
+        t: 'log',
+        text: `${targetMonster.def} struck back and dealt ${diff} damage to ${player.name}!`,
+      });
+      if (isDead && !player.isDead) {
+        events.push({ t: 'died', seat });
+      }
     }
   }
 
@@ -1558,6 +1746,7 @@ function attack(
     ...state,
     rng: rng2,
     players: nextPlayers,
+    monsters: nextMonsters,
   };
 
   const checkHeroesLiving = Object.values(nextPlayers).filter(
@@ -1566,6 +1755,7 @@ function attack(
   const checkTraitorLiving = Object.values(nextPlayers).filter(
     (p) => p.isTraitor && !p.isDead && !p.removed,
   );
+  const checkMonstersLiving = Object.values(nextMonsters).filter((m) => !m.isDead);
 
   if (checkHeroesLiving.length === 0) {
     const traitorWinners = Object.values(nextPlayers)
@@ -1574,7 +1764,7 @@ function attack(
     const result = {
       outcome: 'traitor' as const,
       winners: traitorWinners.length > 0 ? traitorWinners : [seat],
-      reason: 'All heroes have died.',
+      reason: 'All heroes have died in the house.',
     };
     nextState = {
       ...nextState,
@@ -1582,12 +1772,15 @@ function attack(
       result,
     };
     events.push({ t: 'game_over', result });
-  } else if (state.haunt?.traitorSeat && checkTraitorLiving.length === 0) {
+  } else if (
+    (state.haunt?.traitorSeat ? checkTraitorLiving.length === 0 : true) &&
+    checkMonstersLiving.length === 0
+  ) {
     const heroWinners = checkHeroesLiving.map((p) => p.seatId);
     const result = {
       outcome: 'heroes' as const,
       winners: heroWinners,
-      reason: 'The traitor has been slain.',
+      reason: 'The monsters and traitor have been vanquished.',
     };
     nextState = {
       ...nextState,

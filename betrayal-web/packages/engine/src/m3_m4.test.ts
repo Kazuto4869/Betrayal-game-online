@@ -49,8 +49,7 @@ describe('M3: Cards, Decks, and Items', () => {
 describe('M4: Haunt Roll, Haunt Trigger, and Combat', () => {
   it('triggers haunt roll on omen card draw and selects traitor', () => {
     const g = startedGame();
-    const active = g.state.activeSeat!;
-    let state = {
+    const state = {
       ...g.state,
       omensDrawn: 6,
       decks: {
@@ -70,7 +69,7 @@ describe('M4: Haunt Roll, Haunt Trigger, and Combat', () => {
     const opponent = g.state.turnOrder.find((s) => s !== active)!;
     const loc = g.state.players[active]!.location;
 
-    let state: GameState = {
+    const state: GameState = {
       ...g.state,
       phase: 'haunt',
       haunt: {
@@ -109,7 +108,7 @@ describe('M4: Haunt Roll, Haunt Trigger, and Combat', () => {
     const opponent = g.state.turnOrder.find((s) => s !== active)!;
     const loc = g.state.players[active]!.location;
 
-    let state: GameState = {
+    const state: GameState = {
       ...g.state,
       phase: 'haunt',
       haunt: {
@@ -126,7 +125,7 @@ describe('M4: Haunt Roll, Haunt Trigger, and Combat', () => {
       },
     };
 
-    let res = reduce(
+    const res = reduce(
       state,
       {
         t: 'ATTACK',
@@ -137,6 +136,87 @@ describe('M4: Haunt Roll, Haunt Trigger, and Combat', () => {
       content,
     );
     expect(res.error).toBeUndefined();
+    expect(checkInvariants(res.state)).toEqual([]);
+  });
+
+  it('resolves monster combat and updates monster state', () => {
+    const g = startedGame();
+    const active = g.state.activeSeat!;
+    const loc = g.state.players[active]!.location;
+
+    const state: GameState = {
+      ...g.state,
+      phase: 'haunt',
+      haunt: {
+        hauntId: 1,
+        traitorSeat: null,
+        revealed: true,
+        acknowledged: [],
+      },
+      monsters: {
+        'monster.mummy': {
+          id: 'monster.mummy',
+          def: 'The Mummy',
+          location: loc,
+          isDead: false,
+          flags: { might: 2, speed: 3, stunned: false },
+        },
+      },
+      players: {
+        ...g.state.players,
+        [active]: {
+          ...g.state.players[active]!,
+          traits: { ...g.state.players[active]!.traits, might: 8 },
+        },
+      },
+    };
+
+    const res = reduce(
+      state,
+      {
+        t: 'ATTACK',
+        seat: active,
+        target: { kind: 'monster', monsterId: 'monster.mummy' },
+        trait: 'might',
+      },
+      content,
+    );
+
+    expect(res.error).toBeUndefined();
+    expect(res.events.some((e) => e.t === 'attacked')).toBe(true);
+    expect(res.state.players[active]!.hasAttackedThisTurn).toBe(true);
+    expect(checkInvariants(res.state)).toEqual([]);
+  });
+
+  it('allows interacting with room tokens via ROOM_ACTION', () => {
+    const g = startedGame();
+    const active = g.state.activeSeat!;
+    const loc = g.state.players[active]!.location;
+
+    const state: GameState = {
+      ...g.state,
+      tokens: [
+        {
+          id: 'token.sarcophagus',
+          token: 'Sarcophagus',
+          location: loc,
+          flags: {},
+        },
+      ],
+    };
+
+    const res = reduce(
+      state,
+      {
+        t: 'ROOM_ACTION',
+        seat: active,
+        actionId: 'interact_token',
+      },
+      content,
+    );
+
+    expect(res.error).toBeUndefined();
+    expect(res.state.tokens[0]!.flags['completed']).toBe(true);
     expect(checkInvariants(res.state)).toEqual([]);
   });
 });

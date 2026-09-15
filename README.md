@@ -6,7 +6,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue.svg)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-19-61dafb.svg)](https://react.dev/)
 [![Vite](https://img.shields.io/badge/Vite-8-646cff.svg)](https://vitejs.dev/)
-[![Vitest](https://img.shields.io/badge/Tests-309%20passed-brightgreen.svg)](https://vitest.dev/)
+[![Vitest](https://img.shields.io/badge/Tests-311%20passed-brightgreen.svg)](https://vitest.dev/)
 
 ---
 
@@ -125,13 +125,23 @@ npm run dev
 - Vào game: **[http://localhost:5173](http://localhost:5173)**
 - Chế độ xem trước phòng & bàn cờ (Dev Board Preview): **[http://localhost:5173/#board-preview](http://localhost:5173/#board-preview)**
 
-### 4. Chạy ở chế độ Production
+### 4. Chạy ở chế độ Production (Local Single Process)
 ```bash
 cd betrayal-web
 npm run build
 npm start
 ```
 > Truy cập: **[http://localhost:8080](http://localhost:8080)** (Server Node.js phục vụ toàn bộ client bundle và WebSocket trên một cổng duy nhất).
+
+---
+
+## 🌐 Hướng dẫn Triển khai Online (Vercel / Render / VPS)
+
+Để đưa game lên Internet cho bạn bè cùng chơi:
+- **Frontend**: Triển khai siêu nhanh lên **Vercel** (`vercel.app`).
+- **Backend**: Triển khai máy chủ WebSocket lên **Render.com** (miễn phí) hoặc **Railway / VPS**.
+
+👉 **Xem cẩm nang hướng dẫn từng bước chi tiết tại: [DEPLOYMENT_GUIDE.md](docs/DEPLOYMENT_GUIDE.md)**.
 
 ---
 
@@ -145,7 +155,7 @@ cd betrayal-web
 # Kiểm tra lỗi TypeScript toàn bộ 5 packages
 npm run typecheck
 
-# Chạy toàn bộ 304 unit & integration tests với Vitest
+# Chạy toàn bộ 311 unit & integration tests với Vitest
 npm test
 
 # Kiểm tra linting và ranh giới kiến trúc
