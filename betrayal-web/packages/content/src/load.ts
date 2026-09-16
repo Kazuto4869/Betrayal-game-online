@@ -115,6 +115,36 @@ function assertCoherent(file: ContentFile, source: string): void {
   assertCharactersCoherent(file, source);
   assertTilesCoherent(file, source);
   assertHouseCoherent(file, source);
+  assertCardsCoherent(file, source);
+}
+
+function assertCardsCoherent(file: ContentFile, source: string): void {
+  const seen = new Set<string>();
+  for (const c of file.cards ?? []) {
+    if (seen.has(c.id)) {
+      throw new ContentError(`Duplicate card id: ${c.id}`, source);
+    }
+    seen.add(c.id);
+
+    if (c.use.kind === 'passive' && c.onUse.length > 0) {
+      throw new ContentError(`Card ${c.id} is passive but has onUse effects`, source);
+    }
+    if (c.use.kind === 'consumable' && c.onUse.length === 0) {
+      throw new ContentError(
+        `Card ${c.id} is consumable but has no onUse effects`,
+        source,
+      );
+    }
+    if (c.use.kind === 'once_per_turn' && c.onUse.length === 0) {
+      throw new ContentError(
+        `Card ${c.id} is once_per_turn but has no onUse effects`,
+        source,
+      );
+    }
+    if (c.use.kind === 'manual' && c.onUse.length > 0) {
+      throw new ContentError(`Card ${c.id} is manual but has onUse effects`, source);
+    }
+  }
 }
 
 function assertCharactersCoherent(file: ContentFile, source: string): void {

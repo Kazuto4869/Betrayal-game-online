@@ -17,6 +17,7 @@ import {
   type GameState,
   type Rotation,
   type TargetRef,
+  type Trait,
 } from '@bahoth/shared';
 
 function targetRefEquals(a: TargetRef, b: unknown): boolean {
@@ -105,6 +106,51 @@ export function checkInvariants(state: GameState): string[] {
     for (const id of all) {
       if (seen.has(id)) problems.push(`card ${id} appears twice in the ${kind} deck`);
       seen.add(id);
+    }
+  }
+
+  // 4b. Card zone conservation: cards in inPlay exist in exactly one location
+  //     (a player inventory or a placed room's dropped items).
+  const allHeldCards = new Map<string, string>();
+  for (const p of Object.values(state.players)) {
+    for (const c of [...p.items, ...p.omens]) {
+      if (allHeldCards.has(c)) {
+        problems.push(
+          `card ${c} held by multiple owners: ${allHeldCards.get(c)} and player ${p.seatId}`,
+        );
+      } else {
+        allHeldCards.set(c, `player ${p.seatId}`);
+      }
+    }
+  }
+  for (const tile of Object.values(state.board.placed)) {
+    if (tile.droppedItems) {
+      for (const c of tile.droppedItems) {
+        if (allHeldCards.has(c)) {
+          problems.push(
+            `card ${c} in multiple locations: ${allHeldCards.get(c)} and tile ${tile.id}`,
+          );
+        } else {
+          allHeldCards.set(c, `tile ${tile.id}`);
+        }
+      }
+    }
+  }
+  for (const kind of ['item', 'omen'] as const) {
+    for (const c of state.decks[kind].inPlay) {
+      if (!allHeldCards.has(c)) {
+        problems.push(
+          `card ${c} is in ${kind} inPlay but not held by any player or dropped on any tile`,
+        );
+      }
+    }
+  }
+  for (const [cardId, loc] of allHeldCards.entries()) {
+    const isItem = state.decks.item.inPlay.includes(cardId);
+    const isOmen = state.decks.omen.inPlay.includes(cardId);
+    const isEvent = state.decks.event.inPlay.includes(cardId);
+    if (!isItem && !isOmen && !isEvent) {
+      problems.push(`card ${cardId} is at ${loc} but not in any deck's inPlay`);
     }
   }
 
@@ -230,9 +276,13 @@ export function checkInvariants(state: GameState): string[] {
       }
     }
   }
-  // 7c. Same for choose_target/choose_room: the payload the effect
+  // 7c. Same for choose_target/choose_room/choose_trait: the payload the effect
   //     interpreter raised is coherent enough to resume.
-  if (state.pending?.kind === 'choose_target' || state.pending?.kind === 'choose_room') {
+  if (
+    state.pending?.kind === 'choose_target' ||
+    state.pending?.kind === 'choose_room' ||
+    state.pending?.kind === 'choose_trait'
+  ) {
     const { payload, defaultAnswer } = state.pending;
     if (!isEffectPromptPayload(payload) || payload.kind !== state.pending.kind) {
       problems.push(`${state.pending.kind} prompt payload is not an EffectPromptPayload`);
@@ -243,7 +293,9 @@ export function checkInvariants(state: GameState): string[] {
       const answered =
         payload.kind === 'choose_room'
           ? payload.candidates.includes(defaultAnswer as string)
-          : payload.candidates.some((c) => targetRefEquals(c, defaultAnswer));
+          : payload.kind === 'choose_trait'
+            ? payload.candidates.includes(defaultAnswer as Trait)
+            : payload.candidates.some((c) => targetRefEquals(c, defaultAnswer));
       if (!answered) {
         problems.push(
           `${state.pending.kind} prompt defaultAnswer is not among its candidates`,

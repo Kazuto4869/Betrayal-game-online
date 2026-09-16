@@ -284,4 +284,100 @@ describe('coherence checks reject', () => {
     file.characters[0].start.might = 0;
     expectRejected(file, /failed validation/);
   });
+
+  describe('card use policy validation', () => {
+    it('rejects a passive card that has onUse effects', () => {
+      const file = raw();
+      file.cards = [
+        {
+          id: 'test.passive_with_use',
+          deck: 'item',
+          name: 'Bad Passive',
+          text: 'Should not have onUse',
+          use: { kind: 'passive' },
+          onUse: [{ e: 'log', text: 'illegal' }],
+        },
+      ];
+      expectRejected(file, /passive use policy but specifies onUse/);
+    });
+
+    it('rejects a consumable card without onUse effects', () => {
+      const file = raw();
+      file.cards = [
+        {
+          id: 'test.empty_consumable',
+          deck: 'item',
+          name: 'Bad Consumable',
+          text: 'Empty consumable',
+          use: { kind: 'consumable' },
+          onUse: [],
+        },
+      ];
+      expectRejected(file, /consumable use policy but specifies no onUse/);
+    });
+
+    it('rejects a once_per_turn card without onUse effects', () => {
+      const file = raw();
+      file.cards = [
+        {
+          id: 'test.empty_once_per_turn',
+          deck: 'item',
+          name: 'Bad Once Per Turn',
+          text: 'Empty once per turn',
+          use: { kind: 'once_per_turn' },
+          onUse: [],
+        },
+      ];
+      expectRejected(file, /once_per_turn use policy but specifies no onUse/);
+    });
+
+    it('rejects a manual card with onUse effects', () => {
+      const file = raw();
+      file.cards = [
+        {
+          id: 'test.manual_with_use',
+          deck: 'item',
+          name: 'Bad Manual',
+          text: 'Manual with code',
+          use: { kind: 'manual' },
+          onUse: [{ e: 'log', text: 'illegal' }],
+        },
+      ];
+      expectRejected(file, /manual use policy but specifies onUse/);
+    });
+
+    it('accepts valid passive, consumable, and once_per_turn cards', () => {
+      const file = raw();
+      file.cards = [
+        {
+          id: 'test.good_passive',
+          deck: 'item',
+          name: 'Good Passive',
+          text: 'Passive item',
+          use: { kind: 'passive' },
+          onUse: [],
+        },
+        {
+          id: 'test.good_consumable',
+          deck: 'item',
+          name: 'Good Consumable',
+          text: 'Consumable item',
+          use: { kind: 'consumable' },
+          onUse: [{ e: 'log', text: 'used' }],
+        },
+        {
+          id: 'test.good_once_per_turn',
+          deck: 'item',
+          name: 'Good Once Per Turn',
+          text: 'Once per turn item',
+          use: { kind: 'once_per_turn' },
+          onUse: [{ e: 'log', text: 'used once' }],
+        },
+      ];
+      const parsed = buildContent(file, 'test');
+      expect(parsed.cardsById['test.good_passive']).toBeDefined();
+      expect(parsed.cardsById['test.good_consumable']).toBeDefined();
+      expect(parsed.cardsById['test.good_once_per_turn']).toBeDefined();
+    });
+  });
 });

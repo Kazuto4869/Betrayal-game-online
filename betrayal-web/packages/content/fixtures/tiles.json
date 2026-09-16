@@ -10,9 +10,7 @@
         "s": false,
         "w": false
       },
-      "floors": [
-        "ground"
-      ],
+      "floors": ["ground"],
       "symbol": null,
       "staticLinks": [
         {
@@ -31,9 +29,7 @@
         "s": true,
         "w": true
       },
-      "floors": [
-        "ground"
-      ],
+      "floors": ["ground"],
       "symbol": null
     },
     {
@@ -45,9 +41,7 @@
         "s": true,
         "w": false
       },
-      "floors": [
-        "ground"
-      ],
+      "floors": ["ground"],
       "symbol": null,
       "staticLinks": [
         {
@@ -66,9 +60,7 @@
         "s": false,
         "w": true
       },
-      "floors": [
-        "upper"
-      ],
+      "floors": ["upper"],
       "symbol": null
     },
     {
@@ -80,9 +72,7 @@
         "s": false,
         "w": true
       },
-      "floors": [
-        "basement"
-      ],
+      "floors": ["basement"],
       "symbol": null
     },
     {
@@ -94,9 +84,7 @@
         "s": true,
         "w": false
       },
-      "floors": [
-        "basement"
-      ],
+      "floors": ["basement"],
       "symbol": "event"
     },
     {
@@ -108,9 +96,7 @@
         "s": false,
         "w": false
       },
-      "floors": [
-        "basement"
-      ],
+      "floors": ["basement"],
       "symbol": "item"
     },
     {
@@ -122,9 +108,7 @@
         "s": false,
         "w": false
       },
-      "floors": [
-        "basement"
-      ],
+      "floors": ["basement"],
       "symbol": "omen"
     },
     {
@@ -136,9 +120,7 @@
         "s": true,
         "w": true
       },
-      "floors": [
-        "basement"
-      ],
+      "floors": ["basement"],
       "symbol": null
     },
     {
@@ -150,9 +132,7 @@
         "s": false,
         "w": true
       },
-      "floors": [
-        "basement"
-      ],
+      "floors": ["basement"],
       "symbol": "event"
     },
     {
@@ -164,9 +144,7 @@
         "s": true,
         "w": false
       },
-      "floors": [
-        "basement"
-      ],
+      "floors": ["basement"],
       "symbol": null
     },
     {
@@ -178,9 +156,7 @@
         "s": false,
         "w": false
       },
-      "floors": [
-        "basement"
-      ],
+      "floors": ["basement"],
       "symbol": "item"
     },
     {
@@ -192,9 +168,7 @@
         "s": true,
         "w": false
       },
-      "floors": [
-        "ground"
-      ],
+      "floors": ["ground"],
       "symbol": null,
       "staticLinks": [
         {
@@ -213,9 +187,7 @@
         "s": true,
         "w": false
       },
-      "floors": [
-        "ground"
-      ],
+      "floors": ["ground"],
       "symbol": null,
       "staticLinks": [
         {
@@ -241,9 +213,7 @@
         "s": false,
         "w": true
       },
-      "floors": [
-        "ground"
-      ],
+      "floors": ["ground"],
       "symbol": "event"
     },
     {
@@ -255,9 +225,7 @@
         "s": true,
         "w": false
       },
-      "floors": [
-        "ground"
-      ],
+      "floors": ["ground"],
       "symbol": null
     },
     {
@@ -269,9 +237,7 @@
         "s": true,
         "w": false
       },
-      "floors": [
-        "upper"
-      ],
+      "floors": ["upper"],
       "symbol": "item"
     },
     {
@@ -283,9 +249,7 @@
         "s": false,
         "w": false
       },
-      "floors": [
-        "upper"
-      ],
+      "floors": ["upper"],
       "symbol": "omen"
     },
     {
@@ -297,9 +261,7 @@
         "s": true,
         "w": true
       },
-      "floors": [
-        "upper"
-      ],
+      "floors": ["upper"],
       "symbol": "event"
     },
     {
@@ -311,10 +273,7 @@
         "s": true,
         "w": false
       },
-      "floors": [
-        "ground",
-        "upper"
-      ],
+      "floors": ["ground", "upper"],
       "symbol": null,
       "staticLinks": [
         {
@@ -332,10 +291,7 @@
         "s": true,
         "w": false
       },
-      "floors": [
-        "ground",
-        "upper"
-      ],
+      "floors": ["ground", "upper"],
       "symbol": "event"
     },
     {
@@ -347,10 +303,7 @@
         "s": false,
         "w": false
       },
-      "floors": [
-        "ground",
-        "upper"
-      ],
+      "floors": ["ground", "upper"],
       "symbol": "omen"
     },
     {
@@ -362,10 +315,7 @@
         "s": true,
         "w": false
       },
-      "floors": [
-        "ground",
-        "upper"
-      ],
+      "floors": ["ground", "upper"],
       "symbol": null
     },
     {
@@ -377,10 +327,7 @@
         "s": false,
         "w": true
       },
-      "floors": [
-        "ground",
-        "upper"
-      ],
+      "floors": ["ground", "upper"],
       "symbol": "item"
     },
     {
@@ -392,10 +339,7 @@
         "s": false,
         "w": true
       },
-      "floors": [
-        "ground",
-        "upper"
-      ],
+      "floors": ["ground", "upper"],
       "symbol": "event"
     },
     {
@@ -407,10 +351,7 @@
         "s": true,
         "w": true
       },
-      "floors": [
-        "ground",
-        "upper"
-      ],
+      "floors": ["ground", "upper"],
       "symbol": null
     },
     {
@@ -422,10 +363,7 @@
         "s": true,
         "w": true
       },
-      "floors": [
-        "ground",
-        "upper"
-      ],
+      "floors": ["ground", "upper"],
       "symbol": "item"
     },
     {
@@ -437,10 +375,7 @@
         "s": false,
         "w": false
       },
-      "floors": [
-        "basement",
-        "ground"
-      ],
+      "floors": ["basement", "ground"],
       "symbol": null,
       "staticLinks": [
         {
@@ -459,10 +394,7 @@
         "s": true,
         "w": true
       },
-      "floors": [
-        "basement",
-        "ground"
-      ],
+      "floors": ["basement", "ground"],
       "symbol": "event"
     },
     {
@@ -474,11 +406,7 @@
         "s": true,
         "w": false
       },
-      "floors": [
-        "basement",
-        "ground",
-        "upper"
-      ],
+      "floors": ["basement", "ground", "upper"],
       "symbol": null
     },
     {
@@ -490,11 +418,7 @@
         "s": true,
         "w": true
       },
-      "floors": [
-        "basement",
-        "ground",
-        "upper"
-      ],
+      "floors": ["basement", "ground", "upper"],
       "symbol": "omen"
     },
     {
@@ -506,11 +430,7 @@
         "s": true,
         "w": false
       },
-      "floors": [
-        "basement",
-        "ground",
-        "upper"
-      ],
+      "floors": ["basement", "ground", "upper"],
       "symbol": null
     },
     {
@@ -522,11 +442,7 @@
         "s": false,
         "w": false
       },
-      "floors": [
-        "basement",
-        "ground",
-        "upper"
-      ],
+      "floors": ["basement", "ground", "upper"],
       "symbol": null
     },
     {
@@ -538,11 +454,7 @@
         "s": true,
         "w": false
       },
-      "floors": [
-        "basement",
-        "ground",
-        "upper"
-      ],
+      "floors": ["basement", "ground", "upper"],
       "symbol": null
     },
     {
@@ -554,11 +466,7 @@
         "s": true,
         "w": true
       },
-      "floors": [
-        "basement",
-        "ground",
-        "upper"
-      ],
+      "floors": ["basement", "ground", "upper"],
       "symbol": "event"
     },
     {
@@ -570,11 +478,7 @@
         "s": true,
         "w": false
       },
-      "floors": [
-        "basement",
-        "ground",
-        "upper"
-      ],
+      "floors": ["basement", "ground", "upper"],
       "symbol": "omen"
     },
     {
@@ -586,11 +490,7 @@
         "s": false,
         "w": false
       },
-      "floors": [
-        "basement",
-        "ground",
-        "upper"
-      ],
+      "floors": ["basement", "ground", "upper"],
       "symbol": "item"
     },
     {
@@ -602,11 +502,7 @@
         "s": false,
         "w": true
       },
-      "floors": [
-        "basement",
-        "ground",
-        "upper"
-      ],
+      "floors": ["basement", "ground", "upper"],
       "symbol": "event"
     },
     {
@@ -618,11 +514,7 @@
         "s": false,
         "w": true
       },
-      "floors": [
-        "basement",
-        "ground",
-        "upper"
-      ],
+      "floors": ["basement", "ground", "upper"],
       "symbol": "item"
     },
     {
@@ -634,11 +526,7 @@
         "s": false,
         "w": false
       },
-      "floors": [
-        "basement",
-        "ground",
-        "upper"
-      ],
+      "floors": ["basement", "ground", "upper"],
       "symbol": "event"
     },
     {
@@ -650,11 +538,7 @@
         "s": true,
         "w": true
       },
-      "floors": [
-        "basement",
-        "ground",
-        "upper"
-      ],
+      "floors": ["basement", "ground", "upper"],
       "symbol": null
     },
     {
@@ -666,11 +550,7 @@
         "s": true,
         "w": true
       },
-      "floors": [
-        "basement",
-        "ground",
-        "upper"
-      ],
+      "floors": ["basement", "ground", "upper"],
       "symbol": "omen"
     },
     {
@@ -682,11 +562,7 @@
         "s": true,
         "w": false
       },
-      "floors": [
-        "basement",
-        "ground",
-        "upper"
-      ],
+      "floors": ["basement", "ground", "upper"],
       "symbol": "item"
     },
     {
@@ -698,11 +574,7 @@
         "s": false,
         "w": true
       },
-      "floors": [
-        "basement",
-        "ground",
-        "upper"
-      ],
+      "floors": ["basement", "ground", "upper"],
       "symbol": null
     },
     {
@@ -714,11 +586,7 @@
         "s": false,
         "w": false
       },
-      "floors": [
-        "basement",
-        "ground",
-        "upper"
-      ],
+      "floors": ["basement", "ground", "upper"],
       "symbol": "event"
     },
     {
@@ -730,11 +598,7 @@
         "s": true,
         "w": true
       },
-      "floors": [
-        "basement",
-        "ground",
-        "upper"
-      ],
+      "floors": ["basement", "ground", "upper"],
       "symbol": null
     },
     {
@@ -746,11 +610,7 @@
         "s": false,
         "w": true
       },
-      "floors": [
-        "basement",
-        "ground",
-        "upper"
-      ],
+      "floors": ["basement", "ground", "upper"],
       "symbol": "event",
       "onEnter": [
         {
@@ -770,11 +630,7 @@
         "s": true,
         "w": false
       },
-      "floors": [
-        "basement",
-        "ground",
-        "upper"
-      ],
+      "floors": ["basement", "ground", "upper"],
       "symbol": "item"
     },
     {
@@ -786,11 +642,7 @@
         "s": false,
         "w": true
       },
-      "floors": [
-        "basement",
-        "ground",
-        "upper"
-      ],
+      "floors": ["basement", "ground", "upper"],
       "symbol": "omen"
     }
   ],

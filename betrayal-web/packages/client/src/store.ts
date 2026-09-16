@@ -35,14 +35,17 @@ export interface CardDrawInfo {
 }
 
 export interface RollInfo {
-  seat?: SeatId;
+  seat?: SeatId | undefined;
   dice: number[];
   total: number;
   reason: string;
-  hauntRoll?: { needed: number; triggered: boolean };
+  hauntRoll?: { needed: number; triggered: boolean } | undefined;
 }
 
-interface Store {
+export type PresentationItem =
+  { kind: 'card_draw'; draw: CardDrawInfo } | { kind: 'roll'; roll: RollInfo };
+
+export interface Store {
   screen: Screen;
   connected: boolean;
   name: string;
@@ -62,6 +65,7 @@ interface Store {
   /** Seat token from `welcome`, held until `room` reveals the code. */
   heldToken: string | null;
 
+  presentationQueue: PresentationItem[];
   activeCardDraw: CardDrawInfo | null;
   activeRoll: RollInfo | null;
 
@@ -76,6 +80,7 @@ interface Store {
   dismissError: () => void;
   dismissCardDraw: () => void;
   dismissRoll: () => void;
+  dismissPresentation: () => void;
 }
 
 let logId = 0;
@@ -83,7 +88,10 @@ let logId = 0;
 export const useStore = create<Store>((set, get) => ({
   screen: 'home',
   connected: false,
-  name: localStorage.getItem('bahoth.name') ?? '',
+  name:
+    typeof localStorage !== 'undefined'
+      ? (localStorage.getItem('bahoth.name') ?? '')
+      : '',
   content: null,
   contentHash: '',
 
@@ -99,6 +107,7 @@ export const useStore = create<Store>((set, get) => ({
   pendingSeq: null,
   heldToken: null,
 
+  presentationQueue: [],
   activeCardDraw: null,
   activeRoll: null,
 
@@ -134,7 +143,9 @@ export const useStore = create<Store>((set, get) => ({
   },
 
   setName(name) {
-    localStorage.setItem('bahoth.name', name);
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem('bahoth.name', name);
+    }
     set({ name });
   },
 
@@ -169,19 +180,31 @@ export const useStore = create<Store>((set, get) => ({
     set({ error: null });
   },
 
+  dismissPresentation() {
+    set((s) => {
+      const nextQueue = s.presentationQueue.slice(1);
+      const head = nextQueue[0];
+      return {
+        presentationQueue: nextQueue,
+        activeCardDraw: head?.kind === 'card_draw' ? head.draw : null,
+        activeRoll: head?.kind === 'roll' ? head.roll : null,
+      };
+    });
+  },
+
   dismissCardDraw() {
-    set({ activeCardDraw: null });
+    get().dismissPresentation();
   },
 
   dismissRoll() {
-    set({ activeRoll: null });
+    get().dismissPresentation();
   },
 }));
 
-type Set = (partial: Partial<Store> | ((s: Store) => Partial<Store>)) => void;
-type Get = () => Store;
+export type Set = (partial: Partial<Store> | ((s: Store) => Partial<Store>)) => void;
+export type Get = () => Store;
 
-function handle(msg: ServerMessage, set: Set, get: Get): void {
+export function handle(msg: ServerMessage, set: Set, get: Get): void {
   switch (msg.t) {
     case 'welcome': {
       if (msg.seatId) set({ seatId: msg.seatId });
@@ -229,30 +252,60 @@ function handle(msg: ServerMessage, set: Set, get: Get): void {
       const ctx = contextFrom(state, seats, content);
       const at = Date.now();
 
-      let activeCardDraw: CardDrawInfo | null = null;
-      let activeRoll: RollInfo | null = null;
+      const newPresentations: PresentationItem[] = [];
 
       for (const e of msg.events) {
         if (e.t === 'drew_card') {
-          activeCardDraw = { seat: e.seat, cardId: e.cardId, deck: e.deck };
+          newPresentations.push({
+            kind: 'card_draw',
+            draw: { seat: e.seat, cardId: e.cardId, deck: e.deck },
+          });
         } else if (e.t === 'rolled') {
-          activeRoll = { seat: e.seat, dice: e.dice, total: e.total, reason: e.reason };
+          newPresentations.push({
+            kind: 'roll',
+            roll: { seat: e.seat, dice: e.dice, total: e.total, reason: e.reason },
+          });
         } else if (e.t === 'haunt_roll') {
-          const current: RollInfo = activeRoll ?? { dice: [], total: e.total, reason: 'haunt_roll' };
-          activeRoll = {
-            ...current,
-            hauntRoll: { needed: e.needed, triggered: e.triggered },
-          };
+          const lastRollIdx = [...newPresentations]
+            .reverse()
+            .findIndex((p) => p.kind === 'roll');
+          if (lastRollIdx !== -1) {
+            const actualIdx = newPresentations.length - 1 - lastRollIdx;
+            const rollItem = newPresentations[actualIdx] as {
+              kind: 'roll';
+              roll: RollInfo;
+            };
+            rollItem.roll = {
+              ...rollItem.roll,
+              hauntRoll: { needed: e.needed, triggered: e.triggered },
+            };
+          } else {
+            newPresentations.push({
+              kind: 'roll',
+              roll: {
+                seat: state?.activeSeat ?? undefined,
+                dice: [],
+                total: e.total,
+                reason: 'haunt_roll',
+                hauntRoll: { needed: e.needed, triggered: e.triggered },
+              },
+            });
+          }
         }
       }
 
-      set((s) => ({
-        log: [...s.log, ...msg.events.map((e) => entryFor(e, ctx, logId++, at))].slice(
-          -LOG_LIMIT,
-        ),
-        ...(activeCardDraw ? { activeCardDraw } : {}),
-        ...(activeRoll ? { activeRoll } : {}),
-      }));
+      set((s) => {
+        const queue = [...s.presentationQueue, ...newPresentations];
+        const head = queue[0];
+        return {
+          log: [...s.log, ...msg.events.map((e) => entryFor(e, ctx, logId++, at))].slice(
+            -LOG_LIMIT,
+          ),
+          presentationQueue: queue,
+          activeCardDraw: head?.kind === 'card_draw' ? head.draw : null,
+          activeRoll: head?.kind === 'roll' ? head.roll : null,
+        };
+      });
       break;
     }
 

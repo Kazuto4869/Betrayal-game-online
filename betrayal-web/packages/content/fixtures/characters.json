@@ -5,50 +5,10 @@
       "name": "Heather Granville",
       "colour": "purple",
       "tracks": {
-        "speed": [
-          null,
-          3,
-          3,
-          4,
-          5,
-          6,
-          6,
-          7,
-          8
-        ],
-        "might": [
-          null,
-          3,
-          3,
-          3,
-          4,
-          5,
-          6,
-          7,
-          8
-        ],
-        "sanity": [
-          null,
-          3,
-          3,
-          3,
-          4,
-          5,
-          6,
-          6,
-          6
-        ],
-        "knowledge": [
-          null,
-          2,
-          3,
-          3,
-          4,
-          5,
-          6,
-          7,
-          8
-        ]
+        "speed": [null, 3, 3, 4, 5, 6, 6, 7, 8],
+        "might": [null, 3, 3, 3, 4, 5, 6, 7, 8],
+        "sanity": [null, 3, 3, 3, 4, 5, 6, 6, 6],
+        "knowledge": [null, 2, 3, 3, 4, 5, 6, 7, 8]
       },
       "start": {
         "speed": 3,
@@ -62,50 +22,10 @@
       "name": "Jenny LeClerc",
       "colour": "purple",
       "tracks": {
-        "speed": [
-          null,
-          2,
-          3,
-          4,
-          4,
-          4,
-          5,
-          6,
-          8
-        ],
-        "might": [
-          null,
-          3,
-          4,
-          4,
-          4,
-          4,
-          5,
-          6,
-          8
-        ],
-        "sanity": [
-          null,
-          1,
-          1,
-          2,
-          4,
-          4,
-          4,
-          5,
-          6
-        ],
-        "knowledge": [
-          null,
-          2,
-          3,
-          3,
-          4,
-          4,
-          5,
-          6,
-          8
-        ]
+        "speed": [null, 2, 3, 4, 4, 4, 5, 6, 8],
+        "might": [null, 3, 4, 4, 4, 4, 5, 6, 8],
+        "sanity": [null, 1, 1, 2, 4, 4, 4, 5, 6],
+        "knowledge": [null, 2, 3, 3, 4, 4, 5, 6, 8]
       },
       "start": {
         "speed": 4,
@@ -119,50 +39,10 @@
       "name": "Ox Bellows",
       "colour": "red",
       "tracks": {
-        "speed": [
-          null,
-          2,
-          2,
-          2,
-          3,
-          4,
-          5,
-          5,
-          6
-        ],
-        "might": [
-          null,
-          4,
-          5,
-          5,
-          6,
-          6,
-          7,
-          8,
-          8
-        ],
-        "sanity": [
-          null,
-          2,
-          2,
-          3,
-          4,
-          5,
-          5,
-          6,
-          7
-        ],
-        "knowledge": [
-          null,
-          2,
-          2,
-          3,
-          3,
-          5,
-          5,
-          6,
-          6
-        ]
+        "speed": [null, 2, 2, 2, 3, 4, 5, 5, 6],
+        "might": [null, 4, 5, 5, 6, 6, 7, 8, 8],
+        "sanity": [null, 2, 2, 3, 4, 5, 5, 6, 7],
+        "knowledge": [null, 2, 2, 3, 3, 5, 5, 6, 6]
       },
       "start": {
         "speed": 5,
@@ -176,50 +56,10 @@
       "name": "Darrin Flash Williams",
       "colour": "red",
       "tracks": {
-        "speed": [
-          null,
-          4,
-          4,
-          4,
-          5,
-          6,
-          7,
-          7,
-          8
-        ],
-        "might": [
-          null,
-          2,
-          3,
-          3,
-          4,
-          5,
-          6,
-          6,
-          7
-        ],
-        "sanity": [
-          null,
-          1,
-          2,
-          3,
-          4,
-          5,
-          5,
-          5,
-          7
-        ],
-        "knowledge": [
-          null,
-          2,
-          3,
-          3,
-          4,
-          5,
-          5,
-          5,
-          7
-        ]
+        "speed": [null, 4, 4, 4, 5, 6, 7, 7, 8],
+        "might": [null, 2, 3, 3, 4, 5, 6, 6, 7],
+        "sanity": [null, 1, 2, 3, 4, 5, 5, 5, 7],
+        "knowledge": [null, 2, 3, 3, 4, 5, 5, 5, 7]
       },
       "start": {
         "speed": 5,
@@ -233,50 +73,10 @@
       "name": "Vivian Lopez",
       "colour": "blue",
       "tracks": {
-        "speed": [
-          null,
-          3,
-          4,
-          4,
-          4,
-          4,
-          6,
-          7,
-          8
-        ],
-        "might": [
-          null,
-          2,
-          2,
-          2,
-          4,
-          4,
-          5,
-          6,
-          6
-        ],
-        "sanity": [
-          null,
-          4,
-          4,
-          4,
-          5,
-          6,
-          7,
-          8,
-          8
-        ],
-        "knowledge": [
-          null,
-          4,
-          5,
-          5,
-          5,
-          5,
-          6,
-          6,
-          7
-        ]
+        "speed": [null, 3, 4, 4, 4, 4, 6, 7, 8],
+        "might": [null, 2, 2, 2, 4, 4, 5, 6, 6],
+        "sanity": [null, 4, 4, 4, 5, 6, 7, 8, 8],
+        "knowledge": [null, 4, 5, 5, 5, 5, 6, 6, 7]
       },
       "start": {
         "speed": 4,
@@ -290,50 +90,10 @@
       "name": "Madame Zostra",
       "colour": "blue",
       "tracks": {
-        "speed": [
-          null,
-          2,
-          3,
-          3,
-          5,
-          5,
-          6,
-          6,
-          7
-        ],
-        "might": [
-          null,
-          2,
-          3,
-          3,
-          4,
-          5,
-          5,
-          5,
-          6
-        ],
-        "sanity": [
-          null,
-          4,
-          4,
-          4,
-          5,
-          6,
-          7,
-          8,
-          8
-        ],
-        "knowledge": [
-          null,
-          1,
-          3,
-          4,
-          4,
-          4,
-          5,
-          6,
-          6
-        ]
+        "speed": [null, 2, 3, 3, 5, 5, 6, 6, 7],
+        "might": [null, 2, 3, 3, 4, 5, 5, 5, 6],
+        "sanity": [null, 4, 4, 4, 5, 6, 7, 8, 8],
+        "knowledge": [null, 1, 3, 4, 4, 4, 5, 6, 6]
       },
       "start": {
         "speed": 3,
@@ -347,50 +107,10 @@
       "name": "Missy Dubourde",
       "colour": "yellow",
       "tracks": {
-        "speed": [
-          null,
-          3,
-          4,
-          5,
-          6,
-          6,
-          6,
-          7,
-          7
-        ],
-        "might": [
-          null,
-          2,
-          3,
-          3,
-          3,
-          4,
-          5,
-          6,
-          7
-        ],
-        "sanity": [
-          null,
-          1,
-          2,
-          3,
-          4,
-          5,
-          5,
-          6,
-          7
-        ],
-        "knowledge": [
-          null,
-          2,
-          3,
-          4,
-          4,
-          5,
-          6,
-          6,
-          6
-        ]
+        "speed": [null, 3, 4, 5, 6, 6, 6, 7, 7],
+        "might": [null, 2, 3, 3, 3, 4, 5, 6, 7],
+        "sanity": [null, 1, 2, 3, 4, 5, 5, 6, 7],
+        "knowledge": [null, 2, 3, 4, 4, 5, 6, 6, 6]
       },
       "start": {
         "speed": 3,
@@ -404,50 +124,10 @@
       "name": "Zoe Ingstrom",
       "colour": "yellow",
       "tracks": {
-        "speed": [
-          null,
-          4,
-          4,
-          4,
-          4,
-          5,
-          6,
-          8,
-          8
-        ],
-        "might": [
-          null,
-          2,
-          2,
-          3,
-          3,
-          4,
-          4,
-          6,
-          7
-        ],
-        "sanity": [
-          null,
-          3,
-          4,
-          5,
-          5,
-          6,
-          6,
-          7,
-          8
-        ],
-        "knowledge": [
-          null,
-          1,
-          2,
-          3,
-          4,
-          4,
-          5,
-          5,
-          5
-        ]
+        "speed": [null, 4, 4, 4, 4, 5, 6, 8, 8],
+        "might": [null, 2, 2, 3, 3, 4, 4, 6, 7],
+        "sanity": [null, 3, 4, 5, 5, 6, 6, 7, 8],
+        "knowledge": [null, 1, 2, 3, 4, 4, 5, 5, 5]
       },
       "start": {
         "speed": 4,
@@ -461,50 +141,10 @@
       "name": "Peter Akimoto",
       "colour": "green",
       "tracks": {
-        "speed": [
-          null,
-          3,
-          3,
-          3,
-          4,
-          6,
-          6,
-          7,
-          7
-        ],
-        "might": [
-          null,
-          2,
-          3,
-          3,
-          4,
-          5,
-          5,
-          6,
-          8
-        ],
-        "sanity": [
-          null,
-          3,
-          4,
-          4,
-          4,
-          5,
-          6,
-          6,
-          7
-        ],
-        "knowledge": [
-          null,
-          3,
-          4,
-          4,
-          5,
-          6,
-          7,
-          7,
-          8
-        ]
+        "speed": [null, 3, 3, 3, 4, 6, 6, 7, 7],
+        "might": [null, 2, 3, 3, 4, 5, 5, 6, 8],
+        "sanity": [null, 3, 4, 4, 4, 5, 6, 6, 7],
+        "knowledge": [null, 3, 4, 4, 5, 6, 7, 7, 8]
       },
       "start": {
         "speed": 4,
@@ -518,50 +158,10 @@
       "name": "Brandon Jaspers",
       "colour": "green",
       "tracks": {
-        "speed": [
-          null,
-          3,
-          4,
-          4,
-          4,
-          5,
-          6,
-          7,
-          8
-        ],
-        "might": [
-          null,
-          2,
-          3,
-          3,
-          4,
-          5,
-          6,
-          6,
-          7
-        ],
-        "sanity": [
-          null,
-          3,
-          3,
-          3,
-          4,
-          5,
-          6,
-          7,
-          8
-        ],
-        "knowledge": [
-          null,
-          1,
-          3,
-          3,
-          5,
-          5,
-          6,
-          6,
-          7
-        ]
+        "speed": [null, 3, 4, 4, 4, 5, 6, 7, 8],
+        "might": [null, 2, 3, 3, 4, 5, 6, 6, 7],
+        "sanity": [null, 3, 3, 3, 4, 5, 6, 7, 8],
+        "knowledge": [null, 1, 3, 3, 5, 5, 6, 6, 7]
       },
       "start": {
         "speed": 3,
@@ -575,50 +175,10 @@
       "name": "Professor Longfellow",
       "colour": "white",
       "tracks": {
-        "speed": [
-          null,
-          2,
-          2,
-          4,
-          4,
-          5,
-          5,
-          6,
-          6
-        ],
-        "might": [
-          null,
-          1,
-          2,
-          3,
-          4,
-          5,
-          5,
-          6,
-          6
-        ],
-        "sanity": [
-          null,
-          1,
-          3,
-          3,
-          4,
-          5,
-          5,
-          6,
-          7
-        ],
-        "knowledge": [
-          null,
-          4,
-          5,
-          5,
-          5,
-          5,
-          6,
-          7,
-          8
-        ]
+        "speed": [null, 2, 2, 4, 4, 5, 5, 6, 6],
+        "might": [null, 1, 2, 3, 4, 5, 5, 6, 6],
+        "sanity": [null, 1, 3, 3, 4, 5, 5, 6, 7],
+        "knowledge": [null, 4, 5, 5, 5, 5, 6, 7, 8]
       },
       "start": {
         "speed": 4,
@@ -632,50 +192,10 @@
       "name": "Father Rhinehardt",
       "colour": "white",
       "tracks": {
-        "speed": [
-          null,
-          2,
-          3,
-          3,
-          4,
-          5,
-          6,
-          7,
-          7
-        ],
-        "might": [
-          null,
-          1,
-          2,
-          2,
-          4,
-          4,
-          5,
-          5,
-          7
-        ],
-        "sanity": [
-          null,
-          3,
-          4,
-          5,
-          5,
-          6,
-          7,
-          7,
-          8
-        ],
-        "knowledge": [
-          null,
-          1,
-          3,
-          3,
-          4,
-          5,
-          6,
-          6,
-          8
-        ]
+        "speed": [null, 2, 3, 3, 4, 5, 6, 7, 7],
+        "might": [null, 1, 2, 2, 4, 4, 5, 5, 7],
+        "sanity": [null, 3, 4, 5, 5, 6, 7, 7, 8],
+        "knowledge": [null, 1, 3, 3, 4, 5, 6, 6, 8]
       },
       "start": {
         "speed": 3,

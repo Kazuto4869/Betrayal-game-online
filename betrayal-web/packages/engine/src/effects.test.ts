@@ -562,9 +562,7 @@ describe('roll effect', () => {
       who: 'actor',
       dice: 3,
       reason: 'Fixed 3 Dice Roll',
-      branches: [
-        { min: 0, effects: [{ e: 'log', text: 'Rolled fixed dice' }] },
-      ],
+      branches: [{ min: 0, effects: [{ e: 'log', text: 'Rolled fixed dice' }] }],
     };
 
     const out = runEffects(state, [effect], baseCtx(state), content);

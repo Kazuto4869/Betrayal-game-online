@@ -64,14 +64,9 @@ export function rollDie(rng: RngState): [DieFace, RngState] {
  * Only accepts an integer count in 0..8. Reuses rollDie.
  * Returns [faces, total, nextState].
  */
-export function rollDice(
-  rng: RngState,
-  count: number,
-): [DieFace[], number, RngState] {
+export function rollDice(rng: RngState, count: number): [DieFace[], number, RngState] {
   if (!Number.isInteger(count) || count < 0 || count > 8) {
-    throw new Error(
-      `rollDice requires an integer count between 0 and 8, got ${count}`,
-    );
+    throw new Error(`rollDice requires an integer count between 0 and 8, got ${count}`);
   }
   if (count === 0) {
     return [[], 0, rng];

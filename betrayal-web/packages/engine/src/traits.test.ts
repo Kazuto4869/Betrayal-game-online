@@ -38,7 +38,11 @@ describe('trait operations and death transitions', () => {
       ...state,
       players: {
         ...state.players,
-        [seat]: { ...state.players[seat]!, isDead: true, traits: { ...state.players[seat]!.traits, might: 0 } },
+        [seat]: {
+          ...state.players[seat]!,
+          isDead: true,
+          traits: { ...state.players[seat]!.traits, might: 0 },
+        },
       },
     };
     const resDead = gainTrait(deadState, seat, 'might', 3, content);
@@ -118,7 +122,10 @@ describe('trait operations and death transitions', () => {
       ...state,
       players: {
         ...state.players,
-        [seat]: { ...state.players[seat]!, traits: { ...state.players[seat]!.traits, might: 1 } },
+        [seat]: {
+          ...state.players[seat]!,
+          traits: { ...state.players[seat]!.traits, might: 1 },
+        },
       },
     };
     const resHeal = healTrait(degraded, seat, 'might', content);
@@ -136,7 +143,10 @@ describe('trait operations and death transitions', () => {
       ...state,
       players: {
         ...state.players,
-        [seat]: { ...state.players[seat]!, traits: { ...state.players[seat]!.traits, might: 8 } },
+        [seat]: {
+          ...state.players[seat]!,
+          traits: { ...state.players[seat]!.traits, might: 8 },
+        },
       },
     };
     const resBuffed = healTrait(buffed, seat, 'might', content);
@@ -148,7 +158,11 @@ describe('trait operations and death transitions', () => {
       ...degraded,
       players: {
         ...degraded.players,
-        [seat]: { ...degraded.players[seat]!, isDead: true, traits: { ...degraded.players[seat]!.traits, might: 0 } },
+        [seat]: {
+          ...degraded.players[seat]!,
+          isDead: true,
+          traits: { ...degraded.players[seat]!.traits, might: 0 },
+        },
       },
     };
     const resDead = healTrait(dead, seat, 'might', content);
@@ -183,7 +197,12 @@ describe('trait operations and death transitions', () => {
     expect(
       evalCondition(
         state,
-        { k: 'trait_at_least', who: 'actor', trait: 'knowledge', value: printedValue + 1 },
+        {
+          k: 'trait_at_least',
+          who: 'actor',
+          trait: 'knowledge',
+          value: printedValue + 1,
+        },
         ctx,
         content,
       ),
@@ -200,6 +219,19 @@ describe('trait operations and death transitions', () => {
       ...base,
       phase: 'haunt',
       haunt: { hauntId: 1, traitorSeat: null, revealed: true, acknowledged: [] },
+      decks: {
+        ...base.decks,
+        item: {
+          ...base.decks.item,
+          draw: base.decks.item.draw.filter((id) => id !== 'item.adrenaline_shot'),
+          inPlay: [...base.decks.item.inPlay, 'item.adrenaline_shot'],
+        },
+        omen: {
+          ...base.decks.omen,
+          draw: base.decks.omen.draw.filter((id) => id !== 'omen.bite'),
+          inPlay: [...base.decks.omen.inPlay, 'omen.bite'],
+        },
+      },
       players: {
         ...base.players,
         [active]: {

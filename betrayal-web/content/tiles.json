@@ -9,9 +9,7 @@
         "s": true,
         "w": true
       },
-      "floors": [
-        "ground"
-      ],
+      "floors": ["ground"],
       "symbol": null,
       "copies": 1,
       "staticLinks": [],
@@ -26,9 +24,7 @@
         "s": true,
         "w": true
       },
-      "floors": [
-        "ground"
-      ],
+      "floors": ["ground"],
       "symbol": null,
       "copies": 1,
       "staticLinks": [],
@@ -43,9 +39,7 @@
         "s": false,
         "w": true
       },
-      "floors": [
-        "ground"
-      ],
+      "floors": ["ground"],
       "symbol": null,
       "copies": 1,
       "staticLinks": [
@@ -66,10 +60,7 @@
         "s": true,
         "w": true
       },
-      "floors": [
-        "basement",
-        "upper"
-      ],
+      "floors": ["basement", "upper"],
       "symbol": "omen",
       "copies": 1,
       "staticLinks": [],
@@ -84,10 +75,7 @@
         "s": false,
         "w": false
       },
-      "floors": [
-        "basement",
-        "upper"
-      ],
+      "floors": ["basement", "upper"],
       "symbol": "item",
       "copies": 1,
       "staticLinks": [],
@@ -102,10 +90,7 @@
         "s": true,
         "w": false
       },
-      "floors": [
-        "basement",
-        "upper"
-      ],
+      "floors": ["basement", "upper"],
       "symbol": "event",
       "copies": 1,
       "staticLinks": [],
@@ -153,10 +138,7 @@
         "s": true,
         "w": false
       },
-      "floors": [
-        "basement",
-        "upper"
-      ],
+      "floors": ["basement", "upper"],
       "symbol": "event",
       "copies": 1,
       "staticLinks": [],
@@ -204,9 +186,7 @@
         "s": true,
         "w": false
       },
-      "floors": [
-        "basement"
-      ],
+      "floors": ["basement"],
       "symbol": null,
       "copies": 1,
       "staticLinks": [
@@ -227,9 +207,7 @@
         "s": false,
         "w": false
       },
-      "floors": [
-        "basement"
-      ],
+      "floors": ["basement"],
       "symbol": "event",
       "copies": 1,
       "staticLinks": [],
@@ -244,9 +222,7 @@
         "s": true,
         "w": false
       },
-      "floors": [
-        "basement"
-      ],
+      "floors": ["basement"],
       "symbol": "item",
       "copies": 1,
       "staticLinks": [],
@@ -261,9 +237,7 @@
         "s": true,
         "w": false
       },
-      "floors": [
-        "upper"
-      ],
+      "floors": ["upper"],
       "symbol": "omen",
       "copies": 1,
       "staticLinks": [],
@@ -278,9 +252,7 @@
         "s": false,
         "w": true
       },
-      "floors": [
-        "upper"
-      ],
+      "floors": ["upper"],
       "symbol": "omen",
       "copies": 1,
       "staticLinks": [],
@@ -295,9 +267,7 @@
         "s": false,
         "w": true
       },
-      "floors": [
-        "upper"
-      ],
+      "floors": ["upper"],
       "symbol": "event",
       "copies": 1,
       "staticLinks": [],
@@ -312,9 +282,7 @@
         "s": false,
         "w": false
       },
-      "floors": [
-        "ground"
-      ],
+      "floors": ["ground"],
       "symbol": null,
       "copies": 1,
       "staticLinks": [],
@@ -322,7 +290,7 @@
         {
           "e": "move",
           "who": "actor",
-          "to": "landing:basement"
+          "to": { "landing": "basement" }
         },
         {
           "e": "log",
@@ -339,9 +307,7 @@
         "s": true,
         "w": false
       },
-      "floors": [
-        "ground"
-      ],
+      "floors": ["ground"],
       "symbol": "event",
       "copies": 1,
       "staticLinks": [],
@@ -385,9 +351,7 @@
         "s": true,
         "w": true
       },
-      "floors": [
-        "ground"
-      ],
+      "floors": ["ground"],
       "symbol": "event",
       "copies": 1,
       "staticLinks": [],
@@ -402,9 +366,7 @@
         "s": false,
         "w": false
       },
-      "floors": [
-        "ground"
-      ],
+      "floors": ["ground"],
       "symbol": "omen",
       "copies": 1,
       "staticLinks": [],
@@ -419,9 +381,7 @@
         "s": true,
         "w": true
       },
-      "floors": [
-        "ground"
-      ],
+      "floors": ["ground"],
       "symbol": "event",
       "copies": 1,
       "staticLinks": [],
@@ -436,10 +396,7 @@
         "s": false,
         "w": false
       },
-      "floors": [
-        "basement",
-        "ground"
-      ],
+      "floors": ["basement", "ground"],
       "symbol": "omen",
       "copies": 1,
       "staticLinks": [],
@@ -454,10 +411,7 @@
         "s": true,
         "w": true
       },
-      "floors": [
-        "basement",
-        "ground"
-      ],
+      "floors": ["basement", "ground"],
       "symbol": "omen",
       "copies": 1,
       "staticLinks": [],
@@ -472,10 +426,7 @@
         "s": false,
         "w": false
       },
-      "floors": [
-        "ground",
-        "upper"
-      ],
+      "floors": ["ground", "upper"],
       "symbol": "event",
       "copies": 1,
       "staticLinks": [],
@@ -490,10 +441,7 @@
         "s": true,
         "w": true
       },
-      "floors": [
-        "ground",
-        "upper"
-      ],
+      "floors": ["ground", "upper"],
       "symbol": "omen",
       "copies": 1,
       "staticLinks": [],
@@ -508,10 +456,7 @@
         "s": true,
         "w": true
       },
-      "floors": [
-        "ground",
-        "upper"
-      ],
+      "floors": ["ground", "upper"],
       "symbol": "item",
       "copies": 1,
       "staticLinks": [],
@@ -526,11 +471,7 @@
         "s": true,
         "w": true
       },
-      "floors": [
-        "basement",
-        "ground",
-        "upper"
-      ],
+      "floors": ["basement", "ground", "upper"],
       "symbol": "event",
       "copies": 1,
       "staticLinks": [],
@@ -545,11 +486,7 @@
         "s": true,
         "w": false
       },
-      "floors": [
-        "basement",
-        "ground",
-        "upper"
-      ],
+      "floors": ["basement", "ground", "upper"],
       "symbol": "event",
       "copies": 1,
       "staticLinks": [],
@@ -564,11 +501,7 @@
         "s": true,
         "w": true
       },
-      "floors": [
-        "basement",
-        "ground",
-        "upper"
-      ],
+      "floors": ["basement", "ground", "upper"],
       "symbol": null,
       "copies": 1,
       "staticLinks": [],
@@ -583,11 +516,7 @@
         "s": true,
         "w": true
       },
-      "floors": [
-        "basement",
-        "ground",
-        "upper"
-      ],
+      "floors": ["basement", "ground", "upper"],
       "symbol": null,
       "copies": 1,
       "staticLinks": [],
@@ -602,11 +531,7 @@
         "s": true,
         "w": true
       },
-      "floors": [
-        "basement",
-        "ground",
-        "upper"
-      ],
+      "floors": ["basement", "ground", "upper"],
       "symbol": "event",
       "copies": 1,
       "staticLinks": [],
@@ -621,9 +546,7 @@
         "s": false,
         "w": true
       },
-      "floors": [
-        "upper"
-      ],
+      "floors": ["upper"],
       "symbol": "event",
       "copies": 1,
       "staticLinks": [],
@@ -638,9 +561,7 @@
         "s": true,
         "w": false
       },
-      "floors": [
-        "upper"
-      ],
+      "floors": ["upper"],
       "symbol": "omen",
       "copies": 1,
       "staticLinks": [],
@@ -655,9 +576,7 @@
         "s": true,
         "w": false
       },
-      "floors": [
-        "basement"
-      ],
+      "floors": ["basement"],
       "symbol": "omen",
       "copies": 1,
       "staticLinks": [],
@@ -672,9 +591,7 @@
         "s": false,
         "w": true
       },
-      "floors": [
-        "basement"
-      ],
+      "floors": ["basement"],
       "symbol": null,
       "copies": 1,
       "staticLinks": [],
@@ -722,11 +639,7 @@
         "s": true,
         "w": true
       },
-      "floors": [
-        "basement",
-        "ground",
-        "upper"
-      ],
+      "floors": ["basement", "ground", "upper"],
       "symbol": "omen",
       "copies": 1,
       "staticLinks": [],
@@ -774,10 +687,7 @@
         "s": false,
         "w": false
       },
-      "floors": [
-        "ground",
-        "upper"
-      ],
+      "floors": ["ground", "upper"],
       "symbol": "event",
       "copies": 1,
       "staticLinks": [],
@@ -821,10 +731,7 @@
         "s": true,
         "w": false
       },
-      "floors": [
-        "basement",
-        "upper"
-      ],
+      "floors": ["basement", "upper"],
       "symbol": "omen",
       "copies": 1,
       "staticLinks": [],
@@ -868,9 +775,7 @@
         "s": false,
         "w": false
       },
-      "floors": [
-        "basement"
-      ],
+      "floors": ["basement"],
       "symbol": "omen",
       "copies": 1,
       "staticLinks": [],
@@ -885,10 +790,7 @@
         "s": true,
         "w": true
       },
-      "floors": [
-        "ground",
-        "upper"
-      ],
+      "floors": ["ground", "upper"],
       "symbol": "event",
       "copies": 1,
       "staticLinks": [],
@@ -932,9 +834,7 @@
         "s": true,
         "w": false
       },
-      "floors": [
-        "upper"
-      ],
+      "floors": ["upper"],
       "symbol": "event",
       "copies": 1,
       "staticLinks": [],
@@ -949,9 +849,7 @@
         "s": true,
         "w": true
       },
-      "floors": [
-        "basement"
-      ],
+      "floors": ["basement"],
       "symbol": "omen",
       "copies": 1,
       "staticLinks": [],
@@ -977,9 +875,7 @@
         "s": true,
         "w": false
       },
-      "floors": [
-        "ground"
-      ],
+      "floors": ["ground"],
       "symbol": "event",
       "copies": 1,
       "staticLinks": [],
@@ -1027,9 +923,7 @@
         "s": true,
         "w": false
       },
-      "floors": [
-        "basement"
-      ],
+      "floors": ["basement"],
       "symbol": "item",
       "copies": 1,
       "staticLinks": [],
@@ -1073,9 +967,7 @@
         "s": false,
         "w": false
       },
-      "floors": [
-        "basement"
-      ],
+      "floors": ["basement"],
       "symbol": "event",
       "copies": 1,
       "staticLinks": [],
@@ -1101,10 +993,7 @@
         "s": false,
         "w": false
       },
-      "floors": [
-        "basement",
-        "upper"
-      ],
+      "floors": ["basement", "upper"],
       "symbol": "event",
       "copies": 1,
       "staticLinks": [],
@@ -1152,9 +1041,7 @@
         "s": true,
         "w": true
       },
-      "floors": [
-        "upper"
-      ],
+      "floors": ["upper"],
       "symbol": null,
       "copies": 1,
       "staticLinks": [],
@@ -1169,9 +1056,7 @@
         "s": true,
         "w": true
       },
-      "floors": [
-        "basement"
-      ],
+      "floors": ["basement"],
       "symbol": null,
       "copies": 1,
       "staticLinks": [],
@@ -1186,10 +1071,7 @@
         "s": true,
         "w": true
       },
-      "floors": [
-        "ground",
-        "upper"
-      ],
+      "floors": ["ground", "upper"],
       "symbol": "event",
       "copies": 1,
       "staticLinks": [],
@@ -1221,7 +1103,7 @@
                 {
                   "e": "move",
                   "who": "actor",
-                  "to": "landing:basement"
+                  "to": { "landing": "basement" }
                 },
                 {
                   "e": "log",
@@ -1242,11 +1124,7 @@
         "s": true,
         "w": true
       },
-      "floors": [
-        "basement",
-        "ground",
-        "upper"
-      ],
+      "floors": ["basement", "ground", "upper"],
       "symbol": null,
       "copies": 1,
       "staticLinks": [],

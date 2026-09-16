@@ -51,8 +51,8 @@ describe('GET /api/content', () => {
     expect(rebuilt.hash).toBe(raw.hash);
     expect(rebuilt.tiles.length).toBeGreaterThan(0);
     expect(rebuilt.house.startTile).toBeTruthy();
-    expect(rebuilt.characters.some((character) => character.id === 'char.peter_akimoto')).toBe(
-      true,
-    );
+    expect(
+      rebuilt.characters.some((character) => character.id === 'char.peter_akimoto'),
+    ).toBe(true);
   });
 });

@@ -7,16 +7,18 @@ Tài liệu này hướng dẫn chi tiết cách đưa dự án game **Betrayal 
 ## 🧭 Hiểu về Kiến trúc Triển khai (Architecture Overview)
 
 Game Betrayal Online được xây dựng với 2 thành phần chính:
+
 1. **Frontend Web App (`@bahoth/client`)**: Giao diện người dùng React 19 + Vite, hiển thị bàn cờ, xúc xắc, thẻ bài, túi đồ và âm thanh.
 2. **Backend Game Engine & WebSocket Gateway (`@bahoth/server`)**: Máy chủ Node.js duy trì trạng thái ván đấu trong RAM (`RoomManager`), xử lý kết nối WebSocket hai chiều thời gian thực (`/ws`), đồng bộ hành động và ghi log ván đấu.
 
 > [!IMPORTANT]
 > **Lưu ý then chốt về Vercel:**
+>
 > - **Vercel** là nền tảng Serverless / Static Edge CDN hàng đầu thế giới, rất lý tưởng và siêu tốc để phục vụ ứng dụng **Frontend React SPA**.
 > - Tuy nhiên, Vercel Serverless Functions **không hỗ trợ duy trì kết nối WebSocket liên tục (Persistent Stateful WebSocket)**. Khi người chơi kết nối vào game, kết nối WebSocket cần được giữ sống liên tục hàng giờ.
 > - **Chiến lược khuyên dùng:**
 >   - **Mô hình A (Khuyên dùng khi muốn dùng Vercel)**: **Frontend** chạy trên **Vercel** (miễn phí, CDN toàn cầu siêu nhanh), **Backend WebSocket** chạy trên **Render.com** hoặc **Railway** (nền tảng container persistent miễn phí).
->   - **Mô hình B (All-in-One đơn giản nhất)**: Triển khai cả Frontend và Backend gói gọn trong 1 tiến trình Node.js duy nhất trên **Render.com** / **Railway** / **Fly.io** / **VPS** (sử dụng kiến trúc *Zero Reverse-Proxy* có sẵn của repo).
+>   - **Mô hình B (All-in-One đơn giản nhất)**: Triển khai cả Frontend và Backend gói gọn trong 1 tiến trình Node.js duy nhất trên **Render.com** / **Railway** / **Fly.io** / **VPS** (sử dụng kiến trúc _Zero Reverse-Proxy_ có sẵn của repo).
 
 ---
 
@@ -53,7 +55,7 @@ Game Betrayal Online được xây dựng với 2 thành phần chính:
    ```text
    wss://betrayal-game-server.onrender.com/ws
    ```
-   *(Kiểm tra máy chủ đã online bằng cách mở trình duyệt vào: `https://betrayal-game-server.onrender.com/healthz` ➔ Trả về `{"ok":true}`)*.
+   _(Kiểm tra máy chủ đã online bằng cách mở trình duyệt vào: `https://betrayal-game-server.onrender.com/healthz` ➔ Trả về `{"ok":true}`)_.
 
 ---
 
@@ -70,7 +72,7 @@ Dự án đã được cấu hình sẵn file `betrayal-web/vercel.json` để t
    - **Framework Preset**: Chọn `Vite` (hoặc để `Other`, Vercel sẽ tự nhận diện theo `vercel.json`).
 5. Mở mục **Environment Variables** và thêm biến môi trường kết nối WebSocket tới Backend ở Bước 1:
    - **Key**: `VITE_WS_URL`
-   - **Value**: `wss://betrayal-game-server.onrender.com/ws` *(thay bằng domain Render thực tế của bạn)*
+   - **Value**: `wss://betrayal-game-server.onrender.com/ws` _(thay bằng domain Render thực tế của bạn)_
 6. Nhấn nút **Deploy**!
 7. Vercel sẽ tự động build các gói `shared`, `content` và bundle `client` trong vòng dưới 1 phút.
 8. Sau khi deploy thành công, bạn sẽ nhận được đường link chơi game chính thức, ví dụ:
@@ -85,6 +87,7 @@ Dự án đã được cấu hình sẵn file `betrayal-web/vercel.json` để t
 Nếu bạn không muốn quản lý 2 dịch vụ riêng biệt, dự án hỗ trợ chế độ **Single Process Production**: Server Node.js vừa quản lý WebSocket vừa tự host các file tĩnh của React.
 
 ### Cách làm trên Render:
+
 1. Tạo Web Service mới trỏ vào repo như Bước 1 ở trên.
 2. Build Command: `npm run build`
 3. Start Command: `npm start`
@@ -92,7 +95,9 @@ Nếu bạn không muốn quản lý 2 dịch vụ riêng biệt, dự án hỗ 
 5. Truy cập trực tiếp vào domain do Render cấp (`https://betrayal-game-server.onrender.com`). Web client sẽ hiển thị ngay lập tức và tự động kết nối WebSocket trên cùng domain!
 
 ### Cách chạy bằng Docker trên VPS riêng:
+
 Nếu bạn có VPS Ubuntu/Debian (DigitalOcean, AWS, Linode, Hetzner...):
+
 ```bash
 git clone https://github.com/Kazuto4869/Betrayal-game-online.git
 cd Betrayal-game-online/betrayal-web
@@ -100,6 +105,7 @@ npm install
 npm run build
 PORT=8080 npm start
 ```
+
 Cài đặt Nginx hoặc Caddy làm reverse proxy với SSL Let's Encrypt là xong.
 
 ---
@@ -107,20 +113,22 @@ Cài đặt Nginx hoặc Caddy làm reverse proxy với SSL Let's Encrypt là xo
 ## 🛠️ Danh mục Biến môi trường (Environment Variables Reference)
 
 ### Cấu hình Frontend (Vercel):
-| Tên biến | Bắt buộc | Ví dụ | Ý nghĩa |
-| :--- | :---: | :--- | :--- |
+
+| Tên biến      |       Bắt buộc        | Ví dụ                             | Ý nghĩa                                                                                                               |
+| :------------ | :-------------------: | :-------------------------------- | :-------------------------------------------------------------------------------------------------------------------- |
 | `VITE_WS_URL` | Có (khi tách backend) | `wss://my-server.onrender.com/ws` | Địa chỉ WebSocket server mà client sẽ kết nối tới. Nếu bỏ trống, client sẽ mặc định kết nối tới cùng domain hiện tại. |
 
 ### Cấu hình Backend (Render / VPS):
-| Tên biến | Mặc định | Ý nghĩa |
-| :--- | :---: | :--- |
-| `PORT` | `8080` | Cổng HTTP & WebSocket lắng nghe |
-| `NODE_ENV` | `production` | Chế độ môi trường Node |
-| `CONTENT_DIR` | `./content` | Đường dẫn chứa dữ liệu kịch bản, thẻ bài, nhân vật |
-| `DATA_DIR` | `./data` | Nơi lưu trữ nhật ký ván đấu JSONL để tự khôi phục phòng |
-| `ROOM_TTL_HOURS` | `4` | Số giờ giải phóng phòng không có hoạt động |
-| `TURN_TIMEOUT_SECONDS` | `600` | Thời gian tối đa cho 1 lượt người chơi (10 phút) |
-| `DISCONNECT_TIMEOUT_SECONDS`| `90` | Thời gian chờ khi người chơi ngắt kết nối |
+
+| Tên biến                     |   Mặc định   | Ý nghĩa                                                 |
+| :--------------------------- | :----------: | :------------------------------------------------------ |
+| `PORT`                       |    `8080`    | Cổng HTTP & WebSocket lắng nghe                         |
+| `NODE_ENV`                   | `production` | Chế độ môi trường Node                                  |
+| `CONTENT_DIR`                | `./content`  | Đường dẫn chứa dữ liệu kịch bản, thẻ bài, nhân vật      |
+| `DATA_DIR`                   |   `./data`   | Nơi lưu trữ nhật ký ván đấu JSONL để tự khôi phục phòng |
+| `ROOM_TTL_HOURS`             |     `4`      | Số giờ giải phóng phòng không có hoạt động              |
+| `TURN_TIMEOUT_SECONDS`       |    `600`     | Thời gian tối đa cho 1 lượt người chơi (10 phút)        |
+| `DISCONNECT_TIMEOUT_SECONDS` |     `90`     | Thời gian chờ khi người chơi ngắt kết nối               |
 
 ---
 
@@ -134,7 +142,7 @@ Cài đặt Nginx hoặc Caddy làm reverse proxy với SSL Let's Encrypt là xo
 2. **Backend trên Render bị "ngủ" (Sleep after inactivity):**
    - Render gói Free sẽ tự động tạm dừng dịch vụ sau 15 phút không có truy cập.
    - Khi có người chơi truy cập lần đầu tiên, server sẽ mất khoảng 30 - 50 giây để khởi động lại (Cold Start).
-   - *Mẹo*: Bạn có thể dùng các dịch vụ ping miễn phí như [UptimeRobot](https://uptimerobot.com/) ping vào URL `https://your-server.onrender.com/healthz` 10 phút một lần để giữ server luôn thức suốt 24/7!
+   - _Mẹo_: Bạn có thể dùng các dịch vụ ping miễn phí như [UptimeRobot](https://uptimerobot.com/) ping vào URL `https://your-server.onrender.com/healthz` 10 phút một lần để giữ server luôn thức suốt 24/7!
 
 3. **CORS hoặc Mixed Content:**
    - Nếu Frontend chạy HTTPS (`https://betrayal-game.vercel.app`), Backend bắt buộc phải chạy HTTPS/WSS (`wss://...`). Không được dùng `ws://` không mã hóa trên trang HTTPS.

@@ -6,17 +6,24 @@
       "name": "Adrenaline Shot",
       "text": "Before you take a turn, you can use this to gain +4 Speed until end of turn.",
       "flavor": "A glass syringe filled with a pungent, glowing amber fluid.",
-      "keepInPlay": true,
+      "keepInPlay": false,
       "isWeapon": false,
       "isCompanion": false,
       "onUse": [
         {
-          "e": "trait",
-          "who": "actor",
-          "trait": "speed",
-          "delta": 2
+          "e": "set_flag",
+          "scope": "seat",
+          "key": "adrenaline_speed",
+          "value": 4
+        },
+        {
+          "e": "log",
+          "text": "Adrenaline surges through your veins! Gain +4 Speed until end of turn."
         }
-      ]
+      ],
+      "use": {
+        "kind": "consumable"
+      }
     },
     {
       "id": "item.amulet_of_the_ages",
@@ -27,32 +34,11 @@
       "keepInPlay": true,
       "isWeapon": false,
       "isCompanion": false,
-      "onDraw": [
-        {
-          "e": "trait",
-          "who": "actor",
-          "trait": "might",
-          "delta": 1
-        },
-        {
-          "e": "trait",
-          "who": "actor",
-          "trait": "speed",
-          "delta": 1
-        },
-        {
-          "e": "trait",
-          "who": "actor",
-          "trait": "sanity",
-          "delta": 1
-        },
-        {
-          "e": "trait",
-          "who": "actor",
-          "trait": "knowledge",
-          "delta": 1
-        }
-      ]
+      "onDraw": [],
+      "use": {
+        "kind": "passive"
+      },
+      "onUse": []
     },
     {
       "id": "item.angel_feather",
@@ -63,20 +49,11 @@
       "keepInPlay": true,
       "isWeapon": false,
       "isCompanion": false,
-      "onDraw": [
-        {
-          "e": "trait",
-          "who": "actor",
-          "trait": "sanity",
-          "delta": 1
-        },
-        {
-          "e": "trait",
-          "who": "actor",
-          "trait": "speed",
-          "delta": 1
-        }
-      ]
+      "onDraw": [],
+      "use": {
+        "kind": "passive"
+      },
+      "onUse": []
     },
     {
       "id": "item.armor",
@@ -87,14 +64,11 @@
       "keepInPlay": true,
       "isWeapon": false,
       "isCompanion": false,
-      "onDraw": [
-        {
-          "e": "trait",
-          "who": "actor",
-          "trait": "might",
-          "delta": 1
-        }
-      ]
+      "onDraw": [],
+      "use": {
+        "kind": "passive"
+      },
+      "onUse": []
     },
     {
       "id": "item.axe",
@@ -104,7 +78,12 @@
       "flavor": "Heavy, razor-sharp, with a dark stain along the blade that won't wash off.",
       "keepInPlay": true,
       "isWeapon": true,
-      "isCompanion": false
+      "isCompanion": false,
+      "use": {
+        "kind": "passive"
+      },
+      "onDraw": [],
+      "onUse": []
     },
     {
       "id": "item.bell",
@@ -122,7 +101,10 @@
           "trait": "sanity",
           "delta": 1
         }
-      ]
+      ],
+      "use": {
+        "kind": "once_per_turn"
+      }
     },
     {
       "id": "item.blood_dagger",
@@ -133,14 +115,11 @@
       "keepInPlay": true,
       "isWeapon": true,
       "isCompanion": false,
-      "onDraw": [
-        {
-          "e": "trait",
-          "who": "actor",
-          "trait": "might",
-          "delta": 2
-        }
-      ]
+      "onDraw": [],
+      "use": {
+        "kind": "passive"
+      },
+      "onUse": []
     },
     {
       "id": "item.bottle",
@@ -211,7 +190,10 @@
             }
           ]
         }
-      ]
+      ],
+      "use": {
+        "kind": "consumable"
+      }
     },
     {
       "id": "item.candle",
@@ -222,20 +204,11 @@
       "keepInPlay": true,
       "isWeapon": false,
       "isCompanion": false,
-      "onDraw": [
-        {
-          "e": "trait",
-          "who": "actor",
-          "trait": "knowledge",
-          "delta": 1
-        },
-        {
-          "e": "trait",
-          "who": "actor",
-          "trait": "sanity",
-          "delta": 1
-        }
-      ]
+      "onDraw": [],
+      "use": {
+        "kind": "passive"
+      },
+      "onUse": []
     },
     {
       "id": "item.dark_dice",
@@ -303,7 +276,10 @@
             }
           ]
         }
-      ]
+      ],
+      "use": {
+        "kind": "once_per_turn"
+      }
     },
     {
       "id": "item.dynamite",
@@ -311,9 +287,59 @@
       "name": "Dynamite",
       "text": "Throw into a room to deal 4 dice of physical damage to all creatures within.",
       "flavor": "Three red sticks tied with cord and a short fuse.",
-      "keepInPlay": true,
+      "keepInPlay": false,
       "isWeapon": true,
-      "isCompanion": false
+      "isCompanion": false,
+      "use": {
+        "kind": "consumable"
+      },
+      "onUse": [
+        {
+          "e": "prompt",
+          "who": "actor",
+          "prompt": {
+            "kind": "choose_room",
+            "among": "adjacent_or_same_room"
+          },
+          "then": [
+            {
+              "e": "roll",
+              "who": "actor",
+              "dice": 4,
+              "reason": "Dynamite Blast (4 Dice)",
+              "branches": [
+                {
+                  "min": 0,
+                  "effects": [
+                    {
+                      "e": "for_each",
+                      "who": {
+                        "in_room": {
+                          "ref": "chosen"
+                        }
+                      },
+                      "do": [
+                        {
+                          "e": "trait",
+                          "who": {
+                            "ref": "each"
+                          },
+                          "trait": "might",
+                          "delta": -2
+                        }
+                      ]
+                    },
+                    {
+                      "e": "log",
+                      "text": "The dynamite detonates with a thunderous blast, rocking the room!"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "item.healing_salve",
@@ -321,23 +347,35 @@
       "name": "Healing Salve",
       "text": "Restore up to 2 steps to any trait.",
       "flavor": "A pungent herbal paste that immediately numbs pain and stops bleeding.",
-      "keepInPlay": true,
+      "keepInPlay": false,
       "isWeapon": false,
       "isCompanion": false,
       "onUse": [
         {
-          "e": "trait",
+          "e": "prompt",
           "who": "actor",
-          "trait": "might",
-          "delta": 1
-        },
-        {
-          "e": "trait",
-          "who": "actor",
-          "trait": "speed",
-          "delta": 1
+          "prompt": {
+            "kind": "choose_trait"
+          },
+          "then": [
+            {
+              "e": "trait",
+              "who": "actor",
+              "trait": {
+                "ref": "chosen"
+              },
+              "delta": 2
+            },
+            {
+              "e": "log",
+              "text": "The soothing salve restores 2 steps to the chosen trait."
+            }
+          ]
         }
-      ]
+      ],
+      "use": {
+        "kind": "consumable"
+      }
     },
     {
       "id": "item.idol",
@@ -405,7 +443,10 @@
             }
           ]
         }
-      ]
+      ],
+      "use": {
+        "kind": "once_per_turn"
+      }
     },
     {
       "id": "item.lucky_stone",
@@ -416,20 +457,11 @@
       "keepInPlay": true,
       "isWeapon": false,
       "isCompanion": false,
-      "onDraw": [
-        {
-          "e": "trait",
-          "who": "actor",
-          "trait": "speed",
-          "delta": 1
-        },
-        {
-          "e": "trait",
-          "who": "actor",
-          "trait": "sanity",
-          "delta": 1
-        }
-      ]
+      "onDraw": [],
+      "use": {
+        "kind": "passive"
+      },
+      "onUse": []
     },
     {
       "id": "item.medical_kit",
@@ -488,7 +520,10 @@
             }
           ]
         }
-      ]
+      ],
+      "use": {
+        "kind": "once_per_turn"
+      }
     },
     {
       "id": "item.music_box",
@@ -538,7 +573,10 @@
             }
           ]
         }
-      ]
+      ],
+      "use": {
+        "kind": "once_per_turn"
+      }
     },
     {
       "id": "item.pickpocket_gloves",
@@ -549,20 +587,11 @@
       "keepInPlay": true,
       "isWeapon": false,
       "isCompanion": false,
-      "onDraw": [
-        {
-          "e": "trait",
-          "who": "actor",
-          "trait": "speed",
-          "delta": 1
-        },
-        {
-          "e": "trait",
-          "who": "actor",
-          "trait": "knowledge",
-          "delta": 1
-        }
-      ]
+      "onDraw": [],
+      "use": {
+        "kind": "passive"
+      },
+      "onUse": []
     },
     {
       "id": "item.puzzle_box",
@@ -612,7 +641,10 @@
             }
           ]
         }
-      ]
+      ],
+      "use": {
+        "kind": "once_per_turn"
+      }
     },
     {
       "id": "item.rabbits_foot",
@@ -623,14 +655,11 @@
       "keepInPlay": true,
       "isWeapon": false,
       "isCompanion": false,
-      "onDraw": [
-        {
-          "e": "trait",
-          "who": "actor",
-          "trait": "speed",
-          "delta": 1
-        }
-      ]
+      "onDraw": [],
+      "use": {
+        "kind": "passive"
+      },
+      "onUse": []
     },
     {
       "id": "item.revolver",
@@ -641,14 +670,11 @@
       "keepInPlay": true,
       "isWeapon": true,
       "isCompanion": false,
-      "onDraw": [
-        {
-          "e": "trait",
-          "who": "actor",
-          "trait": "might",
-          "delta": 2
-        }
-      ]
+      "onDraw": [],
+      "use": {
+        "kind": "passive"
+      },
+      "onUse": []
     },
     {
       "id": "item.sacrificial_dagger",
@@ -663,16 +689,14 @@
         {
           "e": "trait",
           "who": "actor",
-          "trait": "might",
-          "delta": 2
-        },
-        {
-          "e": "trait",
-          "who": "actor",
           "trait": "sanity",
           "delta": -1
         }
-      ]
+      ],
+      "use": {
+        "kind": "passive"
+      },
+      "onUse": []
     },
     {
       "id": "item.smelling_salts",
@@ -680,17 +704,36 @@
       "name": "Smelling Salts",
       "text": "Wake a stunned explorer or restore 1 Sanity.",
       "flavor": "A small glass vial that clears the fog from your mind with sharp ammonia fumes.",
-      "keepInPlay": true,
+      "keepInPlay": false,
       "isWeapon": false,
       "isCompanion": false,
       "onUse": [
         {
-          "e": "trait",
+          "e": "prompt",
           "who": "actor",
-          "trait": "sanity",
-          "delta": 1
+          "prompt": {
+            "kind": "choose_target",
+            "among": "seats_in_room"
+          },
+          "then": [
+            {
+              "e": "trait",
+              "who": {
+                "ref": "chosen"
+              },
+              "trait": "sanity",
+              "delta": 1
+            },
+            {
+              "e": "log",
+              "text": "The pungent smelling salts clear the explorer head and restore 1 Sanity."
+            }
+          ]
         }
-      ]
+      ],
+      "use": {
+        "kind": "consumable"
+      }
     },
     {
       "id": "omen.bite",
@@ -736,7 +779,11 @@
             }
           ]
         }
-      ]
+      ],
+      "use": {
+        "kind": "passive"
+      },
+      "onUse": []
     },
     {
       "id": "omen.book",
@@ -747,14 +794,11 @@
       "keepInPlay": true,
       "isWeapon": false,
       "isCompanion": false,
-      "onDraw": [
-        {
-          "e": "trait",
-          "who": "actor",
-          "trait": "knowledge",
-          "delta": 2
-        }
-      ]
+      "onDraw": [],
+      "use": {
+        "kind": "passive"
+      },
+      "onUse": []
     },
     {
       "id": "omen.crystal_ball",
@@ -813,7 +857,10 @@
             }
           ]
         }
-      ]
+      ],
+      "use": {
+        "kind": "once_per_turn"
+      }
     },
     {
       "id": "omen.dog",
@@ -824,20 +871,11 @@
       "keepInPlay": true,
       "isWeapon": false,
       "isCompanion": true,
-      "onDraw": [
-        {
-          "e": "trait",
-          "who": "actor",
-          "trait": "might",
-          "delta": 1
-        },
-        {
-          "e": "trait",
-          "who": "actor",
-          "trait": "sanity",
-          "delta": 1
-        }
-      ]
+      "onDraw": [],
+      "use": {
+        "kind": "passive"
+      },
+      "onUse": []
     },
     {
       "id": "omen.girl",
@@ -848,20 +886,11 @@
       "keepInPlay": true,
       "isWeapon": false,
       "isCompanion": true,
-      "onDraw": [
-        {
-          "e": "trait",
-          "who": "actor",
-          "trait": "sanity",
-          "delta": 1
-        },
-        {
-          "e": "trait",
-          "who": "actor",
-          "trait": "knowledge",
-          "delta": 1
-        }
-      ]
+      "onDraw": [],
+      "use": {
+        "kind": "passive"
+      },
+      "onUse": []
     },
     {
       "id": "omen.holy_symbol",
@@ -872,14 +901,11 @@
       "keepInPlay": true,
       "isWeapon": false,
       "isCompanion": false,
-      "onDraw": [
-        {
-          "e": "trait",
-          "who": "actor",
-          "trait": "sanity",
-          "delta": 2
-        }
-      ]
+      "onDraw": [],
+      "use": {
+        "kind": "passive"
+      },
+      "onUse": []
     },
     {
       "id": "omen.madman",
@@ -890,20 +916,11 @@
       "keepInPlay": true,
       "isWeapon": false,
       "isCompanion": true,
-      "onDraw": [
-        {
-          "e": "trait",
-          "who": "actor",
-          "trait": "might",
-          "delta": 2
-        },
-        {
-          "e": "trait",
-          "who": "actor",
-          "trait": "sanity",
-          "delta": -1
-        }
-      ]
+      "onDraw": [],
+      "use": {
+        "kind": "passive"
+      },
+      "onUse": []
     },
     {
       "id": "omen.mask",
@@ -962,7 +979,10 @@
             }
           ]
         }
-      ]
+      ],
+      "use": {
+        "kind": "once_per_turn"
+      }
     },
     {
       "id": "omen.medallion",
@@ -973,14 +993,11 @@
       "keepInPlay": true,
       "isWeapon": false,
       "isCompanion": false,
-      "onDraw": [
-        {
-          "e": "trait",
-          "who": "actor",
-          "trait": "sanity",
-          "delta": 1
-        }
-      ]
+      "onDraw": [],
+      "use": {
+        "kind": "passive"
+      },
+      "onUse": []
     },
     {
       "id": "omen.ring",
@@ -991,14 +1008,11 @@
       "keepInPlay": true,
       "isWeapon": true,
       "isCompanion": false,
-      "onDraw": [
-        {
-          "e": "trait",
-          "who": "actor",
-          "trait": "sanity",
-          "delta": 1
-        }
-      ]
+      "onDraw": [],
+      "use": {
+        "kind": "passive"
+      },
+      "onUse": []
     },
     {
       "id": "omen.skull",
@@ -1056,7 +1070,10 @@
             }
           ]
         }
-      ]
+      ],
+      "use": {
+        "kind": "once_per_turn"
+      }
     },
     {
       "id": "omen.spear",
@@ -1067,14 +1084,11 @@
       "keepInPlay": true,
       "isWeapon": true,
       "isCompanion": false,
-      "onDraw": [
-        {
-          "e": "trait",
-          "who": "actor",
-          "trait": "might",
-          "delta": 2
-        }
-      ]
+      "onDraw": [],
+      "use": {
+        "kind": "passive"
+      },
+      "onUse": []
     },
     {
       "id": "omen.spirit_board",
@@ -1139,7 +1153,10 @@
             }
           ]
         }
-      ]
+      ],
+      "use": {
+        "kind": "once_per_turn"
+      }
     },
     {
       "id": "event.something_slimy",
@@ -1185,7 +1202,10 @@
             }
           ]
         }
-      ]
+      ],
+      "use": {
+        "kind": "passive"
+      }
     },
     {
       "id": "event.burning_man",
@@ -1231,7 +1251,10 @@
             }
           ]
         }
-      ]
+      ],
+      "use": {
+        "kind": "passive"
+      }
     },
     {
       "id": "event.whoops",
@@ -1266,7 +1289,10 @@
             }
           ]
         }
-      ]
+      ],
+      "use": {
+        "kind": "passive"
+      }
     },
     {
       "id": "event.smoke",
@@ -1312,7 +1338,10 @@
             }
           ]
         }
-      ]
+      ],
+      "use": {
+        "kind": "passive"
+      }
     },
     {
       "id": "event.skeletons",
@@ -1358,7 +1387,10 @@
             }
           ]
         }
-      ]
+      ],
+      "use": {
+        "kind": "passive"
+      }
     },
     {
       "id": "event.spider",
@@ -1404,7 +1436,10 @@
             }
           ]
         }
-      ]
+      ],
+      "use": {
+        "kind": "passive"
+      }
     },
     {
       "id": "event.angry_being",
@@ -1450,7 +1485,10 @@
             }
           ]
         }
-      ]
+      ],
+      "use": {
+        "kind": "passive"
+      }
     },
     {
       "id": "event.hideous_shriek",
@@ -1496,7 +1534,10 @@
             }
           ]
         }
-      ]
+      ],
+      "use": {
+        "kind": "passive"
+      }
     },
     {
       "id": "event.something_hidden",
@@ -1542,7 +1583,10 @@
             }
           ]
         }
-      ]
+      ],
+      "use": {
+        "kind": "passive"
+      }
     },
     {
       "id": "event.locked_safe",
@@ -1594,7 +1638,10 @@
             }
           ]
         }
-      ]
+      ],
+      "use": {
+        "kind": "passive"
+      }
     },
     {
       "id": "event.disquieting_sounds",
@@ -1647,7 +1694,10 @@
             }
           ]
         }
-      ]
+      ],
+      "use": {
+        "kind": "passive"
+      }
     },
     {
       "id": "event.image_in_mirror",
@@ -1693,7 +1743,10 @@
             }
           ]
         }
-      ]
+      ],
+      "use": {
+        "kind": "passive"
+      }
     },
     {
       "id": "event.groundskeeper",
@@ -1746,7 +1799,10 @@
             }
           ]
         }
-      ]
+      ],
+      "use": {
+        "kind": "passive"
+      }
     },
     {
       "id": "event.mist_from_walls",
@@ -1792,7 +1848,10 @@
             }
           ]
         }
-      ]
+      ],
+      "use": {
+        "kind": "passive"
+      }
     },
     {
       "id": "event.the_voice",
@@ -1845,7 +1904,10 @@
             }
           ]
         }
-      ]
+      ],
+      "use": {
+        "kind": "passive"
+      }
     },
     {
       "id": "event.phone_call",
@@ -1898,7 +1960,10 @@
             }
           ]
         }
-      ]
+      ],
+      "use": {
+        "kind": "passive"
+      }
     },
     {
       "id": "event.rotten",
@@ -1944,7 +2009,10 @@
             }
           ]
         }
-      ]
+      ],
+      "use": {
+        "kind": "passive"
+      }
     },
     {
       "id": "event.the_walls",
@@ -1990,7 +2058,10 @@
             }
           ]
         }
-      ]
+      ],
+      "use": {
+        "kind": "passive"
+      }
     },
     {
       "id": "event.hanged_men",
@@ -2036,7 +2107,10 @@
             }
           ]
         }
-      ]
+      ],
+      "use": {
+        "kind": "passive"
+      }
     },
     {
       "id": "event.funeral",
@@ -2082,7 +2156,10 @@
             }
           ]
         }
-      ]
+      ],
+      "use": {
+        "kind": "passive"
+      }
     },
     {
       "id": "event.creepy_crawlies",
@@ -2128,7 +2205,10 @@
             }
           ]
         }
-      ]
+      ],
+      "use": {
+        "kind": "passive"
+      }
     },
     {
       "id": "event.closet_door",
@@ -2180,7 +2260,10 @@
             }
           ]
         }
-      ]
+      ],
+      "use": {
+        "kind": "passive"
+      }
     },
     {
       "id": "event.bloody_vision",
@@ -2226,7 +2309,10 @@
             }
           ]
         }
-      ]
+      ],
+      "use": {
+        "kind": "passive"
+      }
     },
     {
       "id": "event.night_view",
@@ -2244,7 +2330,10 @@
           "trait": "sanity",
           "delta": 1
         }
-      ]
+      ],
+      "use": {
+        "kind": "passive"
+      }
     },
     {
       "id": "event.ground_tremors",
@@ -2290,7 +2379,10 @@
             }
           ]
         }
-      ]
+      ],
+      "use": {
+        "kind": "passive"
+      }
     }
   ]
 }

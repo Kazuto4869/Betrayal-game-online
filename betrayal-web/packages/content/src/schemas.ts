@@ -138,18 +138,59 @@ export const HouseSchema = z.object({
 export const DeckKindSchema = z.enum(['item', 'event', 'omen']);
 export type DeckKind = z.infer<typeof DeckKindSchema>;
 
-export const CardSchema = z.object({
-  id: z.string().min(1),
-  deck: DeckKindSchema,
-  name: z.string().min(1),
-  text: z.string(),
-  flavor: z.string().optional(),
-  keepInPlay: z.boolean().default(false),
-  isWeapon: z.boolean().default(false),
-  isCompanion: z.boolean().default(false),
-  onDraw: z.array(EffectSchema).default([]),
-  onUse: z.array(EffectSchema).default([]),
-});
+export const UsePolicySchema = z.discriminatedUnion('kind', [
+  z.object({ kind: z.literal('passive') }),
+  z.object({ kind: z.literal('consumable') }),
+  z.object({ kind: z.literal('once_per_turn') }),
+  z.object({ kind: z.literal('repeatable'), timing: z.string().optional() }),
+  z.object({ kind: z.literal('manual'), reason: z.string().optional() }),
+]);
+export type UsePolicy = z.infer<typeof UsePolicySchema>;
+
+export const CardSchema = z
+  .object({
+    id: z.string().min(1),
+    deck: DeckKindSchema,
+    name: z.string().min(1),
+    text: z.string(),
+    flavor: z.string().optional(),
+    use: UsePolicySchema.default({ kind: 'passive' }),
+    keepInPlay: z.boolean().default(false),
+    isWeapon: z.boolean().default(false),
+    isCompanion: z.boolean().default(false),
+    onDraw: z.array(EffectSchema).default([]),
+    onUse: z.array(EffectSchema).default([]),
+  })
+  .superRefine((card, ctx) => {
+    if (card.use.kind === 'passive' && card.onUse.length > 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `Card ${card.id} has passive use policy but specifies onUse effects`,
+        path: ['onUse'],
+      });
+    }
+    if (card.use.kind === 'consumable' && card.onUse.length === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `Card ${card.id} has consumable use policy but specifies no onUse effects`,
+        path: ['onUse'],
+      });
+    }
+    if (card.use.kind === 'once_per_turn' && card.onUse.length === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `Card ${card.id} has once_per_turn use policy but specifies no onUse effects`,
+        path: ['onUse'],
+      });
+    }
+    if (card.use.kind === 'manual' && card.onUse.length > 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `Card ${card.id} has manual use policy but specifies onUse effects`,
+        path: ['onUse'],
+      });
+    }
+  });
 
 export const TraitorRuleSchema = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('trigger') }),

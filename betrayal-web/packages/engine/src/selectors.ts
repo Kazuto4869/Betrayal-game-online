@@ -58,6 +58,85 @@ export function activePlayers(state: GameState): PlayerState[] {
   return Object.values(state.players).filter((p) => !p.removed);
 }
 
+export const PASSIVE_TRAIT_MODIFIERS: Record<string, Partial<Record<Trait, number>>> = {
+  'item.amulet_of_the_ages': { might: 1, speed: 1, sanity: 1, knowledge: 1 },
+  'item.angel_feather': { sanity: 1, speed: 1 },
+  'item.armor': { might: 1 },
+  'item.candle': { knowledge: 1, sanity: 1 },
+  'item.lucky_stone': { speed: 1, sanity: 1 },
+  'item.pickpocket_gloves': { speed: 1, knowledge: 1 },
+  'item.rabbits_foot': { speed: 1 },
+  'omen.book': { knowledge: 2 },
+  'omen.holy_symbol': { sanity: 2 },
+  'omen.medallion': { sanity: 1 },
+  'omen.ring': { sanity: 1 },
+  // Companions:
+  'omen.dog': { might: 1, sanity: 1 },
+  'omen.girl': { sanity: 1, knowledge: 1 },
+  'omen.madman': { might: 2, sanity: -1 },
+};
+
+export const WEAPON_ATTACK_MODIFIERS: Record<string, { trait: Trait; dice: number }> = {
+  'item.axe': { trait: 'might', dice: 1 },
+  'item.blood_dagger': { trait: 'might', dice: 2 },
+  'item.revolver': { trait: 'might', dice: 2 },
+  'item.sacrificial_dagger': { trait: 'might', dice: 2 },
+  'omen.ring': { trait: 'might', dice: 2 },
+  'omen.spear': { trait: 'might', dice: 2 },
+};
+
+export function getPassiveTraitModifier(
+  state: GameState,
+  seat: SeatId,
+  trait: Trait,
+): number {
+  const player = state.players[seat];
+  if (!player) return 0;
+  let total = 0;
+  const held = [...player.items, ...player.omens];
+  for (const cardId of held) {
+    const mod = PASSIVE_TRAIT_MODIFIERS[cardId]?.[trait];
+    if (mod) total += mod;
+  }
+  return total;
+}
+
+export function getCompanionTraitModifier(
+  state: GameState,
+  seat: SeatId,
+  trait: Trait,
+  content: Content,
+): number {
+  const player = state.players[seat];
+  if (!player) return 0;
+  let total = 0;
+  for (const cardId of player.omens) {
+    if (content.cardsById[cardId]?.isCompanion) {
+      const mod = PASSIVE_TRAIT_MODIFIERS[cardId]?.[trait];
+      if (mod) total += mod;
+    }
+  }
+  return total;
+}
+
+export function getWeaponAttackModifier(
+  state: GameState,
+  seat: SeatId,
+  trait: Trait,
+): number {
+  const player = state.players[seat];
+  if (!player) return 0;
+  let maxBonus = 0;
+  const held = [...player.items, ...player.omens];
+  for (const cardId of held) {
+    const weapon = WEAPON_ATTACK_MODIFIERS[cardId];
+    if (weapon && weapon.trait === trait) {
+      if (weapon.dice > maxBonus) maxBonus = weapon.dice;
+    }
+  }
+  return maxBonus;
+}
+
 export function traitValue(
   state: GameState,
   seat: SeatId,
@@ -68,8 +147,13 @@ export function traitValue(
   if (!player?.charId) return 0;
   const character = content.charactersById[player.charId];
   if (!character) return 0;
-  const value = character.tracks[trait][player.traits[trait]];
-  return value ?? 0;
+  const baseValue = character.tracks[trait][player.traits[trait]] ?? 0;
+  const passive = getPassiveTraitModifier(state, seat, trait);
+  let temp = 0;
+  if (trait === 'speed' && typeof player.flags['adrenaline_speed'] === 'number') {
+    temp += Number(player.flags['adrenaline_speed']);
+  }
+  return Math.max(0, baseValue + passive + temp);
 }
 
 export function isCharacterTaken(
@@ -134,9 +218,13 @@ export function getLegalActions(
         rotation: rotation as Rotation,
       }));
     }
-    // choose_target/choose_room have no bespoke action type, unlike
+    // choose_target/choose_room/choose_trait have no bespoke action type, unlike
     // rotate_tile — they answer through the generic ANSWER.
-    if (state.pending.kind === 'choose_target' || state.pending.kind === 'choose_room') {
+    if (
+      state.pending.kind === 'choose_target' ||
+      state.pending.kind === 'choose_room' ||
+      state.pending.kind === 'choose_trait'
+    ) {
       const answers = legalAnswersFor(state.pending) ?? [];
       const promptId = state.pending.id;
       return answers.map((answer) => ({ t: 'ANSWER' as const, seat, promptId, answer }));
@@ -184,8 +272,29 @@ export function getLegalActions(
         for (const dir of getOpenDoorways(state, seat, content)) {
           actions.push({ t: 'MOVE_THROUGH', seat, dir });
         }
-        for (const itemId of player.items) {
-          actions.push({ t: 'USE_ITEM', seat, cardId: itemId });
+        for (const cardId of [...player.items, ...player.omens]) {
+          const card = content.cardsById[cardId];
+          if (!card) continue;
+          if (card.use?.kind === 'passive' || card.use?.kind === 'manual') continue;
+          if (!card.onUse || card.onUse.length === 0) continue;
+          if (
+            card.use?.kind === 'once_per_turn' &&
+            player.usedCardsThisTurn?.includes(cardId)
+          ) {
+            continue;
+          }
+          actions.push({ t: 'USE_ITEM', seat, cardId });
+        }
+        for (const cardId of [...player.items, ...player.omens]) {
+          const card = content.cardsById[cardId];
+          if (card?.isCompanion || cardId === 'omen.bite') continue;
+          actions.push({ t: 'DROP', seat, cardIds: [cardId] });
+        }
+        if (player.location) {
+          const tile = state.board.placed[player.location];
+          for (const cardId of tile?.droppedItems ?? []) {
+            actions.push({ t: 'PICKUP', seat, cardIds: [cardId] });
+          }
         }
         if (state.phase === 'haunt' && !player.hasAttackedThisTurn && player.location) {
           for (const other of Object.values(state.players)) {

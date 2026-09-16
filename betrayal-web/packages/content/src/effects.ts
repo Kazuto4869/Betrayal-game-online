@@ -71,6 +71,7 @@ export const SeatRefSchema = z.union([
    * nor `SeatRef` otherwise provides.
    */
   z.object({ ref: z.enum(['chosen', 'each']) }),
+  z.object({ in_room: z.lazy(() => RoomRefSchema) }),
 ]);
 
 export const RoomRefSchema = z.union([
@@ -83,6 +84,12 @@ export const RoomRefSchema = z.union([
   /** The answer to the innermost enclosing `prompt` effect. */
   z.object({ ref: z.literal('chosen') }),
 ]);
+
+export const TraitRefSchema = z.union([
+  TraitSchema,
+  z.object({ ref: z.literal('chosen') }),
+]);
+export type TraitRef = z.infer<typeof TraitRefSchema>;
 
 const FlagValueSchema = z.union([z.number(), z.boolean(), z.string()]);
 const FlagScopeSchema = z.enum(['game', 'seat', 'tile']);
@@ -152,17 +159,28 @@ export const ConditionSchema: z.ZodType<Condition> = z.lazy(() =>
 // prompt; the resolved candidates live in the runtime PendingPrompt payload
 // (@bahoth/shared), not here.
 export type PromptSpec =
-  | { kind: 'choose_room'; among: 'placed' | 'reachable_from_actor' }
-  | { kind: 'choose_target'; among: 'other_seats_in_room' | 'all_heroes' };
+  | {
+      kind: 'choose_room';
+      among: 'placed' | 'reachable_from_actor' | 'adjacent_or_same_room';
+    }
+  | {
+      kind: 'choose_target';
+      among: 'other_seats_in_room' | 'all_heroes' | 'seats_in_room';
+    }
+  | { kind: 'choose_trait'; traits?: Trait[] | undefined };
 
 export const PromptSpecSchema = z.discriminatedUnion('kind', [
   z.object({
     kind: z.literal('choose_room'),
-    among: z.enum(['placed', 'reachable_from_actor']),
+    among: z.enum(['placed', 'reachable_from_actor', 'adjacent_or_same_room']),
   }),
   z.object({
     kind: z.literal('choose_target'),
-    among: z.enum(['other_seats_in_room', 'all_heroes']),
+    among: z.enum(['other_seats_in_room', 'all_heroes', 'seats_in_room']),
+  }),
+  z.object({
+    kind: z.literal('choose_trait'),
+    traits: z.array(TraitSchema).optional(),
   }),
 ]);
 
@@ -170,7 +188,7 @@ export const PromptSpecSchema = z.discriminatedUnion('kind', [
 // Effect
 
 export type Effect =
-  | { e: 'trait'; who: SeatRef; trait: Trait; delta: number }
+  | { e: 'trait'; who: SeatRef; trait: TraitRef; delta: number }
   | { e: 'move'; who: SeatRef; to: RoomRef }
   | {
       e: 'set_flag';
@@ -199,7 +217,7 @@ export const EffectSchema: z.ZodType<Effect> = z.lazy(() =>
     z.object({
       e: z.literal('trait'),
       who: SeatRefSchema,
-      trait: TraitSchema,
+      trait: TraitRefSchema,
       delta: z.number().int(),
     }),
     z.object({ e: z.literal('move'), who: SeatRefSchema, to: RoomRefSchema }),

@@ -26,6 +26,7 @@ import {
   type PromptKind,
   type SeatId,
   type TargetRef,
+  type Trait,
 } from '@bahoth/shared';
 import type {
   Condition,
@@ -36,7 +37,7 @@ import type {
   SeatRef,
 } from '@bahoth/content';
 import { raisePrompt } from './prompts.js';
-import { getReachable } from './movement.js';
+import { getConnections, getReachable } from './movement.js';
 import { traitValue } from './selectors.js';
 import { makeRng, nextInt, rollDice } from './rng.js';
 import { gainTrait, loseTrait } from './traits.js';
@@ -51,7 +52,7 @@ export class EffectError extends Error {
 export interface EffectContext {
   actor: SeatId;
   /** The answer to the innermost enclosing `prompt` (`{ ref: 'chosen' }`). */
-  chosen?: TargetRef | PlacedId | undefined;
+  chosen?: TargetRef | PlacedId | Trait | undefined;
   /** The seat the innermost enclosing `for_each` is on (`{ ref: 'each' }`). */
   each?: SeatId | undefined;
 }
@@ -89,7 +90,7 @@ export function runEffects(
 export function resumeEffects(
   state: GameState,
   resume: EffectResume,
-  answer: TargetRef | PlacedId,
+  answer: TargetRef | PlacedId | Trait,
   content: Content,
 ): EffectOutcome {
   const events: GameEvent[] = [];
@@ -275,11 +276,13 @@ function runList(
       const payload: EffectPromptPayload =
         resolved.kind === 'choose_room'
           ? { kind: 'choose_room', candidates: resolved.candidates as PlacedId[], resume }
-          : {
-              kind: 'choose_target',
-              candidates: resolved.candidates as TargetRef[],
-              resume,
-            };
+          : resolved.kind === 'choose_trait'
+            ? { kind: 'choose_trait', candidates: resolved.candidates as Trait[], resume }
+            : {
+                kind: 'choose_target',
+                candidates: resolved.candidates as TargetRef[],
+                resume,
+              };
       const kind: PromptKind = resolved.kind;
       const pending = raisePrompt(working, {
         seatId: seat,
@@ -294,14 +297,7 @@ function runList(
       const seat = resolveSingleSeat(working, effect.who, activeCtx);
       let diceCount = effect.dice ?? 1;
       if (effect.trait) {
-        const player = working.players[seat];
-        if (player && player.charId) {
-          const charDef = content.charactersById[player.charId];
-          const track = charDef?.tracks[effect.trait];
-          const idx = player.traits[effect.trait];
-          const val = track ? Number(track[idx]) : 1;
-          diceCount = isNaN(val) ? 1 : val;
-        }
+        diceCount = traitValue(working, seat, effect.trait, content);
       }
       diceCount = Math.max(1, Math.min(8, diceCount));
       const rng = working.rng ?? makeRng(12345);
@@ -334,7 +330,7 @@ function runForEach(
   ctx: EffectContext,
   content: Content,
 ): RunResult {
-  const seats = resolveSeatSet(state, effect.who, ctx);
+  const seats = resolveSeatSet(state, effect.who, ctx, content);
   const events: GameEvent[] = [];
   let working = state;
 
@@ -357,7 +353,10 @@ function runForEach(
 
 function applyLeaf(
   state: GameState,
-  effect: Exclude<Effect, { e: 'if' } | { e: 'for_each' } | { e: 'prompt' } | { e: 'roll' }>,
+  effect: Exclude<
+    Effect,
+    { e: 'if' } | { e: 'for_each' } | { e: 'prompt' } | { e: 'roll' }
+  >,
   ctx: EffectContext,
   content: Content,
 ): EffectOutcome {
@@ -384,11 +383,14 @@ function applyTrait(
   content: Content,
 ): EffectOutcome {
   const seat = resolveSingleSeat(state, effect.who, ctx);
+  const trait: Trait =
+    typeof effect.trait === 'string' ? effect.trait : (ctx.chosen as Trait);
+  if (!trait) return { state, events: [] };
   if (effect.delta > 0) {
-    return gainTrait(state, seat, effect.trait, effect.delta, content);
+    return gainTrait(state, seat, trait, effect.delta, content);
   }
   if (effect.delta < 0) {
-    return loseTrait(state, seat, effect.trait, -effect.delta, content);
+    return loseTrait(state, seat, trait, -effect.delta, content);
   }
   return { state, events: [] };
 }
@@ -530,6 +532,11 @@ function resolveSingleSeat(state: GameState, ref: SeatRef, ctx: EffectContext): 
     );
   }
   if ('seat' in ref) return ref.seat;
+  if ('in_room' in ref) {
+    throw new EffectError(
+      'SeatRef "in_room" resolves to a set — use for_each, not a single-seat effect',
+    );
+  }
   if (ref.ref === 'chosen') {
     if (
       typeof ctx.chosen !== 'object' ||
@@ -547,12 +554,24 @@ function resolveSingleSeat(state: GameState, ref: SeatRef, ctx: EffectContext): 
 }
 
 /** For `for_each`'s `who` (and only there): the set to iterate. `'any_hero'` is existential, not a set — evalCondition handles its quantifier separately; iterating it makes no sense. */
-function resolveSeatSet(state: GameState, ref: SeatRef, ctx: EffectContext): SeatId[] {
+function resolveSeatSet(
+  state: GameState,
+  ref: SeatRef,
+  ctx: EffectContext,
+  content: Content,
+): SeatId[] {
   if (ref === 'all_heroes') return heroSeats(state);
   if (ref === 'any_hero') {
     throw new EffectError(
       'SeatRef "any_hero" is existential — use "all_heroes" to iterate everyone',
     );
+  }
+  if (typeof ref === 'object' && 'in_room' in ref) {
+    const { id } = resolveRoomRef(state, ref.in_room, ctx, content);
+    if (!id) return [];
+    return Object.values(state.players)
+      .filter((p) => !p.isDead && !p.removed && p.location === id)
+      .map((p) => p.seatId);
   }
   return [resolveSingleSeat(state, ref, ctx)];
 }
@@ -612,31 +631,50 @@ function resolvePromptCandidates(
   content: Content,
 ):
   | { kind: 'choose_room'; candidates: PlacedId[] }
-  | { kind: 'choose_target'; candidates: TargetRef[] } {
+  | { kind: 'choose_target'; candidates: TargetRef[] }
+  | { kind: 'choose_trait'; candidates: Trait[] } {
   if (spec.kind === 'choose_room') {
     if (spec.among === 'placed') {
       return { kind: 'choose_room', candidates: Object.keys(state.board.placed) };
     }
+    if (spec.among === 'adjacent_or_same_room') {
+      const loc = state.players[ctx.actor]?.location;
+      if (!loc) return { kind: 'choose_room', candidates: [] };
+      const conns = getConnections(state, loc, content);
+      return { kind: 'choose_room', candidates: [loc, ...conns] };
+    }
     return { kind: 'choose_room', candidates: getReachable(state, ctx.actor, content) };
   }
 
-  if (spec.among === 'other_seats_in_room') {
+  if (spec.kind === 'choose_target') {
     const location = state.players[ctx.actor]?.location ?? null;
-    const candidates: TargetRef[] = Object.values(state.players)
-      .filter(
-        (p) =>
-          p.seatId !== ctx.actor && p.location === location && !p.isDead && !p.removed,
-      )
-      .map((p) => ({ kind: 'seat', seatId: p.seatId }));
+    if (spec.among === 'other_seats_in_room') {
+      const candidates: TargetRef[] = Object.values(state.players)
+        .filter(
+          (p) =>
+            p.seatId !== ctx.actor && p.location === location && !p.isDead && !p.removed,
+        )
+        .map((p) => ({ kind: 'seat', seatId: p.seatId }));
+      return { kind: 'choose_target', candidates };
+    }
+    if (spec.among === 'seats_in_room') {
+      const candidates: TargetRef[] = Object.values(state.players)
+        .filter((p) => p.location === location && !p.isDead && !p.removed)
+        .map((p) => ({ kind: 'seat', seatId: p.seatId }));
+      return { kind: 'choose_target', candidates };
+    }
+
+    // among: 'all_heroes'
+    const candidates: TargetRef[] = heroSeats(state).map((seatId) => ({
+      kind: 'seat',
+      seatId,
+    }));
     return { kind: 'choose_target', candidates };
   }
 
-  // among: 'all_heroes'
-  const candidates: TargetRef[] = heroSeats(state).map((seatId) => ({
-    kind: 'seat',
-    seatId,
-  }));
-  return { kind: 'choose_target', candidates };
+  const candidates: Trait[] =
+    spec.traits ?? (['speed', 'might', 'sanity', 'knowledge'] as Trait[]);
+  return { kind: 'choose_trait', candidates };
 }
 
 // ---------------------------------------------------------------------------

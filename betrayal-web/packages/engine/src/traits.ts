@@ -19,13 +19,7 @@
  * - inventory/card drop is deferred to Phase 7 room-card-piles (retained on corpse).
  */
 
-import type {
-  GameEvent,
-  GameState,
-  PlayerState,
-  SeatId,
-  Trait,
-} from '@bahoth/shared';
+import type { GameEvent, GameState, PlayerState, SeatId, Trait } from '@bahoth/shared';
 import type { Content } from '@bahoth/content';
 import { resolvePromptWithDefault } from './reduce.js';
 import { nextSeatInOrder } from './selectors.js';
@@ -69,11 +63,11 @@ export function killExplorer(
   events.push({ t: 'died', seat });
 
   // 2. Check remaining living players for game over
-  const remainingHeroes = Object.values(working.players).filter(
-    (p) => (p.seatId === seat ? false : !p.isTraitor && !p.isDead && !p.removed),
+  const remainingHeroes = Object.values(working.players).filter((p) =>
+    p.seatId === seat ? false : !p.isTraitor && !p.isDead && !p.removed,
   );
-  const remainingTraitor = Object.values(working.players).filter(
-    (p) => (p.seatId === seat ? false : p.isTraitor && !p.isDead && !p.removed),
+  const remainingTraitor = Object.values(working.players).filter((p) =>
+    p.seatId === seat ? false : p.isTraitor && !p.isDead && !p.removed,
   );
   const remainingMonsters = Object.values(working.monsters).filter((m) => !m.isDead);
 
@@ -93,7 +87,9 @@ export function killExplorer(
       nextPhase = 'game_over';
       events.push({ t: 'game_over', result });
     } else if (
-      (working.haunt?.traitorSeat ? remainingTraitor.length === 0 : Object.keys(working.monsters).length > 0) &&
+      (working.haunt?.traitorSeat
+        ? remainingTraitor.length === 0
+        : Object.keys(working.monsters).length > 0) &&
       remainingMonsters.length === 0
     ) {
       const heroWinners = remainingHeroes.map((p) => p.seatId);

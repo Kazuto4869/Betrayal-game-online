@@ -4,6 +4,7 @@ import { reduce } from './reduce.js';
 import { checkInvariants } from './invariants.js';
 import { startedGame } from './testing.js';
 import type { GameState } from '@bahoth/shared';
+import { traitValue } from './selectors.js';
 
 const content = fixtureContent();
 
@@ -24,14 +25,18 @@ describe('M3: Cards, Decks, and Items', () => {
     const active = g.state.activeSeat!;
     const stateWithItem = state_with_item(g.state, active, 'item.adrenaline_shot');
 
-    const beforeSpeed = stateWithItem.players[active]!.traits.speed;
+    const beforeSpeed = traitValue(stateWithItem, active, 'speed', content);
+    const beforeIndex = stateWithItem.players[active]!.traits.speed;
     const resUse = reduce(
       stateWithItem,
       { t: 'USE_ITEM', seat: active, cardId: 'item.adrenaline_shot' },
       content,
     );
     expect(resUse.error).toBeUndefined();
-    expect(resUse.state.players[active]!.traits.speed).toBeGreaterThan(beforeSpeed);
+    expect(traitValue(resUse.state, active, 'speed', content)).toBeGreaterThan(
+      beforeSpeed,
+    );
+    expect(resUse.state.players[active]!.traits.speed).toBe(beforeIndex);
     expect(checkInvariants(resUse.state)).toEqual([]);
 
     // Test DROP
@@ -119,9 +124,18 @@ describe('M4: Haunt Roll, Haunt Trigger, and Combat', () => {
       },
       players: {
         ...g.state.players,
-        [active]: { ...g.state.players[active]!, location: loc, traits: { ...g.state.players[active]!.traits, might: 8 } },
+        [active]: {
+          ...g.state.players[active]!,
+          location: loc,
+          traits: { ...g.state.players[active]!.traits, might: 8 },
+        },
         // Opponent has Might 1, taking any damage drops them to skull (index 0)
-        [opponent]: { ...g.state.players[opponent]!, location: loc, isTraitor: true, traits: { ...g.state.players[opponent]!.traits, might: 1 } },
+        [opponent]: {
+          ...g.state.players[opponent]!,
+          location: loc,
+          isTraitor: true,
+          traits: { ...g.state.players[opponent]!.traits, might: 1 },
+        },
       },
     };
 

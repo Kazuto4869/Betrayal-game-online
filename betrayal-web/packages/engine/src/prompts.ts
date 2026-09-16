@@ -27,6 +27,7 @@ import {
   type Rotation,
   type SeatId,
   type TargetRef,
+  type Trait,
 } from '@bahoth/shared';
 
 function targetRefEquals(a: TargetRef, b: unknown): boolean {
@@ -113,6 +114,18 @@ export const PROMPT_HANDLERS: Record<PromptKind, PromptHandler> = {
   choose_card: unraised, // M3, with the decks
   choose_room: effectPromptHandler('choose_room'),
   confirm: unraised, // M4, with the haunt
+  choose_trait: {
+    validate(payload, answer) {
+      if (!isEffectPromptPayload(payload) || payload.kind !== 'choose_trait')
+        return false;
+      if (typeof answer !== 'string') return false;
+      return payload.candidates.includes(answer as Trait);
+    },
+    legalAnswers(payload) {
+      if (!isEffectPromptPayload(payload) || payload.kind !== 'choose_trait') return [];
+      return [...payload.candidates];
+    },
+  },
 };
 
 /** Whether `answer` is one this prompt would accept. */

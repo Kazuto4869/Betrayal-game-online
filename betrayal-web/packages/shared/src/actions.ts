@@ -27,6 +27,7 @@ export type GameAction =
   | { t: 'USE_ITEM'; seat: SeatId; cardId: CardId; target?: TargetRef | undefined }
   | { t: 'TRADE'; seat: SeatId; to: SeatId; cardIds: CardId[] }
   | { t: 'DROP'; seat: SeatId; cardIds: CardId[] }
+  | { t: 'PICKUP'; seat: SeatId; cardIds: CardId[] }
   | { t: 'ROOM_ACTION'; seat: SeatId; actionId: string }
   | { t: 'ATTACK'; seat: SeatId; target: TargetRef; trait: Trait }
   | { t: 'ASSIGN_DAMAGE'; seat: SeatId; alloc: Partial<Record<Trait, number>> }

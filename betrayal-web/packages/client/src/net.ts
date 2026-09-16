@@ -54,7 +54,8 @@ export class Connection {
 
   connect(): void {
     this.closedByUs = false;
-    const envWs = (import.meta as unknown as { env?: Record<string, string> }).env?.VITE_WS_URL;
+    const envWs = (import.meta as unknown as { env?: Record<string, string> }).env
+      ?.VITE_WS_URL;
     let url: string;
     if (envWs) {
       url = envWs.endsWith(WS_PATH) ? envWs : `${envWs.replace(/\/$/, '')}${WS_PATH}`;

@@ -25,9 +25,7 @@ export function GameOverModal() {
         <p className="game-over-modal__reason">{result.reason}</p>
         <div className="game-over-modal__winners">
           <strong>Winners:</strong>{' '}
-          {result.winners
-            .map((sid) => state.players[sid]?.name ?? sid)
-            .join(', ')}
+          {result.winners.map((sid) => state.players[sid]?.name ?? sid).join(', ')}
         </div>
       </div>
     </div>

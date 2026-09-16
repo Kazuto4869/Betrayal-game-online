@@ -9,14 +9,21 @@ export function HauntBanner() {
   const activeRoll = useStore((s) => s.activeRoll);
   const [expanded, setExpanded] = useState(false);
 
-  if (!state || state.phase !== 'haunt' || !state.haunt || !content || activeCardDraw || activeRoll) {
+  if (
+    !state ||
+    state.phase !== 'haunt' ||
+    !state.haunt ||
+    !content ||
+    activeCardDraw ||
+    activeRoll
+  ) {
     return null;
   }
 
   const haunt = content.hauntsById[state.haunt.hauntId];
   if (!haunt) return null;
 
-  const isTraitor = seatId ? state.players[seatId]?.isTraitor ?? false : false;
+  const isTraitor = seatId ? (state.players[seatId]?.isTraitor ?? false) : false;
   const traitorPlayer = state.haunt.traitorSeat
     ? state.players[state.haunt.traitorSeat]
     : null;
@@ -24,7 +31,9 @@ export function HauntBanner() {
   const side = isTraitor ? haunt.traitor : haunt.heroes;
 
   return (
-    <div className={`haunt-banner ${isTraitor ? 'haunt-banner--traitor' : 'haunt-banner--hero'}`}>
+    <div
+      className={`haunt-banner ${isTraitor ? 'haunt-banner--traitor' : 'haunt-banner--hero'}`}
+    >
       <div className="haunt-banner__header">
         <div className="haunt-banner__title-group">
           <span className="haunt-banner__badge">

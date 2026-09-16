@@ -13,6 +13,7 @@ import {
   type Floor,
   type GameState,
   type PlacedId,
+  type PlayerState,
   type SeatId,
 } from '@bahoth/shared';
 import type { Content } from '@bahoth/content';
@@ -262,14 +263,28 @@ export function beginTurnFor(
 ): GameState {
   const player = state.players[seat];
   if (!player) return state;
-  return {
+  const flags = { ...player.flags };
+  delete flags['adrenaline_speed'];
+  const nextPlayer: PlayerState = {
+    ...player,
+    flags,
+    usedCardsThisTurn: [],
+    cameFrom: null,
+  };
+  const nextState: GameState = {
     ...state,
     players: {
       ...state.players,
+      [seat]: nextPlayer,
+    },
+  };
+  return {
+    ...nextState,
+    players: {
+      ...nextState.players,
       [seat]: {
-        ...player,
-        movesLeft: traitValue(state, seat, 'speed', content),
-        cameFrom: null,
+        ...nextPlayer,
+        movesLeft: traitValue(nextState, seat, 'speed', content),
       },
     },
   };

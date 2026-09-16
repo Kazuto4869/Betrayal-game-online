@@ -32,13 +32,13 @@ why a roll, trait change, movement restriction, or Haunt occurred.
 
 ## Evidence ledger
 
-| Finding | Evidence | Label | Release implication |
-| --- | --- | --- | --- |
-| Haunt-roll presentation can precede the Omen reveal | Direct player report | Observed | Blocking; ordering must be reproduced and fixed |
-| Some Omen actions require rolls, choices, conditions, or persistent ownership | Existing card/effect model and player report | Derived + Observed | Each Omen needs a mechanic coverage matrix |
-| Special rooms can appear inert | Direct player report | Observed | Blocking for rooms marked automated |
-| A single reducer result may emit card and roll events together | Current architecture | Derived | UI event order alone may not represent rule-resolution order |
-| Actual behavior across all Omen cards and special rooms has not been playtested | No complete session record supplied | Unknown | Require scripted and manual coverage before release |
+| Finding                                                                         | Evidence                                     | Label              | Release implication                                          |
+| ------------------------------------------------------------------------------- | -------------------------------------------- | ------------------ | ------------------------------------------------------------ |
+| Haunt-roll presentation can precede the Omen reveal                             | Direct player report                         | Observed           | Blocking; ordering must be reproduced and fixed              |
+| Some Omen actions require rolls, choices, conditions, or persistent ownership   | Existing card/effect model and player report | Derived + Observed | Each Omen needs a mechanic coverage matrix                   |
+| Special rooms can appear inert                                                  | Direct player report                         | Observed           | Blocking for rooms marked automated                          |
+| A single reducer result may emit card and roll events together                  | Current architecture                         | Derived            | UI event order alone may not represent rule-resolution order |
+| Actual behavior across all Omen cards and special rooms has not been playtested | No complete session record supplied          | Unknown            | Require scripted and manual coverage before release          |
 
 ## Player-facing failure modes
 
@@ -104,12 +104,12 @@ Production restoration to 3 players is a separate explicit decision.
 
 ## GMT map
 
-| Goal | Means | Tool | Expected player behavior | Failure signal |
-| --- | --- | --- | --- | --- |
-| Understand exploration consequences | Causal feedback | Ordered reveal/effect queue | Player predicts why the next roll occurs | Dice appears before the card |
-| Make Omen acquisition meaningful | Risk and persistent state | Card resolution, inventory, prompts | Player reads, resolves, then anticipates Haunt risk | Card is cosmetic or effect is skipped |
-| Treat rooms as game state, not background art | Spatial rules | Entry/exit/end-turn hooks and room actions | Player changes route or decision around a room | Special room has no visible behavior |
-| Preserve tension without confusion | Pacing and information | One blocking presentation at a time | Player can explain the last consequence | Overlapping modals or unexplained changes |
+| Goal                                          | Means                     | Tool                                       | Expected player behavior                            | Failure signal                            |
+| --------------------------------------------- | ------------------------- | ------------------------------------------ | --------------------------------------------------- | ----------------------------------------- |
+| Understand exploration consequences           | Causal feedback           | Ordered reveal/effect queue                | Player predicts why the next roll occurs            | Dice appears before the card              |
+| Make Omen acquisition meaningful              | Risk and persistent state | Card resolution, inventory, prompts        | Player reads, resolves, then anticipates Haunt risk | Card is cosmetic or effect is skipped     |
+| Treat rooms as game state, not background art | Spatial rules             | Entry/exit/end-turn hooks and room actions | Player changes route or decision around a room      | Special room has no visible behavior      |
+| Preserve tension without confusion            | Pacing and information    | One blocking presentation at a time        | Player can explain the last consequence             | Overlapping modals or unexplained changes |
 
 ## Cheapest decisive playtest
 
@@ -137,4 +137,3 @@ non-overlapping feedback in rule order.
 Revise signal: rules resolve correctly but UI order or explanation is unclear.  
 Stop signal: a card/room effect is silently skipped, duplicated after reconnect,
 or the Haunt roll advances while an Omen decision remains unresolved.
-

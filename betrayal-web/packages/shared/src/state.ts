@@ -88,6 +88,7 @@ export interface PlayerState {
    */
   removed: boolean;
   hasAttackedThisTurn: boolean;
+  usedCardsThisTurn?: CardId[];
   flags: Flags;
 }
 
@@ -99,6 +100,7 @@ export interface PlacedTile {
   y: number;
   rotation: Rotation;
   discoveredBy: SeatId | null;
+  droppedItems?: CardId[];
   flags: Flags;
 }
 
@@ -130,6 +132,7 @@ export const PROMPT_KINDS = [
   'choose_card',
   'choose_room',
   'confirm',
+  'choose_trait',
 ] as const;
 
 export type PromptKind = (typeof PROMPT_KINDS)[number];
@@ -215,6 +218,7 @@ export interface EffectResume {
    * list this prompt was in, or, if it was inside a `for_each`, the rest of
    * the list AFTER the whole loop. */
   remaining: unknown[];
+  discardCardId?: CardId | undefined;
   forEach?:
     | {
         /** Seats whose `body` hasn't started yet. */
@@ -239,13 +243,15 @@ export interface EffectResume {
  */
 export type EffectPromptPayload =
   | { kind: 'choose_room'; candidates: PlacedId[]; resume: EffectResume }
-  | { kind: 'choose_target'; candidates: TargetRef[]; resume: EffectResume };
+  | { kind: 'choose_target'; candidates: TargetRef[]; resume: EffectResume }
+  | { kind: 'choose_trait'; candidates: Trait[]; resume: EffectResume };
 
 /** Same role as `isRotateTilePayload`: shared owns the shape so invariants.ts and the client can check it without importing engine internals. */
 export function isEffectPromptPayload(p: unknown): p is EffectPromptPayload {
   if (typeof p !== 'object' || p === null) return false;
   const r = p as Record<string, unknown>;
-  if (r.kind !== 'choose_room' && r.kind !== 'choose_target') return false;
+  if (r.kind !== 'choose_room' && r.kind !== 'choose_target' && r.kind !== 'choose_trait')
+    return false;
   if (!Array.isArray(r.candidates)) return false;
   if (typeof r.resume !== 'object' || r.resume === null) return false;
   const resume = r.resume as Record<string, unknown>;

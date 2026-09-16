@@ -53,7 +53,7 @@ describe('rng', () => {
 
   it('rollDice accepts counts up to max 8 and total matches face sum', () => {
     for (let count = 1; count <= 8; count++) {
-      const [faces, total, nextRng] = rollDice(makeRng( count * 10), count);
+      const [faces, total, nextRng] = rollDice(makeRng(count * 10), count);
       expect(faces).toHaveLength(count);
       for (const f of faces) expect([0, 1, 2]).toContain(f);
       expect(total).toBe(faces.reduce((a, b) => a + b, 0));

@@ -31,12 +31,16 @@ export function CardModal() {
         ? '🎒 VẬT PHẨM (ITEM)'
         : '⚡ BIẾN CỐ (EVENT)';
 
+  const presentationQueue = useStore((s) => s.presentationQueue);
+  const nextItem = presentationQueue[1];
+  const nextRoll = nextItem?.kind === 'roll' ? nextItem.roll : activeRoll;
+
   let actionButtonLabel = '✅ Đã Đọc Xong (Xác Nhận)';
-  if (activeRoll) {
+  if (nextRoll) {
     actionButtonLabel =
-      activeRoll.hauntRoll || activeRoll.reason === 'haunt_roll'
+      nextRoll.hauntRoll || nextRoll.reason === 'haunt_roll'
         ? '🔮 Tiếp Tục: Gieo Xúc Xắc Ám Ảnh (Haunt Roll)'
-        : `🎲 Tiếp Tục: Gieo Xúc Xắc Kiểm Tra (${activeRoll.reason.toUpperCase()})`;
+        : `🎲 Tiếp Tục: Gieo Xúc Xắc Kiểm Tra (${nextRoll.reason.toUpperCase()})`;
   } else if (card.deck === 'item' || card.deck === 'omen') {
     actionButtonLabel = '🎒 Nhận Thẻ Vào Túi Đồ (Xác Nhận)';
   }
@@ -46,9 +50,7 @@ export function CardModal() {
       <div className="card-modal" onClick={(e) => e.stopPropagation()}>
         {!revealed ? (
           <div className="card-modal__unrevealed">
-            <div className={`card-modal__badge ${deckColorClass}`}>
-              {deckTitle}
-            </div>
+            <div className={`card-modal__badge ${deckColorClass}`}>{deckTitle}</div>
             <div className="card-modal__back-art">
               <span className="card-modal__back-glyph">
                 {card.deck === 'omen' ? '🔮' : card.deck === 'item' ? '🗝️' : '⚡'}
@@ -58,7 +60,8 @@ export function CardModal() {
               Khám Phá Lá Bài {card.deck.toUpperCase()}
             </h2>
             <p className="card-modal__intro">
-              Một năng lượng kỳ bí bao trùm căn phòng. Hãy lật thẻ bài để xem số phận của bạn!
+              Một năng lượng kỳ bí bao trùm căn phòng. Hãy lật thẻ bài để xem số phận của
+              bạn!
             </p>
             <div className="card-modal__actions">
               <button
@@ -72,18 +75,18 @@ export function CardModal() {
           </div>
         ) : (
           <div className="card-modal__revealed">
-            <div className={`card-modal__badge ${deckColorClass}`}>
-              {deckTitle}
-            </div>
+            <div className={`card-modal__badge ${deckColorClass}`}>{deckTitle}</div>
             <h2 className="card-modal__title">{card.name}</h2>
             <div className="card-modal__tags">
-              {card.isWeapon && <span className="card-modal__tag">⚔️ Vũ Khí (Weapon)</span>}
-              {card.isCompanion && <span className="card-modal__tag">🐕 Bạn Đồng Hành (Companion)</span>}
+              {card.isWeapon && (
+                <span className="card-modal__tag">⚔️ Vũ Khí (Weapon)</span>
+              )}
+              {card.isCompanion && (
+                <span className="card-modal__tag">🐕 Bạn Đồng Hành (Companion)</span>
+              )}
             </div>
             <div className="card-modal__text">{card.text}</div>
-            {card.flavor && (
-              <div className="card-modal__flavor">“{card.flavor}”</div>
-            )}
+            {card.flavor && <div className="card-modal__flavor">“{card.flavor}”</div>}
             <div className="card-modal__actions">
               <button
                 type="button"

@@ -721,8 +721,12 @@ h2 {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .card-modal {
@@ -850,8 +854,13 @@ h2 {
 }
 
 @keyframes pulse-slow {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.1); }
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
 }
 
 .card-modal__intro {
@@ -897,7 +906,9 @@ h2 {
   border: 2px solid var(--accent);
   border-radius: 12px;
   padding: 24px;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9), 0 0 30px rgba(220, 150, 60, 0.2);
+  box-shadow:
+    0 20px 50px rgba(0, 0, 0, 0.9),
+    0 0 30px rgba(220, 150, 60, 0.2);
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -905,8 +916,14 @@ h2 {
 }
 
 @keyframes scaleIn {
-  from { transform: scale(0.9); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 .dice-tray__header {
@@ -947,7 +964,9 @@ h2 {
   place-items: center;
   font-weight: 900;
   font-size: 20px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4), inset 0 -2px 0 rgba(0, 0, 0, 0.25);
+  box-shadow:
+    0 4px 8px rgba(0, 0, 0, 0.4),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.25);
   transition: transform 0.1s ease;
 }
 
@@ -958,8 +977,12 @@ h2 {
 }
 
 @keyframes dice-shake {
-  0% { transform: rotate(-10deg) scale(1.1); }
-  100% { transform: rotate(10deg) scale(1.1); }
+  0% {
+    transform: rotate(-10deg) scale(1.1);
+  }
+  100% {
+    transform: rotate(10deg) scale(1.1);
+  }
 }
 
 .dice-tray__die--0 {
@@ -1249,4 +1272,3 @@ h2 {
     animation: none !important;
   }
 }
-

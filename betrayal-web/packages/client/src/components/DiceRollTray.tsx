@@ -38,13 +38,25 @@ export function DiceRollTray() {
   if (!activeRoll || activeCardDraw) return null;
 
   const isHaunt = Boolean(activeRoll.hauntRoll) || activeRoll.reason === 'haunt_roll';
+  const presentationQueue = useStore((s) => s.presentationQueue);
+  const nextItem = presentationQueue[1];
+  const nextIsHaunt =
+    nextItem?.kind === 'roll' &&
+    (Boolean(nextItem.roll.hauntRoll) || nextItem.roll.reason === 'haunt_roll');
+  const buttonLabel = nextItem
+    ? nextIsHaunt
+      ? '🔮 Tiếp Tục: Gieo Xúc Xắc Ám Ảnh (Haunt Roll)'
+      : '➡️ Tiếp Tục'
+    : '✅ Xác Nhận / Tiếp Tục';
 
   return (
     <div className="modal-backdrop modal-backdrop--dice">
       <div className="dice-tray dice-tray--modal" role="alert" aria-live="assertive">
         <div className="dice-tray__header">
           <span className="dice-tray__reason">
-            {isHaunt ? '🔮 HAUNT ROLL (ĐỔ XÚC XẮC ÁM ẢNH)' : `🎲 ${activeRoll.reason.toUpperCase()}`}
+            {isHaunt
+              ? '🔮 HAUNT ROLL (ĐỔ XÚC XẮC ÁM ẢNH)'
+              : `🎲 ${activeRoll.reason.toUpperCase()}`}
           </span>
         </div>
 
@@ -91,7 +103,7 @@ export function DiceRollTray() {
                 className="btn btn--primary btn--full"
                 onClick={dismissRoll}
               >
-                ✅ Xác Nhận / Tiếp Tục
+                {buttonLabel}
               </button>
             </div>
           </div>

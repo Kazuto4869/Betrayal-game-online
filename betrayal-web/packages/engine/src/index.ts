@@ -12,7 +12,15 @@ export {
   takenColours,
   traitValue,
 } from './selectors.js';
-export { makeRng, next, nextInt, rollDie, rollDice, shuffle, type DieFace } from './rng.js';
+export {
+  makeRng,
+  next,
+  nextInt,
+  rollDie,
+  rollDice,
+  shuffle,
+  type DieFace,
+} from './rng.js';
 export {
   gainTrait,
   loseTrait,

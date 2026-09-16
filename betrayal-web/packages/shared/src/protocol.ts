@@ -71,6 +71,11 @@ export const GameActionSchema = z.discriminatedUnion('t', [
     seat: z.string(),
     cardIds: z.array(z.string()).max(32),
   }),
+  z.object({
+    t: z.literal('PICKUP'),
+    seat: z.string(),
+    cardIds: z.array(z.string()).max(32),
+  }),
   z.object({ t: z.literal('ROOM_ACTION'), seat: z.string(), actionId: z.string() }),
   z.object({
     t: z.literal('ATTACK'),

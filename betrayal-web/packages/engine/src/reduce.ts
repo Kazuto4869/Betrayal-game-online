@@ -61,6 +61,7 @@ import {
   nextSeatInOrder,
   takenColours,
   traitValue,
+  getWeaponAttackModifier,
 } from './selectors.js';
 import { beginTurnFor, findPath } from './movement.js';
 import { rollDice, shuffle } from './rng.js';
@@ -152,16 +153,15 @@ function dispatch(state: GameState, action: GameAction, content: Content): Reduc
       return useItem(state, action.seat, action.cardId, action.target, content);
     case 'DROP':
       return dropItems(state, action.seat, action.cardIds, content);
+    case 'PICKUP':
+      return pickupItems(state, action.seat, action.cardIds, content);
     case 'ATTACK':
       return attack(state, action.seat, action.target, action.trait, content);
     case 'ROOM_ACTION':
       return roomAction(state, action.seat, action.actionId, content);
     case 'TRADE':
     case 'ASSIGN_DAMAGE':
-      return fail(
-        'UNKNOWN_ACTION',
-        `${action.t} is not implemented yet`,
-      );
+      return fail('UNKNOWN_ACTION', `${action.t} is not implemented yet`);
   }
 }
 
@@ -198,6 +198,7 @@ function makePlayer(seatId: SeatId, name: string): PlayerState {
     disconnectedAt: null,
     removed: false,
     hasAttackedThisTurn: false,
+    usedCardsThisTurn: [],
     flags: {},
   };
 }
@@ -312,7 +313,10 @@ function startGame(state: GameState, seat: SeatId, content: Content): ReduceResu
   // so replay reproduces the same decks every time (docs/05-engine.md#54).
   const [tileDeck, rngAfterTile] = shuffle(rngAfterOrder, content.deckTiles);
   const [itemDeck, rngAfterItem] = shuffle(rngAfterTile, content.deckCards?.item ?? []);
-  const [eventDeck, rngAfterEvent] = shuffle(rngAfterItem, content.deckCards?.event ?? []);
+  const [eventDeck, rngAfterEvent] = shuffle(
+    rngAfterItem,
+    content.deckCards?.event ?? [],
+  );
   const [omenDeck, nextRng] = shuffle(rngAfterEvent, content.deckCards?.omen ?? []);
 
   const board = placeStartingLayout(content);
@@ -649,7 +653,12 @@ function finishDiscovery(
           },
         };
         if (cardDef?.onDraw && cardDef.onDraw.length > 0) {
-          const effOutcome = runEffects(workingState, cardDef.onDraw, { actor: seat }, content);
+          const effOutcome = runEffects(
+            workingState,
+            cardDef.onDraw,
+            { actor: seat },
+            content,
+          );
           workingState = effOutcome.state;
           events.push(...effOutcome.events);
         }
@@ -668,7 +677,12 @@ function finishDiscovery(
           },
         };
         if (cardDef?.onDraw && cardDef.onDraw.length > 0) {
-          const effOutcome = runEffects(workingState, cardDef.onDraw, { actor: seat }, content);
+          const effOutcome = runEffects(
+            workingState,
+            cardDef.onDraw,
+            { actor: seat },
+            content,
+          );
           workingState = effOutcome.state;
           events.push(...effOutcome.events);
         }
@@ -679,23 +693,44 @@ function finishDiscovery(
           const triggered = total < nextOmensDrawn;
           events.push({ t: 'haunt_roll', total, needed: nextOmensDrawn, triggered });
           if (triggered) {
-            const hauntOutcome = triggerHaunt(workingState, seat, cardId, payload.tileId, content);
+            const hauntOutcome = triggerHaunt(
+              workingState,
+              seat,
+              cardId,
+              payload.tileId,
+              content,
+            );
             workingState = hauntOutcome.state;
             events.push(...hauntOutcome.events);
           }
         }
       } else if (symbol === 'event') {
         if (cardDef?.onDraw && cardDef.onDraw.length > 0) {
-          const effOutcome = runEffects(workingState, cardDef.onDraw, { actor: seat }, content);
+          const effOutcome = runEffects(
+            workingState,
+            cardDef.onDraw,
+            { actor: seat },
+            content,
+          );
           workingState = effOutcome.state;
           events.push(...effOutcome.events);
         }
         if (cardDef?.keepInPlay) {
           const nextDeck = { ...deck, draw: nextDraw, inPlay: [...deck.inPlay, cardId] };
-          workingState = { ...workingState, decks: { ...workingState.decks, event: nextDeck } };
+          workingState = {
+            ...workingState,
+            decks: { ...workingState.decks, event: nextDeck },
+          };
         } else {
-          const nextDeck = { ...deck, draw: nextDraw, discard: [...deck.discard, cardId] };
-          workingState = { ...workingState, decks: { ...workingState.decks, event: nextDeck } };
+          const nextDeck = {
+            ...deck,
+            draw: nextDraw,
+            discard: [...deck.discard, cardId],
+          };
+          workingState = {
+            ...workingState,
+            decks: { ...workingState.decks, event: nextDeck },
+          };
         }
       }
     }
@@ -724,6 +759,34 @@ function finishDiscovery(
  * the moment one is, which is why `PROMPT_HANDLERS` is a total record — a new
  * kind cannot reach this switch without the compiler asking about it.
  */
+function discardCardFromSeat(
+  state: GameState,
+  seat: SeatId,
+  cardId: CardId,
+  content: Content,
+): GameState {
+  const player = state.players[seat];
+  if (!player) return state;
+  const card = content.cardsById[cardId];
+  const deckKind = card?.deck ?? (player.omens.includes(cardId) ? 'omen' : 'item');
+  const nextItems = player.items.filter((id) => id !== cardId);
+  const nextOmens = player.omens.filter((id) => id !== cardId);
+  const deck = state.decks[deckKind];
+  const nextDeck = {
+    ...deck,
+    inPlay: deck.inPlay.filter((id) => id !== cardId),
+    discard: deck.discard.includes(cardId) ? deck.discard : [...deck.discard, cardId],
+  };
+  return {
+    ...state,
+    decks: { ...state.decks, [deckKind]: nextDeck },
+    players: {
+      ...state.players,
+      [seat]: { ...player, items: nextItems, omens: nextOmens },
+    },
+  };
+}
+
 function resumePrompt(
   state: GameState,
   prompt: PendingPrompt,
@@ -740,17 +803,45 @@ function resumePrompt(
     );
   }
   if (
-    (prompt.kind === 'choose_target' || prompt.kind === 'choose_room') &&
+    (prompt.kind === 'choose_target' ||
+      prompt.kind === 'choose_room' ||
+      prompt.kind === 'choose_trait') &&
     isEffectPromptPayload(prompt.payload)
   ) {
     const cleared: GameState = { ...state, pending: null };
     const outcome = resumeEffects(
       cleared,
       prompt.payload.resume,
-      answer as TargetRef | PlacedId,
+      answer as TargetRef | PlacedId | Trait,
       content,
     );
-    return { state: outcome.state, events: outcome.events };
+    let outcomeState = outcome.state;
+    const discardCardId = prompt.payload.resume.discardCardId;
+    if (discardCardId) {
+      if (outcomeState.pending === null) {
+        outcomeState = discardCardFromSeat(
+          outcomeState,
+          prompt.payload.resume.actor,
+          discardCardId,
+          content,
+        );
+      } else if (isEffectPromptPayload(outcomeState.pending.payload)) {
+        outcomeState = {
+          ...outcomeState,
+          pending: {
+            ...outcomeState.pending,
+            payload: {
+              ...outcomeState.pending.payload,
+              resume: {
+                ...outcomeState.pending.payload.resume,
+                discardCardId,
+              },
+            },
+          },
+        };
+      }
+    }
+    return { state: outcomeState, events: outcome.events };
   }
   return { state: { ...state, pending: null }, events: [] };
 }
@@ -819,10 +910,19 @@ function endTurn(state: GameState, seat: SeatId, content: Content): ReduceResult
   const round = wrapped ? state.round + 1 : state.round;
 
   const player = state.players[seat];
+  const endingFlags = player ? { ...player.flags } : undefined;
+  if (endingFlags && 'adrenaline_speed' in endingFlags) {
+    delete endingFlags['adrenaline_speed'];
+  }
   const players = player
     ? {
         ...state.players,
-        [seat]: { ...player, hasAttackedThisTurn: false, cameFrom: null },
+        [seat]: {
+          ...player,
+          flags: endingFlags!,
+          hasAttackedThisTurn: false,
+          cameFrom: null,
+        },
       }
     : state.players;
 
@@ -1137,7 +1237,10 @@ function turnBudget(state: GameState): number {
  * first enumerable legal answer stands in, because for a `rotate_tile` prompt
  * "clear it instead" means losing a drawn tile.
  */
-export function resolvePromptWithDefault(state: GameState, content: Content): ReduceResult {
+export function resolvePromptWithDefault(
+  state: GameState,
+  content: Content,
+): ReduceResult {
   const pending = state.pending;
   if (!pending) return { state, events: [] };
 
@@ -1264,7 +1367,8 @@ function triggerHaunt(
 ): { state: GameState; events: GameEvent[] } {
   let hauntId = 1;
   if (omenCardId.includes('holy_symbol') || omenCardId.includes('symbol')) hauntId = 1;
-  else if (omenCardId.includes('spirit_board') || omenCardId.includes('board')) hauntId = 2;
+  else if (omenCardId.includes('spirit_board') || omenCardId.includes('board'))
+    hauntId = 2;
   else if (omenCardId.includes('bite')) hauntId = 5;
   else if (omenCardId.includes('ring')) hauntId = 10;
   else if (omenCardId.includes('skull')) hauntId = 16;
@@ -1296,7 +1400,9 @@ function triggerHaunt(
     case 'holder': {
       const holder = livingSeats.find((s) => {
         const p = state.players[s]!;
-        return p.items.includes(traitorRule.cardId) || p.omens.includes(traitorRule.cardId);
+        return (
+          p.items.includes(traitorRule.cardId) || p.omens.includes(traitorRule.cardId)
+        );
       });
       traitorSeat = holder ?? revealerSeat;
       break;
@@ -1434,48 +1540,96 @@ function useItem(
     return fail('WRONG_PHASE', `Cannot use items during ${state.phase}`);
   }
   if (state.activeSeat !== seat) return fail('NOT_YOUR_TURN', 'It is not your turn');
+  if (state.pending !== null) {
+    return fail('ILLEGAL_MOVE', 'Cannot use items while a prompt is pending');
+  }
   const player = state.players[seat];
-  if (!player || player.isDead) return fail('ILLEGAL_MOVE', 'Cannot use items');
+  if (!player || player.isDead || player.removed)
+    return fail('ILLEGAL_MOVE', 'Cannot use items');
   const hasCard = player.items.includes(cardId) || player.omens.includes(cardId);
   if (!hasCard) return fail('ILLEGAL_MOVE', `Player does not have card ${cardId}`);
 
   const card = content.cardsById[cardId];
   if (!card) return fail('ILLEGAL_MOVE', `Card ${cardId} does not exist`);
 
+  if (card.use?.kind === 'passive') {
+    return fail('ILLEGAL_MOVE', `${card.name} is passive and cannot be actively used`);
+  }
+  if (card.use?.kind === 'manual') {
+    return fail('ILLEGAL_MOVE', `${card.name} is manual/unsupported`);
+  }
+  if (!card.onUse || card.onUse.length === 0) {
+    return fail('ILLEGAL_MOVE', `${card.name} has no onUse effect`);
+  }
+  if (card.use?.kind === 'once_per_turn' && player.usedCardsThisTurn?.includes(cardId)) {
+    return fail('ILLEGAL_MOVE', `${card.name} has already been used this turn`);
+  }
+
   let nextState = state;
   const events: GameEvent[] = [];
 
-  if (card.onUse && card.onUse.length > 0) {
-    const outcome = runEffects(
-      nextState,
-      card.onUse,
-      {
-        actor: seat,
-        chosen: target ? (target.kind === 'seat' ? target.seatId : target.monsterId) : undefined,
+  const usedThisTurn = [...(player.usedCardsThisTurn ?? []), cardId];
+  nextState = {
+    ...nextState,
+    players: {
+      ...nextState.players,
+      [seat]: {
+        ...nextState.players[seat]!,
+        usedCardsThisTurn: usedThisTurn,
       },
-      content,
-    );
-    nextState = outcome.state;
-    events.push(...outcome.events);
-  }
+    },
+  };
 
-  if (!card.keepInPlay) {
-    const nextItems = nextState.players[seat]!.items.filter((id) => id !== cardId);
-    const nextOmens = nextState.players[seat]!.omens.filter((id) => id !== cardId);
-    const deckKind = card.deck;
-    const nextDeck = {
-      ...nextState.decks[deckKind],
-      inPlay: nextState.decks[deckKind].inPlay.filter((id) => id !== cardId),
-      discard: [...nextState.decks[deckKind].discard, cardId],
-    };
+  const outcome = runEffects(
+    nextState,
+    card.onUse,
+    {
+      actor: seat,
+      chosen: target
+        ? target.kind === 'seat'
+          ? target.seatId
+          : target.monsterId
+        : undefined,
+    },
+    content,
+  );
+  nextState = outcome.state;
+  events.push(...outcome.events);
+
+  if (cardId === 'item.adrenaline_shot') {
+    const curPlayer = nextState.players[seat]!;
     nextState = {
       ...nextState,
-      decks: { ...nextState.decks, [deckKind]: nextDeck },
       players: {
         ...nextState.players,
-        [seat]: { ...nextState.players[seat]!, items: nextItems, omens: nextOmens },
+        [seat]: {
+          ...curPlayer,
+          movesLeft: curPlayer.movesLeft + 4,
+        },
       },
     };
+  }
+
+  if (!card.keepInPlay || card.use?.kind === 'consumable') {
+    if (nextState.pending !== null) {
+      if (isEffectPromptPayload(nextState.pending.payload)) {
+        nextState = {
+          ...nextState,
+          pending: {
+            ...nextState.pending,
+            payload: {
+              ...nextState.pending.payload,
+              resume: {
+                ...nextState.pending.payload.resume,
+                discardCardId: cardId,
+              },
+            },
+          },
+        };
+      }
+    } else {
+      nextState = discardCardFromSeat(nextState, seat, cardId, content);
+    }
   }
 
   events.push({ t: 'log', text: `${player.name} used ${card.name}.` });
@@ -1486,25 +1640,40 @@ function dropItems(
   state: GameState,
   seat: SeatId,
   cardIds: CardId[],
-  _content: Content,
+  content: Content,
 ): ReduceResult {
   if (!['explore', 'haunt'].includes(state.phase)) {
     return fail('WRONG_PHASE', `Cannot drop items during ${state.phase}`);
   }
   if (state.activeSeat !== seat) return fail('NOT_YOUR_TURN', 'It is not your turn');
+  if (state.pending !== null) {
+    return fail('ILLEGAL_MOVE', 'Cannot drop items while a prompt is pending');
+  }
   const player = state.players[seat];
-  if (!player || player.isDead || player.location === null) {
+  if (!player || player.isDead || player.removed || player.location === null) {
     return fail('ILLEGAL_MOVE', 'Cannot drop items');
   }
+  if (cardIds.length === 0) {
+    return fail('ILLEGAL_MOVE', 'No cards specified to drop');
+  }
+
+  for (const id of cardIds) {
+    if (!player.items.includes(id) && !player.omens.includes(id)) {
+      return fail('ILLEGAL_MOVE', `Player does not have card ${id}`);
+    }
+    const card = content.cardsById[id];
+    if (card?.isCompanion || id === 'omen.bite') {
+      return fail('ILLEGAL_MOVE', `Cannot drop companion or Bite (${id})`);
+    }
+  }
+
   const currentLoc = player.location;
+  const tile = state.board.placed[currentLoc]!;
+  const existingDropped = tile.droppedItems ?? [];
+  const newDropped = [...existingDropped, ...cardIds];
+
   const nextItems = player.items.filter((id) => !cardIds.includes(id));
   const nextOmens = player.omens.filter((id) => !cardIds.includes(id));
-
-  const tile = state.board.placed[currentLoc]!;
-  const existingDropped = (
-    typeof tile.flags['dropped'] === 'string' ? tile.flags['dropped'].split(',') : []
-  ).filter(Boolean);
-  const newDropped = [...existingDropped, ...cardIds];
 
   const nextState: GameState = {
     ...state,
@@ -1514,6 +1683,7 @@ function dropItems(
         ...state.board.placed,
         [currentLoc]: {
           ...tile,
+          droppedItems: newDropped,
           flags: { ...tile.flags, dropped: newDropped.join(',') },
         },
       },
@@ -1523,10 +1693,88 @@ function dropItems(
       [seat]: { ...player, items: nextItems, omens: nextOmens },
     },
   };
+
+  const cardNames = cardIds.map((id) => content.cardsById[id]?.name ?? id).join(', ');
   return {
     state: nextState,
-    events: [{ t: 'log', text: `${player.name} dropped ${cardIds.length} item(s).` }],
+    events: [{ t: 'log', text: `${player.name} dropped ${cardNames}.` }],
   };
+}
+
+function pickupItems(
+  state: GameState,
+  seat: SeatId,
+  cardIds: CardId[],
+  content: Content,
+): ReduceResult {
+  if (!['explore', 'haunt'].includes(state.phase)) {
+    return fail('WRONG_PHASE', `Cannot pick up items during ${state.phase}`);
+  }
+  if (state.activeSeat !== seat) return fail('NOT_YOUR_TURN', 'It is not your turn');
+  if (state.pending !== null) {
+    return fail('ILLEGAL_MOVE', 'Cannot pick up items while a prompt is pending');
+  }
+  const player = state.players[seat];
+  if (!player || player.isDead || player.removed || player.location === null) {
+    return fail('ILLEGAL_MOVE', 'Cannot pick up items');
+  }
+  if (cardIds.length === 0) {
+    return fail('ILLEGAL_MOVE', 'No cards specified to pick up');
+  }
+
+  const currentLoc = player.location;
+  const tile = state.board.placed[currentLoc];
+  if (!tile) return fail('ILLEGAL_MOVE', 'Current tile not found');
+
+  const tileDropped = tile.droppedItems ?? [];
+  for (const id of cardIds) {
+    if (!tileDropped.includes(id)) {
+      return fail('ILLEGAL_MOVE', `Card ${id} is not in the room`);
+    }
+  }
+
+  const nextDropped = tileDropped.filter((id) => !cardIds.includes(id));
+  const newItems = [...player.items];
+  const newOmens = [...player.omens];
+
+  for (const id of cardIds) {
+    const card = content.cardsById[id];
+    if (card?.deck === 'omen') {
+      newOmens.push(id);
+    } else {
+      newItems.push(id);
+    }
+  }
+
+  const nextState: GameState = {
+    ...state,
+    board: {
+      ...state.board,
+      placed: {
+        ...state.board.placed,
+        [currentLoc]: {
+          ...tile,
+          droppedItems: nextDropped,
+          flags: { ...tile.flags, dropped: nextDropped.join(',') },
+        },
+      },
+    },
+    players: {
+      ...state.players,
+      [seat]: {
+        ...player,
+        items: newItems,
+        omens: newOmens,
+      },
+    },
+  };
+
+  const cardNames = cardIds.map((id) => content.cardsById[id]?.name ?? id).join(', ');
+  const events: GameEvent[] = [
+    { t: 'log', text: `${player.name} picked up ${cardNames}.` },
+  ];
+
+  return { state: nextState, events };
 }
 
 function roomAction(
@@ -1589,7 +1837,11 @@ function attack(
   }
 
   const attackTrait = trait ?? 'might';
-  const attackerDice = Math.max(1, traitValue(state, seat, attackTrait, content));
+  const weaponBonus = getWeaponAttackModifier(state, seat, attackTrait);
+  const attackerDice = Math.max(
+    1,
+    traitValue(state, seat, attackTrait, content) + weaponBonus,
+  );
   const rng = state.rng;
   if (!rng) return fail('INVARIANT_VIOLATION', 'Missing RNG');
 
