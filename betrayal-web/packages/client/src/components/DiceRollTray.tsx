@@ -4,6 +4,7 @@ import { useStore } from '../store.js';
 export function DiceRollTray() {
   const activeRoll = useStore((s) => s.activeRoll);
   const activeCardDraw = useStore((s) => s.activeCardDraw);
+  const presentationQueue = useStore((s) => s.presentationQueue);
   const dismissRoll = useStore((s) => s.dismissRoll);
   const [isRolling, setIsRolling] = useState(true);
   const [displayDice, setDisplayDice] = useState<number[]>([]);
@@ -38,7 +39,6 @@ export function DiceRollTray() {
   if (!activeRoll || activeCardDraw) return null;
 
   const isHaunt = Boolean(activeRoll.hauntRoll) || activeRoll.reason === 'haunt_roll';
-  const presentationQueue = useStore((s) => s.presentationQueue);
   const nextItem = presentationQueue[1];
   const nextIsHaunt =
     nextItem?.kind === 'roll' &&

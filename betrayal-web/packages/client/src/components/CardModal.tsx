@@ -6,6 +6,7 @@ export function CardModal() {
   const activeRoll = useStore((s) => s.activeRoll);
   const content = useStore((s) => s.content);
   const dismissCardDraw = useStore((s) => s.dismissCardDraw);
+  const presentationQueue = useStore((s) => s.presentationQueue);
   const [revealed, setRevealed] = useState(false);
 
   useEffect(() => {
@@ -31,7 +32,6 @@ export function CardModal() {
         ? '🎒 VẬT PHẨM (ITEM)'
         : '⚡ BIẾN CỐ (EVENT)';
 
-  const presentationQueue = useStore((s) => s.presentationQueue);
   const nextItem = presentationQueue[1];
   const nextRoll = nextItem?.kind === 'roll' ? nextItem.roll : activeRoll;
 
