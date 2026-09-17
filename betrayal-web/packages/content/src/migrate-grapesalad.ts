@@ -166,6 +166,9 @@ function convertRoom(room: z.infer<typeof LegacyRoomSchema>): Tile {
     copies: 1,
     staticLinks: staticLinksForRoom(room),
     onEnter: [],
+    onExit: [],
+    onEndTurn: [],
+    actions: [],
   };
 }
 
@@ -179,6 +182,9 @@ const IMAGE_ONLY_TILES: Tile[] = [
     copies: 1,
     staticLinks: [],
     onEnter: [],
+    onExit: [],
+    onEndTurn: [],
+    actions: [],
   },
   {
     id: 'tile.mystic_elevator',
@@ -189,6 +195,9 @@ const IMAGE_ONLY_TILES: Tile[] = [
     copies: 1,
     staticLinks: [],
     onEnter: [],
+    onExit: [],
+    onEndTurn: [],
+    actions: [],
   },
 ];
 

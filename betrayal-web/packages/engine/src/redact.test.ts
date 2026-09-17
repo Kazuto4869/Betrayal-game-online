@@ -130,4 +130,134 @@ describe('redactFor', () => {
     redactFor(state, 'seat_0');
     expect(JSON.stringify(state)).toBe(before);
   });
+
+  describe('Task 11: Haunt Briefing Privacy', () => {
+    it('provides heroes only hero briefing and zero traitor tome text', () => {
+      const base = startedGame({ playerCount: 3 }).state;
+      const hauntState: GameState = {
+        ...base,
+        phase: 'haunt',
+        haunt: {
+          hauntId: 1,
+          traitorSeat: 'seat_0',
+          revealed: true,
+          acknowledged: [],
+          hauntTitle: 'The Mummy Walks',
+          heroSide: {
+            goal: 'Banish the Mummy to eternal sleep.',
+            rules: ['Search the Catacombs for the amulet.'],
+            win: [],
+            intro: 'The sarcophagus creaks open in front of you.',
+            rightNow: ['Place the Sarcophagus token in the room.'],
+          },
+          traitorSide: {
+            goal: 'Awaken the ancient Pharaoh to consume the heroes.',
+            rules: ['The Mummy cannot be harmed by mortal weapons.'],
+            win: [],
+            intro: 'You pledge your loyalty to the eternal king.',
+            rightNow: ['Take control of the Mummy pawn.'],
+          },
+        },
+      };
+
+      // seat_1 and seat_2 are heroes
+      const hero0View = redactFor(hauntState, 'seat_1');
+      const hero1View = redactFor(hauntState, 'seat_2');
+
+      expect(hero0View.haunt?.briefing?.role).toBe('hero');
+      expect(hero0View.haunt?.briefing?.side.goal).toBe(
+        'Banish the Mummy to eternal sleep.',
+      );
+      expect(hero0View.haunt?.heroSide).toBeUndefined();
+      expect(hero0View.haunt?.traitorSide).toBeUndefined();
+
+      // Zero traitor tome text in hero serialized snapshot
+      const hero0Json = JSON.stringify(hero0View);
+      expect(hero0Json).not.toContain('Awaken the ancient Pharaoh');
+      expect(hero0Json).not.toContain('Take control of the Mummy pawn');
+      expect(hero0Json).not.toContain('cannot be harmed by mortal weapons');
+
+      const hero1Json = JSON.stringify(hero1View);
+      expect(hero1Json).not.toContain('Awaken the ancient Pharaoh');
+      expect(hero1Json).not.toContain('Take control of the Mummy pawn');
+    });
+
+    it('provides traitor only traitor tome and zero hero survival text', () => {
+      const base = startedGame({ playerCount: 3 }).state;
+      const hauntState: GameState = {
+        ...base,
+        phase: 'haunt',
+        haunt: {
+          hauntId: 1,
+          traitorSeat: 'seat_0',
+          revealed: true,
+          acknowledged: [],
+          hauntTitle: 'The Mummy Walks',
+          heroSide: {
+            goal: 'Banish the Mummy to eternal sleep.',
+            rules: ['Search the Catacombs for the amulet.'],
+            win: [],
+            intro: 'The sarcophagus creaks open in front of you.',
+            rightNow: ['Place the Sarcophagus token in the room.'],
+          },
+          traitorSide: {
+            goal: 'Awaken the ancient Pharaoh to consume the heroes.',
+            rules: ['The Mummy cannot be harmed by mortal weapons.'],
+            win: [],
+            intro: 'You pledge your loyalty to the eternal king.',
+            rightNow: ['Take control of the Mummy pawn.'],
+          },
+        },
+      };
+
+      // seat_0 is traitor
+      const traitorView = redactFor(hauntState, 'seat_0');
+      expect(traitorView.haunt?.briefing?.role).toBe('traitor');
+      expect(traitorView.haunt?.briefing?.side.goal).toBe(
+        'Awaken the ancient Pharaoh to consume the heroes.',
+      );
+      expect(traitorView.haunt?.heroSide).toBeUndefined();
+      expect(traitorView.haunt?.traitorSide).toBeUndefined();
+
+      // Zero hero survival text in traitor serialized snapshot
+      const traitorJson = JSON.stringify(traitorView);
+      expect(traitorJson).not.toContain('Banish the Mummy to eternal sleep');
+      expect(traitorJson).not.toContain('Search the Catacombs for the amulet');
+      expect(traitorJson).not.toContain('The sarcophagus creaks open');
+    });
+
+    it('spectators and unseated viewers receive neither private book body', () => {
+      const base = startedGame({ playerCount: 3 }).state;
+      const hauntState: GameState = {
+        ...base,
+        phase: 'haunt',
+        haunt: {
+          hauntId: 1,
+          traitorSeat: 'seat_0',
+          revealed: true,
+          acknowledged: [],
+          hauntTitle: 'The Mummy Walks',
+          heroSide: {
+            goal: 'Banish the Mummy to eternal sleep.',
+            rules: ['Search the Catacombs for the amulet.'],
+            win: [],
+          },
+          traitorSide: {
+            goal: 'Awaken the ancient Pharaoh to consume the heroes.',
+            rules: ['The Mummy cannot be harmed by mortal weapons.'],
+            win: [],
+          },
+        },
+      };
+
+      const spectatorView = redactFor(hauntState, null);
+      expect(spectatorView.haunt?.briefing).toBeUndefined();
+      expect(spectatorView.haunt?.heroSide).toBeUndefined();
+      expect(spectatorView.haunt?.traitorSide).toBeUndefined();
+
+      const spectatorJson = JSON.stringify(spectatorView);
+      expect(spectatorJson).not.toContain('Banish the Mummy to eternal sleep');
+      expect(spectatorJson).not.toContain('Awaken the ancient Pharaoh');
+    });
+  });
 });

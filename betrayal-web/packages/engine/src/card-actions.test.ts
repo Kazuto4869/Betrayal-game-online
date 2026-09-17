@@ -7,8 +7,9 @@ import {
   traitValue,
   getWeaponAttackModifier,
   getPassiveTraitModifier,
+  getLegalActions,
 } from './selectors.js';
-import { beginTurnFor } from './movement.js';
+import { beginTurnFor, getDogReachableRooms } from './movement.js';
 import type { GameState, SeatId, CardId, GameAction } from '@bahoth/shared';
 
 const content = fixtureContent();
@@ -577,5 +578,219 @@ describe('Task 6: Card-zone conservation and pickup', () => {
     );
     expect(replayed.decks.item.discard).toEqual(resReconnect.state.decks.item.discard);
     expect(checkInvariants(replayed)).toEqual([]);
+  });
+
+  describe('Dog Companion and Custody/Passive Companions', () => {
+    it('Dog companion provides +1 Might and +1 Sanity passively while held', () => {
+      const g = startedGame();
+      const active = g.state.activeSeat!;
+      const beforeMight = traitValue(g.state, active, 'might', content);
+      const beforeSanity = traitValue(g.state, active, 'sanity', content);
+
+      const stateWithDog = giveCard(g.state, active, 'omen.dog', 'omen');
+      expect(traitValue(stateWithDog, active, 'might', content)).toBe(beforeMight + 1);
+      expect(traitValue(stateWithDog, active, 'sanity', content)).toBe(beforeSanity + 1);
+    });
+
+    it('allows once-per-turn COMMAND_DOG to an explored room up to 6 spaces away', () => {
+      const g = startedGame();
+      const active = g.state.activeSeat!;
+      const stateWithDog = giveCard(g.state, active, 'omen.dog', 'omen');
+      const startLoc = stateWithDog.players[active]!.location!;
+
+      const dogReachable = getDogReachableRooms(stateWithDog, startLoc, content);
+      expect(dogReachable.length).toBeGreaterThan(0);
+      const targetRoom = dogReachable[0]!;
+
+      const legal = getLegalActions(stateWithDog, active, content);
+      expect(
+        legal.some((a) => a.t === 'COMMAND_DOG' && a.destination === targetRoom),
+      ).toBe(true);
+
+      const res = reduce(
+        stateWithDog,
+        { t: 'COMMAND_DOG', seat: active, destination: targetRoom },
+        content,
+      );
+      expect(res.error).toBeUndefined();
+      expect(res.state.players[active]!.usedCardsThisTurn).toContain('omen.dog');
+      expect(res.state.players[active]!.flags['dog_used_this_turn']).toBe(true);
+      expect(res.state.flags['dog_last_run']).toBeDefined();
+      expect(checkInvariants(res.state)).toEqual([]);
+
+      // Second attempt in same turn fails
+      const res2 = reduce(
+        res.state,
+        { t: 'COMMAND_DOG', seat: active, destination: targetRoom },
+        content,
+      );
+      expect(res2.error?.code).toBe('ILLEGAL_MOVE');
+      expect(res2.error?.message).toContain('once per turn');
+
+      // Advancing turn resets dog use
+      let curState = res.state;
+      const initialSeat = active;
+      // End turns until active seat gets their next turn
+      do {
+        const currentActive = curState.activeSeat!;
+        const endRes = reduce(curState, { t: 'END_TURN', seat: currentActive }, content);
+        expect(endRes.error).toBeUndefined();
+        curState = endRes.state;
+      } while (curState.activeSeat !== initialSeat);
+
+      expect(curState.players[active]?.usedCardsThisTurn ?? []).not.toContain('omen.dog');
+      expect(curState.players[active]?.flags['dog_used_this_turn']).toBeUndefined();
+    });
+
+    it('allows Dog to carry an item from owner inventory and drop it at destination', () => {
+      const g = startedGame();
+      const active = g.state.activeSeat!;
+      let state = giveCard(g.state, active, 'omen.dog', 'omen');
+      state = giveCard(state, active, 'item.bell', 'item');
+      const startLoc = state.players[active]!.location!;
+      const targetRoom = getDogReachableRooms(state, startLoc, content)[0]!;
+
+      const res = reduce(
+        state,
+        {
+          t: 'COMMAND_DOG',
+          seat: active,
+          destination: targetRoom,
+          cardId: 'item.bell',
+        },
+        content,
+      );
+      expect(res.error).toBeUndefined();
+      expect(res.state.players[active]!.items).not.toContain('item.bell');
+      expect(res.state.board.placed[targetRoom]!.droppedItems).toContain('item.bell');
+      expect(checkInvariants(res.state)).toEqual([]);
+    });
+
+    it('allows Dog to fetch a dropped item from destination and deliver to owner', () => {
+      const g = startedGame();
+      const active = g.state.activeSeat!;
+      let state = giveCard(g.state, active, 'omen.dog', 'omen');
+      const startLoc = state.players[active]!.location!;
+      const targetRoom = getDogReachableRooms(state, startLoc, content)[0]!;
+
+      const destTile = state.board.placed[targetRoom]!;
+      state = {
+        ...state,
+        decks: {
+          ...state.decks,
+          item: {
+            ...state.decks.item,
+            draw: state.decks.item.draw.filter((id) => id !== 'item.armor'),
+            inPlay: [...state.decks.item.inPlay, 'item.armor'],
+          },
+        },
+        board: {
+          ...state.board,
+          placed: {
+            ...state.board.placed,
+            [targetRoom]: {
+              ...destTile,
+              droppedItems: ['item.armor'],
+            },
+          },
+        },
+      };
+
+      const beforeMight = traitValue(state, active, 'might', content);
+      const res = reduce(
+        state,
+        {
+          t: 'COMMAND_DOG',
+          seat: active,
+          destination: targetRoom,
+          cardId: 'item.armor',
+        },
+        content,
+      );
+      expect(res.error).toBeUndefined();
+      expect(res.state.players[active]!.items).toContain('item.armor');
+      expect(res.state.board.placed[targetRoom]!.droppedItems).not.toContain(
+        'item.armor',
+      );
+      expect(traitValue(res.state, active, 'might', content)).toBe(beforeMight + 1);
+      expect(checkInvariants(res.state)).toEqual([]);
+    });
+
+    it('rejects Dog carrying companions (Girl, Madman, Dog)', () => {
+      const g = startedGame();
+      const active = g.state.activeSeat!;
+      let state = giveCard(g.state, active, 'omen.dog', 'omen');
+      state = giveCard(state, active, 'omen.girl', 'omen');
+      const startLoc = state.players[active]!.location!;
+      const targetRoom = getDogReachableRooms(state, startLoc, content)[0]!;
+
+      const res = reduce(
+        state,
+        {
+          t: 'COMMAND_DOG',
+          seat: active,
+          destination: targetRoom,
+          cardId: 'omen.girl',
+        },
+        content,
+      );
+      expect(res.error?.code).toBe('ILLEGAL_MOVE');
+      expect(res.error?.message).toContain('companion');
+    });
+
+    it('rejects Dog traversing through roll barrier rooms (Chasm, Tower) and special drops', () => {
+      const g = startedGame();
+      const active = g.state.activeSeat!;
+      const stateWithDog = giveCard(g.state, active, 'omen.dog', 'omen');
+      const startLoc = stateWithDog.players[active]!.location!;
+
+      const chasmTile = {
+        id: 'basement:5,5',
+        tileId: 'tile.chasm',
+        floor: 'basement' as const,
+        x: 5,
+        y: 5,
+        rotation: 0 as const,
+        discoveredBy: active,
+        flags: {},
+      };
+      const stateWithChasm = {
+        ...stateWithDog,
+        board: {
+          ...stateWithDog.board,
+          placed: {
+            ...stateWithDog.board.placed,
+            [chasmTile.id]: chasmTile,
+          },
+          index: {
+            ...stateWithDog.board.index,
+            basement: {
+              ...stateWithDog.board.index.basement,
+              '5,5': chasmTile.id,
+            },
+          },
+        },
+      };
+
+      const dogReachable = getDogReachableRooms(stateWithChasm, startLoc, content);
+      expect(dogReachable).not.toContain(chasmTile.id);
+    });
+
+    it('Girl and Madman companions provide passive custody bonuses and do not grant movement actions', () => {
+      const g = startedGame();
+      const active = g.state.activeSeat!;
+      const beforeSanity = traitValue(g.state, active, 'sanity', content);
+      const beforeMight = traitValue(g.state, active, 'might', content);
+
+      let state = giveCard(g.state, active, 'omen.girl', 'omen');
+      expect(traitValue(state, active, 'sanity', content)).toBe(beforeSanity + 1);
+
+      state = giveCard(state, active, 'omen.madman', 'omen');
+      expect(traitValue(state, active, 'might', content)).toBe(beforeMight + 2);
+      expect(traitValue(state, active, 'sanity', content)).toBe(beforeSanity);
+
+      const legal = getLegalActions(state, active, content);
+      expect(legal.filter((a) => a.t === 'COMMAND_DOG')).toHaveLength(0);
+    });
   });
 });

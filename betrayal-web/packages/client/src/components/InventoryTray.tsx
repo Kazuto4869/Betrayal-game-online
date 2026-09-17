@@ -1,4 +1,7 @@
+import { useState } from 'react';
+import { getLegalActions } from '@bahoth/engine';
 import { useStore } from '../store.js';
+import { DogCommandModal } from './DogCommandModal.js';
 
 export function InventoryTray() {
   const state = useStore((s) => s.state);
@@ -6,6 +9,9 @@ export function InventoryTray() {
   const seatId = useStore((s) => s.seatId);
   const send = useStore((s) => s.send);
   const pending = useStore((s) => s.pendingSeq !== null);
+  const selectedTileId = useStore((s) => s.selectedTileId);
+  const selectTile = useStore((s) => s.selectTile);
+  const [isDogModalOpen, setIsDogModalOpen] = useState(false);
 
   if (!state || !seatId || !content) return null;
   const player = state.players[seatId];
@@ -37,19 +43,79 @@ export function InventoryTray() {
         )
       : [];
 
-  // Tokens in the same room for interaction
-  const tokensInRoom =
-    isMyTurn && player.location
-      ? (state.tokens ?? []).filter(
-          (t) => t.location === player.location && !t.flags['completed'],
-        )
-      : [];
+  const activeTileId = selectedTileId ?? player.location;
+  const activeTile = activeTileId ? state.board.placed[activeTileId] : undefined;
+  const activeTileDef = activeTile ? content.tilesById[activeTile.tileId] : undefined;
 
   const currentTile = player.location ? state.board.placed[player.location] : undefined;
+  const currentTileDef = currentTile ? content.tilesById[currentTile.tileId] : undefined;
   const droppedInRoom = currentTile?.droppedItems ?? [];
+
+  // Legal room actions (including token interaction) determined by engine authority
+  const legalActions = getLegalActions(state, seatId, content);
+  const legalRoomActions = legalActions.filter(
+    (a): a is Extract<typeof a, { t: 'ROOM_ACTION' }> => a.t === 'ROOM_ACTION',
+  );
 
   return (
     <div className="inventory-tray">
+      {activeTileDef && (
+        <div
+          className="room-info-panel"
+          data-testid="room-info-panel"
+          style={{
+            margin: '8px 0',
+            padding: '8px',
+            background: 'rgba(30, 41, 59, 0.5)',
+            borderRadius: '6px',
+            border: '1px solid rgba(148, 163, 184, 0.2)',
+          }}
+        >
+          <div
+            className="room-info-panel__header"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: activeTileDef.ruleText ? '6px' : '0',
+            }}
+          >
+            <span
+              className="room-info-panel__title"
+              style={{ fontWeight: 'bold', fontSize: '13px', color: '#e2e8f0' }}
+            >
+              📍 {activeTileDef.name}
+              {selectedTileId && selectedTileId !== player.location && ' (Inspecting)'}
+            </span>
+            {selectedTileId && selectedTileId !== player.location && (
+              <button
+                type="button"
+                className="btn btn--small btn--ghost"
+                onClick={() => selectTile(null)}
+              >
+                Current Room
+              </button>
+            )}
+          </div>
+          {activeTileDef.ruleText && (
+            <div
+              className="room-info-panel__rule-text"
+              data-testid="room-rule-text"
+              style={{
+                fontSize: '12px',
+                fontStyle: 'italic',
+                color: '#cbd5e1',
+                background: 'rgba(0, 0, 0, 0.25)',
+                padding: '6px 8px',
+                borderRadius: '4px',
+                lineHeight: '1.4',
+              }}
+            >
+              {activeTileDef.ruleText}
+            </div>
+          )}
+        </div>
+      )}
       {droppedInRoom.length > 0 && (
         <div
           className="room-items-panel"
@@ -148,9 +214,9 @@ export function InventoryTray() {
         </div>
       )}
 
-      {tokensInRoom.length > 0 && (
+      {legalRoomActions.length > 0 && (
         <div
-          className="token-panel"
+          className="token-panel room-actions-panel"
           style={{
             margin: '8px 0',
             padding: '8px',
@@ -167,26 +233,40 @@ export function InventoryTray() {
               marginBottom: '6px',
             }}
           >
-            🪙 Room Objectives & Tokens:
+            🏛️ Room Actions & Objectives:
           </div>
           <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-            {tokensInRoom.map((token) => (
-              <button
-                key={token.id}
-                type="button"
-                className="btn btn--small btn--primary"
-                disabled={pending}
-                onClick={() =>
-                  send({
-                    t: 'ROOM_ACTION',
-                    seat: seatId,
-                    actionId: 'interact_token',
-                  })
-                }
-              >
-                Interact with {token.token}
-              </button>
-            ))}
+            {legalRoomActions.map((ra) => {
+              let label = ra.actionId;
+              if (ra.actionId === 'interact_token') {
+                const token = (state.tokens ?? []).find(
+                  (t) => t.location === player.location && !t.flags['completed'],
+                );
+                label = token ? `Interact with ${token.token}` : 'Interact with Token';
+              } else {
+                const actionDef = currentTileDef?.actions?.find(
+                  (a) => a.id === ra.actionId,
+                );
+                label = actionDef?.name ?? ra.actionId;
+              }
+              return (
+                <button
+                  key={ra.actionId}
+                  type="button"
+                  className="btn btn--small btn--primary"
+                  disabled={pending}
+                  onClick={() =>
+                    send({
+                      t: 'ROOM_ACTION',
+                      seat: seatId,
+                      actionId: ra.actionId,
+                    })
+                  }
+                >
+                  {label}
+                </button>
+              );
+            })}
           </div>
         </div>
       )}
@@ -276,6 +356,32 @@ export function InventoryTray() {
                       ✨ Dùng (Use)
                     </button>
                   )}
+                  {id === 'omen.dog' &&
+                    (player.flags['dog_used_this_turn'] ? (
+                      <button
+                        type="button"
+                        className="btn btn--small btn--ghost"
+                        disabled
+                        title="Chó đã di chuyển/vận chuyển đồ trong lượt này."
+                      >
+                        ⏳ Chó đã đi lượt này
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        className="btn btn--small btn--primary"
+                        data-testid="command-dog-btn"
+                        disabled={!isMyTurn || pending}
+                        title={
+                          !isMyTurn
+                            ? 'Chỉ sai Chó trong lượt của bạn'
+                            : 'Sai Chó đi thám thính, mang đồ hoặc nhặt đồ'
+                        }
+                        onClick={() => setIsDogModalOpen(true)}
+                      >
+                        🐶 Sai Chó (Command)
+                      </button>
+                    ))}
                   {isNonDroppable ? (
                     <span
                       className="tag"
@@ -304,6 +410,7 @@ export function InventoryTray() {
           })}
         </div>
       )}
+      <DogCommandModal isOpen={isDogModalOpen} onClose={() => setIsDogModalOpen(false)} />
     </div>
   );
 }

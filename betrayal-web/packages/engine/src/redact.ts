@@ -14,7 +14,13 @@
  * and omensDrawn.
  */
 
-import { DECK_KINDS, type DeckState, type GameState, type SeatId } from '@bahoth/shared';
+import {
+  DECK_KINDS,
+  type DeckState,
+  type GameState,
+  type SeatId,
+  type HauntBriefing,
+} from '@bahoth/shared';
 
 /**
  * @param seat the viewer, or null for a spectator with no seat.
@@ -44,7 +50,8 @@ export function redactFor(state: GameState, seat: SeatId | null): GameState {
     // Same treatment as the card draw piles (docs/06-networking.md#64: "Tile
     // deck order — same treatment"): identities hidden, count public.
     tileDeck: [],
-    tileDeckCount: state.tileDeck.length,
+    tileDeckCount: state.tileDeck.length + (state.tileDiscard?.length ?? 0),
+    tileDiscard: [],
     haunt: redactHaunt(state, seat),
   };
 }
@@ -52,16 +59,48 @@ export function redactFor(state: GameState, seat: SeatId | null): GameState {
 function redactHaunt(state: GameState, seat: SeatId | null): GameState['haunt'] {
   const haunt = state.haunt;
   if (!haunt) return null;
+
+  // Destructure unredacted internal fields
+  const { heroSide, traitorSide, hauntTitle, briefing: _b, ...publicHaunt } = haunt;
+
   // Until the reveal completes, the haunt's identity is hidden from everyone.
-  // Per-side instruction text is served over a separate authenticated route
-  // rather than embedded in the snapshot (M4).
   if (!haunt.revealed) {
-    return { ...haunt, hauntId: 0, traitorSeat: null };
+    return { ...publicHaunt, hauntId: 0, traitorSeat: null, acknowledged: [] };
   }
-  // After the reveal, who the traitor is becomes public — that is the whole
-  // point of the reveal — so only the seat's own view needs no special case.
-  void seat;
-  return { ...haunt };
+
+  // Spectator receives public haunt info only; NO private book briefing
+  if (!seat) {
+    return publicHaunt;
+  }
+
+  const isTraitor = haunt.traitorSeat === seat;
+  const isHero =
+    haunt.traitorSeat !== seat &&
+    !!state.players[seat] &&
+    !state.players[seat]?.isDead &&
+    !state.players[seat]?.removed;
+
+  let briefing: HauntBriefing | undefined;
+  if (isTraitor && traitorSide) {
+    briefing = {
+      hauntId: haunt.hauntId,
+      title: hauntTitle ?? `Haunt #${haunt.hauntId}`,
+      role: 'traitor',
+      side: traitorSide,
+    };
+  } else if (isHero && heroSide) {
+    briefing = {
+      hauntId: haunt.hauntId,
+      title: hauntTitle ?? `Haunt #${haunt.hauntId}`,
+      role: 'hero',
+      side: heroSide,
+    };
+  }
+
+  return {
+    ...publicHaunt,
+    briefing,
+  };
 }
 
 /** True if `state` looks like it has already been redacted. */

@@ -1100,6 +1100,156 @@ h2 {
   color: var(--muted);
 }
 
+.haunt-banner__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.haunt-banner__book-btn {
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.haunt-banner__readiness {
+  padding: 6px 10px;
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 4px;
+  font-size: 12px;
+  color: #e2a850;
+  font-weight: 500;
+}
+
+/* --- Haunt Briefing Modal (Task 11) --- */
+.haunt-briefing-backdrop {
+  z-index: 95;
+}
+
+.haunt-briefing-modal {
+  max-width: 720px;
+  width: 92vw;
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  overflow: hidden;
+  border-radius: 12px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85);
+}
+
+.haunt-briefing-modal--hero {
+  border: 2px solid #3c7d9c;
+  background: #141b22;
+}
+
+.haunt-briefing-modal--traitor {
+  border: 2px solid #b3453a;
+  background: #201315;
+}
+
+.haunt-briefing-modal__header {
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.haunt-briefing-modal__badge {
+  align-self: flex-start;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 3px 10px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.5);
+  text-transform: uppercase;
+}
+
+.haunt-briefing-modal--hero .haunt-briefing-modal__badge {
+  color: #79b7d5;
+  border: 1px solid #3c7d9c;
+}
+
+.haunt-briefing-modal--traitor .haunt-briefing-modal__badge {
+  color: #e57373;
+  border: 1px solid #b3453a;
+}
+
+.haunt-briefing-modal__title {
+  margin: 0;
+  font-size: 22px;
+  font-family: var(--serif);
+  color: var(--parchment);
+}
+
+.haunt-briefing-modal__goal {
+  font-size: 15px;
+  line-height: 1.45;
+  color: #f4ecdc;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 8px 12px;
+  border-radius: 6px;
+  border-left: 3px solid currentColor;
+}
+
+.haunt-briefing-modal--hero .haunt-briefing-modal__goal {
+  border-color: #3c7d9c;
+}
+
+.haunt-briefing-modal--traitor .haunt-briefing-modal__goal {
+  border-color: #b3453a;
+}
+
+.haunt-briefing-modal__body {
+  padding: 20px 24px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  line-height: 1.55;
+  font-size: 14px;
+  color: #d1c7bd;
+}
+
+.haunt-briefing-section {
+  background: rgba(255, 255, 255, 0.03);
+  padding: 12px 16px;
+  border-radius: 6px;
+}
+
+.haunt-briefing-section--intro {
+  font-style: italic;
+  background: transparent;
+  padding: 0;
+  color: #c9bdae;
+}
+
+.haunt-briefing-section h4 {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  font-family: var(--serif);
+  color: var(--parchment);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.haunt-briefing-section ul {
+  margin: 0;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.haunt-briefing-modal__footer {
+  padding: 14px 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  display: flex;
+  justify-content: flex-end;
+  background: rgba(0, 0, 0, 0.2);
+}
+
 /* --- Inventory Tray --- */
 .inventory-tray {
   margin-top: 16px;

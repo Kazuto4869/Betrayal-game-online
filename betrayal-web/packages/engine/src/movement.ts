@@ -10,14 +10,110 @@ import {
   cellKey,
   neighbourCell,
   rotateDoors,
+  type Dir,
   type Floor,
   type GameState,
   type PlacedId,
+  type PlacedTile,
   type PlayerState,
+  type Rotation,
   type SeatId,
+  type Trait,
 } from '@bahoth/shared';
-import type { Content } from '@bahoth/content';
+import type { Content, Tile } from '@bahoth/content';
 import { traitValue } from './selectors.js';
+
+/**
+ * Rotate a direction clockwise by `rotation` degrees (0, 90, 180, 270).
+ */
+export function rotateDir(dir: Dir, rotation: Rotation): Dir {
+  const steps = (rotation / 90) % 4;
+  const idx = DIR_ORDER.indexOf(dir);
+  return DIR_ORDER[(idx + steps) % 4]!;
+}
+
+/**
+ * Returns the orthogonal grid direction from `fromPlaced` to `toPlaced`,
+ * or null if they are not grid-adjacent on the same floor.
+ */
+export function getStepDirection(
+  fromPlaced: PlacedTile,
+  toPlaced: PlacedTile,
+): Dir | null {
+  if (fromPlaced.floor !== toPlaced.floor) return null;
+  const dx = toPlaced.x - fromPlaced.x;
+  const dy = toPlaced.y - fromPlaced.y;
+  if (dx === 0 && dy === -1) return 'n';
+  if (dx === 1 && dy === 0) return 'e';
+  if (dx === 0 && dy === 1) return 's';
+  if (dx === -1 && dy === 0) return 'w';
+  return null;
+}
+
+export interface CrossingBarrier {
+  fromTileDef: Tile;
+  trait: Trait;
+  threshold: number;
+}
+
+/**
+ * Checks if moving from `from` to `to` crosses a barrier in `from`.
+ * Returning through the doorway used to enter does NOT require a roll.
+ * Crossing to the opposite doorway requires rolling the specified trait.
+ */
+export function getCrossingBarrier(
+  state: GameState,
+  seat: SeatId,
+  from: PlacedId,
+  to: PlacedId,
+  cameFrom: PlacedId | null,
+  content: Content,
+): CrossingBarrier | null {
+  const fromPlaced = state.board.placed[from];
+  const toPlaced = state.board.placed[to];
+  if (!fromPlaced || !toPlaced) return null;
+
+  const fromTileDef = content.tilesById[fromPlaced.tileId];
+  if (!fromTileDef || !fromTileDef.crossing) return null;
+
+  const exitDir = getStepDirection(fromPlaced, toPlaced);
+  if (!exitDir) return null;
+
+  const crossing = fromTileDef.crossing;
+  if (!crossing.sides) return null;
+  const sideA = rotateDir(crossing.sides[0], fromPlaced.rotation);
+  const sideB = rotateDir(crossing.sides[1], fromPlaced.rotation);
+
+  if (exitDir !== sideA && exitDir !== sideB) {
+    return null;
+  }
+
+  const player = state.players[seat];
+  let entryDir: Dir | null = null;
+  if (cameFrom) {
+    const cameFromPlaced = state.board.placed[cameFrom];
+    if (cameFromPlaced) {
+      entryDir = getStepDirection(fromPlaced, cameFromPlaced);
+    }
+  }
+  if (!entryDir && player) {
+    const flag = player.flags[`barrier_side:${from}`];
+    if (flag === 'n' || flag === 'e' || flag === 's' || flag === 'w') {
+      entryDir = flag;
+    }
+  }
+
+  // Returning through the entry doorway does not require a roll
+  if (entryDir && exitDir === entryDir) {
+    return null;
+  }
+
+  return {
+    fromTileDef,
+    trait: crossing.trait,
+    threshold: crossing.threshold,
+  };
+}
 
 /**
  * The placed tile that is `floor`'s landing, or null if it has not been
@@ -189,8 +285,12 @@ function walk(state: GameState, seat: SeatId, content: Content): WalkResult {
     if (entry.depth >= budget) continue;
 
     for (const nb of getConnections(state, entry.pos, content)) {
-      // No immediate backtrack into the room just left.
-      if (nb === entry.cameFrom) continue;
+      // No immediate backtrack into the room just left, except in barrier rooms
+      // where returning through the entry doorway is explicitly allowed without roll.
+      const tile = state.board.placed[entry.pos];
+      const currentTile = tile ? content.tilesById[tile.tileId] : undefined;
+      const isBarrier = Boolean(currentTile?.crossing);
+      if (nb === entry.cameFrom && !isBarrier) continue;
 
       const key = stateKey(nb, entry.pos);
       if (visited.has(key)) continue;
@@ -265,6 +365,7 @@ export function beginTurnFor(
   if (!player) return state;
   const flags = { ...player.flags };
   delete flags['adrenaline_speed'];
+  delete flags['dog_used_this_turn'];
   const nextPlayer: PlayerState = {
     ...player,
     flags,
@@ -288,4 +389,183 @@ export function beginTurnFor(
       },
     },
   };
+}
+
+/**
+ * Valid connections for Dog traversal:
+ * - Normal door-to-door connections
+ * - Two-way stairs
+ * - Excludes oneway drops, mystic elevator, and roll barrier rooms (crossing / exit rolls)
+ */
+export function getDogConnections(
+  state: GameState,
+  from: PlacedId,
+  content: Content,
+): PlacedId[] {
+  const tile = state.board.placed[from];
+  if (!tile) return [];
+  const tileDef = content.tilesById[tile.tileId];
+  if (!tileDef) return [];
+
+  if (tileDef.crossing || (tileDef.onExit && tileDef.onExit.length > 0)) {
+    return [];
+  }
+  if (tile.tileId === 'tile.mystic_elevator') {
+    return [];
+  }
+
+  const out: PlacedId[] = [];
+  const seen = new Set<PlacedId>();
+  const add = (id: PlacedId): void => {
+    if (id === from || seen.has(id)) return;
+    const dest = state.board.placed[id];
+    if (!dest) return;
+    const destDef = content.tilesById[dest.tileId];
+    if (!destDef) return;
+    if (dest.tileId === 'tile.mystic_elevator') return;
+    seen.add(id);
+    out.push(id);
+  };
+
+  const doors = rotateDoors(tileDef.doors, tile.rotation);
+  for (const dir of DIR_ORDER) {
+    if (!doors[dir]) continue;
+    const [nx, ny] = neighbourCell(tile.x, tile.y, dir);
+    const neighbourId = state.board.index[tile.floor][cellKey(nx, ny)];
+    if (!neighbourId) continue;
+    const neighbour = state.board.placed[neighbourId];
+    const neighbourDef = neighbour && content.tilesById[neighbour.tileId];
+    if (!neighbour || !neighbourDef) continue;
+    const neighbourDoors = rotateDoors(neighbourDef.doors, neighbour.rotation);
+    if (neighbourDoors[OPPOSITE[dir]]) add(neighbourId);
+  }
+
+  for (const link of tileDef.staticLinks) {
+    if (link.kind === 'to_tile' && link.twoWay) {
+      for (const [id, other] of Object.entries(state.board.placed)) {
+        if (other.tileId === link.target) add(id);
+      }
+    } else if (link.kind === 'to_floor' && link.twoWay) {
+      const landing = landingPlacedId(state, content, link.floor);
+      if (landing) add(landing);
+    }
+  }
+
+  for (const [id, other] of Object.entries(state.board.placed)) {
+    if (id === from) continue;
+    const otherDef = content.tilesById[other.tileId];
+    if (!otherDef) continue;
+    for (const link of otherDef.staticLinks) {
+      if (link.kind === 'to_tile' && link.twoWay && link.target === tile.tileId) {
+        add(id);
+      } else if (
+        link.kind === 'to_floor' &&
+        link.twoWay &&
+        link.landing === tile.tileId
+      ) {
+        add(id);
+      }
+    }
+  }
+
+  return out;
+}
+
+export function getDogReachableRooms(
+  state: GameState,
+  from: PlacedId,
+  content: Content,
+): PlacedId[] {
+  const visited = new Map<PlacedId, number>();
+  visited.set(from, 0);
+  const queue: Array<{ pos: PlacedId; depth: number }> = [{ pos: from, depth: 0 }];
+
+  let head = 0;
+  while (head < queue.length) {
+    const { pos, depth } = queue[head++]!;
+    if (depth >= 6) continue;
+
+    for (const nb of getDogConnections(state, pos, content)) {
+      if (!visited.has(nb)) {
+        visited.set(nb, depth + 1);
+        queue.push({ pos: nb, depth: depth + 1 });
+      }
+    }
+  }
+
+  const result: PlacedId[] = [];
+  for (const [id, depth] of visited.entries()) {
+    if (id !== from && depth <= 6) {
+      result.push(id);
+    }
+  }
+  return result;
+}
+
+export function getDogPath(
+  state: GameState,
+  from: PlacedId,
+  to: PlacedId,
+  content: Content,
+): PlacedId[] | null {
+  if (from === to) return [];
+  const pred = new Map<PlacedId, PlacedId>();
+  const dist = new Map<PlacedId, number>();
+  dist.set(from, 0);
+  const queue: PlacedId[] = [from];
+
+  let head = 0;
+  while (head < queue.length) {
+    const pos = queue[head++]!;
+    const d = dist.get(pos)!;
+    if (d >= 6) continue;
+
+    for (const nb of getDogConnections(state, pos, content)) {
+      if (!dist.has(nb)) {
+        dist.set(nb, d + 1);
+        pred.set(nb, pos);
+        if (nb === to) {
+          const path: PlacedId[] = [];
+          let cur: PlacedId | undefined = to;
+          while (cur && cur !== from) {
+            path.unshift(cur);
+            cur = pred.get(cur);
+          }
+          return path;
+        }
+        queue.push(nb);
+      }
+    }
+  }
+  return null;
+}
+
+/**
+ * Leaving a room containing opponents (heroes) costs +1 movement per hero.
+ */
+export function getMonsterLeaveCost(state: GameState, from: PlacedId): number {
+  const heroesInRoom = Object.values(state.players).filter(
+    (p) => !p.isDead && !p.removed && !p.isTraitor && p.location === from,
+  ).length;
+  return 1 + heroesInRoom;
+}
+
+export function getMonsterConnections(
+  state: GameState,
+  from: PlacedId,
+  content: Content,
+): PlacedId[] {
+  return getConnections(state, from, content);
+}
+
+export function getMonsterReachable(
+  state: GameState,
+  monsterLoc: PlacedId,
+  movesLeft: number,
+  content: Content,
+): PlacedId[] {
+  if (movesLeft <= 0) return [];
+  const cost = getMonsterLeaveCost(state, monsterLoc);
+  if (movesLeft < cost) return [];
+  return getMonsterConnections(state, monsterLoc, content);
 }

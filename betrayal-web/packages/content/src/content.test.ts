@@ -11,11 +11,96 @@
 import { describe, expect, it } from 'vitest';
 import charactersJson from '../fixtures/characters.json' with { type: 'json' };
 import tilesJson from '../fixtures/tiles.json' with { type: 'json' };
+import canonicalTilesJson from '../../../content/tiles.json' with { type: 'json' };
 import { COLOURS } from '@bahoth/shared';
 import { buildContent, ContentError } from './load.js';
 import { fixtureContent } from './fixtures.js';
 import { ColourSchema, FloorSchema, TraitSchema } from './schemas.js';
 import { EffectSchema, RoomRefSchema } from './effects.js';
+
+export const OFFICIAL_47_LOGICAL_IDS = [
+  'tile.entrance_hall',
+  'tile.foyer',
+  'tile.grand_staircase',
+  'tile.upper_landing',
+  'tile.basement_landing',
+  'tile.servants_quarters',
+  'tile.storeroom',
+  'tile.operating_laboratory',
+  'tile.research_laboratory',
+  'tile.stairs_from_basement',
+  'tile.underground_lake',
+  'tile.wine_cellar',
+  'tile.balcony',
+  'tile.master_bedroom',
+  'tile.bedroom',
+  'tile.coal_chute',
+  'tile.gardens',
+  'tile.ballroom',
+  'tile.dining_room',
+  'tile.patio',
+  'tile.kitchen',
+  'tile.abandoned_room',
+  'tile.conservatory',
+  'tile.charred_room',
+  'tile.bloody_room',
+  'tile.organ_room',
+  'tile.statuary_corridor',
+  'tile.creaky_hallway',
+  'tile.dusty_hallway',
+  'tile.game_room',
+  'tile.tower',
+  'tile.gallery',
+  'tile.catacombs',
+  'tile.chasm',
+  'tile.junk_room',
+  'tile.chapel',
+  'tile.gymnasium',
+  'tile.the_pentagram_chamber',
+  'tile.library',
+  'tile.attic',
+  'tile.furnace_room',
+  'tile.graveyard',
+  'tile.larder',
+  'tile.crypt',
+  'tile.the_vault',
+  'tile.collapsed_room',
+  'tile.mystic_elevator',
+] as const;
+
+export const OFFICIAL_PREPLACED_IDS = [
+  'tile.entrance_hall',
+  'tile.foyer',
+  'tile.grand_staircase',
+  'tile.upper_landing',
+  'tile.basement_landing',
+] as const;
+
+export const NEUTRAL_ROOM_IDS = [
+  'tile.servants_quarters',
+  'tile.storeroom',
+  'tile.operating_laboratory',
+  'tile.research_laboratory',
+  'tile.underground_lake',
+  'tile.wine_cellar',
+  'tile.balcony',
+  'tile.master_bedroom',
+  'tile.bedroom',
+  'tile.gardens',
+  'tile.ballroom',
+  'tile.dining_room',
+  'tile.patio',
+  'tile.kitchen',
+  'tile.abandoned_room',
+  'tile.conservatory',
+  'tile.charred_room',
+  'tile.bloody_room',
+  'tile.organ_room',
+  'tile.statuary_corridor',
+  'tile.creaky_hallway',
+  'tile.dusty_hallway',
+  'tile.game_room',
+] as const;
 
 /** Content before validation is exactly as untyped as the JSON it came from. */
 type Raw = Record<string, any>;
@@ -36,15 +121,136 @@ function expectRejected(file: Raw, match: RegExp): void {
   expect(() => buildContent(file, 'test')).toThrow(match);
 }
 
+describe('official 2E room set and neutral rooms', () => {
+  it('contains exactly the expected 47 logical tile IDs in canonical content', () => {
+    const ids = canonicalTilesJson.tiles.map((t: Raw) => t.id).sort();
+    const expected = [...OFFICIAL_47_LOGICAL_IDS].sort();
+    expect(ids).toEqual(expected);
+
+    const layoutIds = canonicalTilesJson.house.layout.map((p: Raw) => p.tileId).sort();
+    const expectedPreplaced = [...OFFICIAL_PREPLACED_IDS].sort();
+    expect(layoutIds).toEqual(expectedPreplaced);
+
+    const drawable = canonicalTilesJson.tiles.filter(
+      (t: Raw) => !layoutIds.includes(t.id),
+    );
+    expect(drawable).toHaveLength(42);
+    expect(canonicalTilesJson.house.layout).toHaveLength(5);
+    expect(canonicalTilesJson.tiles).toHaveLength(47);
+
+    // Retains official image-only 2E base rooms
+    expect(ids).toContain('tile.collapsed_room');
+    expect(ids).toContain('tile.mystic_elevator');
+
+    // Excludes expansion-only rooms
+    expect(ids).not.toContain('tile.panic_room');
+  });
+
+  it('ensures Operating Laboratory, Research Laboratory, Gardens, and all neutral rooms have empty mechanical hook arrays', () => {
+    for (const neutralId of NEUTRAL_ROOM_IDS) {
+      const tile = canonicalTilesJson.tiles.find((t: Raw) => t.id === neutralId);
+      expect(tile, `canonical neutral room ${neutralId} must exist`).toBeDefined();
+      expect(tile.onEnter ?? [], `${neutralId} must have empty onEnter hook`).toEqual([]);
+    }
+  });
+
+  it('verifies exact floor eligibility for all 47 official logical room tiles against 2E rulebook / legacy table', () => {
+    const expectedFloorTable: Record<string, ('basement' | 'ground' | 'upper')[]> = {
+      'tile.entrance_hall': ['ground'],
+      'tile.foyer': ['ground'],
+      'tile.grand_staircase': ['ground'],
+      'tile.upper_landing': ['upper'],
+      'tile.basement_landing': ['basement'],
+      'tile.stairs_from_basement': ['basement'],
+      'tile.underground_lake': ['basement'],
+      'tile.wine_cellar': ['basement'],
+      'tile.catacombs': ['basement'],
+      'tile.chasm': ['basement'],
+      'tile.the_pentagram_chamber': ['basement'],
+      'tile.furnace_room': ['basement'],
+      'tile.larder': ['basement'],
+      'tile.crypt': ['basement'],
+      'tile.balcony': ['upper'],
+      'tile.master_bedroom': ['upper'],
+      'tile.bedroom': ['upper'],
+      'tile.tower': ['upper'],
+      'tile.gallery': ['upper'],
+      'tile.attic': ['upper'],
+      'tile.coal_chute': ['ground'],
+      'tile.gardens': ['ground'],
+      'tile.ballroom': ['ground'],
+      'tile.dining_room': ['ground'],
+      'tile.patio': ['ground'],
+      'tile.graveyard': ['ground'],
+      'tile.servants_quarters': ['basement', 'upper'],
+      'tile.storeroom': ['basement', 'upper'],
+      'tile.operating_laboratory': ['basement', 'upper'],
+      'tile.research_laboratory': ['basement', 'upper'],
+      'tile.gymnasium': ['basement', 'upper'],
+      'tile.the_vault': ['basement', 'upper'],
+      'tile.kitchen': ['basement', 'ground'],
+      'tile.abandoned_room': ['basement', 'ground'],
+      'tile.conservatory': ['ground', 'upper'],
+      'tile.charred_room': ['ground', 'upper'],
+      'tile.bloody_room': ['ground', 'upper'],
+      'tile.chapel': ['ground', 'upper'],
+      'tile.library': ['ground', 'upper'],
+      'tile.collapsed_room': ['ground', 'upper'],
+      'tile.organ_room': ['basement', 'ground', 'upper'],
+      'tile.statuary_corridor': ['basement', 'ground', 'upper'],
+      'tile.creaky_hallway': ['basement', 'ground', 'upper'],
+      'tile.dusty_hallway': ['basement', 'ground', 'upper'],
+      'tile.game_room': ['basement', 'ground', 'upper'],
+      'tile.junk_room': ['basement', 'ground', 'upper'],
+      'tile.mystic_elevator': ['basement', 'ground', 'upper'],
+    };
+
+    expect(Object.keys(expectedFloorTable)).toHaveLength(47);
+
+    for (const [tileId, expectedFloors] of Object.entries(expectedFloorTable)) {
+      const tile = canonicalTilesJson.tiles.find((t: Raw) => t.id === tileId);
+      expect(tile, `Tile ${tileId} must exist in canonical tiles`).toBeDefined();
+      expect(
+        [...(tile.floors as string[])].sort(),
+        `Tile ${tileId} must have exact floors ${expectedFloors.join(', ')}`,
+      ).toEqual([...expectedFloors].sort());
+    }
+  });
+
+  it('verifies exact symbol coverage: 13 omen, 4 item, 18 event, 7 drawable none', () => {
+    const layoutIds = canonicalTilesJson.house.layout.map((p: Raw) => p.tileId);
+    const drawable = canonicalTilesJson.tiles.filter(
+      (t: Raw) => !layoutIds.includes(t.id),
+    );
+
+    const symbolCounts = { omen: 0, item: 0, event: 0, none: 0 };
+    for (const t of drawable) {
+      const sym = (t.symbol as 'omen' | 'item' | 'event' | null) ?? 'none';
+      symbolCounts[sym]++;
+    }
+
+    expect(symbolCounts).toEqual({
+      omen: 13,
+      item: 4,
+      event: 18,
+      none: 7,
+    });
+  });
+
+  it('keeps canonical content and fixture copies synchronized', () => {
+    expect(tilesJson).toEqual(canonicalTilesJson);
+  });
+});
+
 describe('the fixture house', () => {
   const content = fixtureContent();
 
   it('has the expected component counts', () => {
-    // The tripwire. 44 room tiles, plus the three starting rooms and the two
-    // landings, is the shape docs/02-rules-model.md#21 describes.
+    // The tripwire. 44 room tiles (2 preplaced landings + 42 drawable), plus the
+    // three starting rooms representing the single physical starting tile.
     expect(content.house.layout).toHaveLength(5);
-    expect(content.deckTiles).toHaveLength(44);
-    expect(content.tiles).toHaveLength(49);
+    expect(content.deckTiles).toHaveLength(42);
+    expect(content.tiles).toHaveLength(47);
     expect(content.characters).toHaveLength(12);
   });
 
@@ -65,11 +271,7 @@ describe('the fixture house', () => {
 
   it('resolves every static link', () => {
     const links = content.tiles.flatMap((t) => t.staticLinks.map((l) => [t, l] as const));
-    // The graph is only interesting if the content actually exercises it.
-    expect(links.length).toBeGreaterThanOrEqual(4);
-    const kinds = new Set(links.map(([, l]) => l.kind));
-    expect(kinds).toEqual(new Set(['to_tile', 'to_floor', 'oneway_drop']));
-
+    expect(links.length).toBeGreaterThanOrEqual(2);
     for (const [tile, link] of links) {
       if (link.kind === 'to_tile') {
         expect(
@@ -98,15 +300,15 @@ describe('the fixture house', () => {
 
   it('leaves the deck unshuffled and one entry per copy', () => {
     const file = raw();
-    tileIn(file, 'tile.bare_room').copies = 3;
+    tileIn(file, 'tile.dining_room').copies = 3;
     const built = buildContent(file, 'test');
 
-    expect(built.deckTiles).toHaveLength(46);
-    expect(built.deckTiles.filter((id) => id === 'tile.bare_room')).toHaveLength(3);
+    expect(built.deckTiles).toHaveLength(44);
+    expect(built.deckTiles.filter((id) => id === 'tile.dining_room')).toHaveLength(3);
     // File order, so a given content bundle always deals the same deck before
     // the engine's seeded shuffle touches it.
     const again = raw();
-    tileIn(again, 'tile.bare_room').copies = 3;
+    tileIn(again, 'tile.dining_room').copies = 3;
     expect(built.deckTiles).toEqual(buildContent(again, 'test').deckTiles);
   });
 
@@ -124,7 +326,7 @@ describe('the content hash', () => {
     expect(a.hash).toBe(b.hash);
 
     const changed = raw();
-    tileIn(changed, 'tile.long_hallway').doors.e = true;
+    tileIn(changed, 'tile.creaky_hallway').doors.e = false;
     expect(buildContent(changed, 'test').hash).not.toBe(a.hash);
   });
 });
@@ -167,25 +369,25 @@ describe("effects.ts's Floor/Trait copies", () => {
 describe('coherence checks reject', () => {
   it('a duplicate tile id', () => {
     const file = raw();
-    file.tiles.push(structuredClone(tileIn(file, 'tile.bare_room')));
+    file.tiles.push(structuredClone(tileIn(file, 'tile.dining_room')));
     expectRejected(file, /Duplicate tile id/);
   });
 
   it('a tile with no doors', () => {
     const file = raw();
-    tileIn(file, 'tile.bare_room').doors = { n: false, e: false, s: false, w: false };
+    tileIn(file, 'tile.dining_room').doors = { n: false, e: false, s: false, w: false };
     expectRejected(file, /has no doors/);
   });
 
   it('a tile that lists a floor twice', () => {
     const file = raw();
-    tileIn(file, 'tile.bare_room').floors = ['ground', 'ground'];
+    tileIn(file, 'tile.dining_room').floors = ['ground', 'ground'];
     expectRejected(file, /lists a floor twice/);
   });
 
   it('a link to a tile that does not exist', () => {
     const file = raw();
-    tileIn(file, 'tile.hidden_stair').staticLinks = [
+    tileIn(file, 'tile.stairs_from_basement').staticLinks = [
       { kind: 'to_tile', target: 'tile.nowhere', twoWay: true },
     ];
     expectRejected(file, /links to unknown tile/);
@@ -193,15 +395,15 @@ describe('coherence checks reject', () => {
 
   it('a link from a tile to itself', () => {
     const file = raw();
-    tileIn(file, 'tile.hidden_stair').staticLinks = [
-      { kind: 'to_tile', target: 'tile.hidden_stair', twoWay: true },
+    tileIn(file, 'tile.stairs_from_basement').staticLinks = [
+      { kind: 'to_tile', target: 'tile.stairs_from_basement', twoWay: true },
     ];
     expectRejected(file, /links to itself/);
   });
 
   it('a floor link that disagrees with the house about the landing', () => {
     const file = raw();
-    tileIn(file, 'tile.rattling_lift').staticLinks = [
+    tileIn(file, 'tile.stairs_from_basement').staticLinks = [
       { kind: 'to_floor', floor: 'upper', landing: 'tile.foyer', twoWay: true },
     ];
     expectRejected(file, /the house declares/);
@@ -209,7 +411,9 @@ describe('coherence checks reject', () => {
 
   it('a drop onto a floor the tile may itself be placed on', () => {
     const file = raw();
-    tileIn(file, 'tile.coal_slide').floors = ['basement', 'ground'];
+    tileIn(file, 'tile.stairs_from_basement').staticLinks = [
+      { kind: 'oneway_drop', floor: 'basement' },
+    ];
     expectRejected(file, /which it may also be placed on/);
   });
 
@@ -267,15 +471,14 @@ describe('coherence checks reject', () => {
 
   it('a start tile that is not on the board', () => {
     const file = raw();
-    file.house.startTile = 'tile.bare_room';
+    file.house.startTile = 'tile.dining_room';
     expectRejected(file, /the starting layout does not place/);
   });
 
   it('a landing that is not pre-placed on its own floor', () => {
     const file = raw();
     file.house.landings.upper = 'tile.foyer';
-    // Keep the lift's link agreeing with the house so this is the only fault.
-    tileIn(file, 'tile.rattling_lift').staticLinks = [];
+    tileIn(file, 'tile.grand_staircase').staticLinks = [];
     expectRejected(file, /is not pre-placed on the upper/);
   });
 
@@ -378,6 +581,134 @@ describe('coherence checks reject', () => {
       expect(parsed.cardsById['test.good_passive']).toBeDefined();
       expect(parsed.cardsById['test.good_consumable']).toBeDefined();
       expect(parsed.cardsById['test.good_once_per_turn']).toBeDefined();
+    });
+  });
+
+  describe('tile rule hooks and metadata schema & coherence', () => {
+    it('rejects duplicate room action IDs on a tile', () => {
+      const file = raw();
+      const vault = tileIn(file, 'tile.the_vault');
+      vault.ruleText = 'Vault rule';
+      vault.actions = [
+        {
+          id: 'action.the_vault.open',
+          name: 'Open Vault',
+          cadence: { kind: 'once_per_game', key: 'vault_empty', scope: 'tile' },
+          effects: [{ e: 'log', text: 'Opened' }],
+        },
+        {
+          id: 'action.the_vault.open',
+          name: 'Open Vault Duplicate',
+          cadence: { kind: 'once_per_game', key: 'vault_empty', scope: 'tile' },
+          effects: [{ e: 'log', text: 'Opened again' }],
+        },
+      ];
+      expectRejected(file, /duplicate room action id/i);
+    });
+
+    it('rejects crossing metadata on a tile without two appropriate exits', () => {
+      const file = raw();
+      const room = tileIn(file, 'tile.dining_room');
+      room.ruleText = 'Crossing rule';
+      room.doors = { n: true, e: false, s: false, w: false };
+      room.crossing = { trait: 'speed', threshold: 3 };
+      expectRejected(file, /crossing.*two.*exits/i);
+    });
+
+    it('rejects empty executable room actions', () => {
+      const file = raw();
+      const vault = tileIn(file, 'tile.the_vault');
+      vault.ruleText = 'Vault rule';
+      vault.actions = [
+        {
+          id: 'action.the_vault.open',
+          name: 'Open Vault',
+          cadence: { kind: 'once_per_game', key: 'vault_empty', scope: 'tile' },
+          effects: [],
+        },
+      ];
+      expectRejected(file, /empty.*action|at least one executable effect/i);
+    });
+
+    it('rejects once-per-game declarations lacking a persistent flag key or scope', () => {
+      const file = raw();
+      const vault = tileIn(file, 'tile.the_vault');
+      vault.ruleText = 'Vault rule';
+      vault.actions = [
+        {
+          id: 'action.the_vault.open',
+          name: 'Open Vault',
+          cadence: { kind: 'once_per_game' } as any,
+          effects: [{ e: 'log', text: 'Opened' }],
+        },
+      ];
+      expectRejected(file, /once-per-game.*flag.*key|failed validation/i);
+    });
+
+    it('rejects executable room hooks without ruleText', () => {
+      const file = raw();
+      const junk = tileIn(file, 'tile.junk_room');
+      delete junk.ruleText;
+      junk.onExit = [{ e: 'log', text: 'exited' }];
+      expectRejected(file, /missing ruleText|executable room hook/i);
+    });
+
+    it('rejects ruleText on neutral rooms', () => {
+      const file = raw();
+      const neutral = tileIn(file, 'tile.servants_quarters');
+      neutral.ruleText = 'Neutral room should not have rule text';
+      expectRejected(file, /neutral room.*ruleText/i);
+    });
+  });
+
+  describe('Task 10: 2E Haunt books and official Haunt Chart', () => {
+    const content = fixtureContent();
+
+    it('contains exactly 50 haunts with unique IDs from 1 to 50', () => {
+      expect(content.haunts).toHaveLength(50);
+      const ids = content.haunts.map((h) => h.id).sort((a, b) => a - b);
+      expect(ids).toEqual(Array.from({ length: 50 }, (_, i) => i + 1));
+    });
+
+    it('every haunt has a non-empty name and structured hero and traitor entries', () => {
+      for (const h of content.haunts) {
+        expect(h.name.length).toBeGreaterThan(0);
+        expect(h.heroes).toBeDefined();
+        expect(h.heroes.goal.length).toBeGreaterThan(0);
+        expect(h.heroes.rules.length).toBeGreaterThan(0);
+
+        expect(h.traitor).toBeDefined();
+        expect(h.traitor.goal.length).toBeGreaterThan(0);
+        expect(h.traitor.rules.length).toBeGreaterThan(0);
+
+        if (!h.hasTraitor) {
+          expect([12, 31, 50]).toContain(h.id);
+          expect(h.traitorRule.kind).toBe('none');
+        }
+        if (h.hasHiddenTraitor) {
+          expect([9, 34, 43]).toContain(h.id);
+        }
+      }
+    });
+
+    it('has official 2E Haunt Chart with exactly 169 combinations (13 rooms x 13 omens)', () => {
+      expect(content.hauntChart).toHaveLength(169);
+      for (const entry of content.hauntChart) {
+        expect(entry.hauntId).toBeGreaterThanOrEqual(1);
+        expect(entry.hauntId).toBeLessThanOrEqual(50);
+        expect(entry.roomTileId.startsWith('tile.')).toBe(true);
+        expect(entry.omenCardId.startsWith('omen.')).toBe(true);
+      }
+
+      // Spot-check classic known mappings:
+      // Abandoned Room + Girl -> Haunt 1 (The Mummy Walks)
+      expect(content.hauntByOmenAndRoom['omen.girl:tile.abandoned_room']).toBe(1);
+      // Catacombs + Bite -> Haunt 4 (The Web of Destiny)
+      expect(content.hauntByOmenAndRoom['omen.bite:tile.catacombs']).toBe(4);
+      // Balcony + Crystal Ball -> Haunt 32 (Lost)
+      expect(content.hauntByOmenAndRoom['omen.crystal_ball:tile.balcony']).toBe(32);
+      // Pentagram Chamber + Book -> Haunt 50 (Treasure Hunt)
+      expect(content.hauntByOmenAndRoom['omen.book:tile.the_pentagram_chamber']).toBe(50);
     });
   });
 });

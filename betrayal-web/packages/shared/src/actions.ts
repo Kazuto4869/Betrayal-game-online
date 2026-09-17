@@ -7,7 +7,16 @@
  * start. Unimplemented actions are rejected with UNKNOWN_ACTION.
  */
 
-import type { CardId, CharId, Dir, PlacedId, Rotation, SeatId, Trait } from './ids.js';
+import type {
+  CardId,
+  CharId,
+  Dir,
+  MonsterId,
+  PlacedId,
+  Rotation,
+  SeatId,
+  Trait,
+} from './ids.js';
 
 export type TargetRef =
   { kind: 'seat'; seatId: SeatId } | { kind: 'monster'; monsterId: string };
@@ -29,9 +38,23 @@ export type GameAction =
   | { t: 'DROP'; seat: SeatId; cardIds: CardId[] }
   | { t: 'PICKUP'; seat: SeatId; cardIds: CardId[] }
   | { t: 'ROOM_ACTION'; seat: SeatId; actionId: string }
+  | { t: 'COMMAND_DOG'; seat: SeatId; destination: PlacedId; cardId?: CardId | undefined }
   | { t: 'ATTACK'; seat: SeatId; target: TargetRef; trait: Trait }
   | { t: 'ASSIGN_DAMAGE'; seat: SeatId; alloc: Partial<Record<Trait, number>> }
   | { t: 'END_TURN'; seat: SeatId }
+  | { t: 'ACK_HAUNT_BRIEFING'; seat: SeatId }
+  // monster phase actions
+  | { t: 'START_MONSTER'; seat: SeatId; monsterId: MonsterId }
+  | { t: 'MOVE_MONSTER'; seat: SeatId; monsterId: MonsterId; to: PlacedId }
+  | {
+      t: 'MONSTER_ATTACK';
+      seat: SeatId;
+      monsterId: MonsterId;
+      target: TargetRef;
+      trait?: Trait | undefined;
+    }
+  | { t: 'END_MONSTER_TURN'; seat: SeatId; monsterId: MonsterId }
+  | { t: 'END_MONSTER_PHASE'; seat: SeatId }
   /** Vote for, or withdraw a vote for, removing a seat that has gone away. */
   | { t: 'VOTE_REMOVE'; seat: SeatId; target: SeatId; vote: boolean }
   // generic prompt answer
@@ -65,6 +88,7 @@ export type RuleErrorCode =
   | 'CHARACTER_REQUIRED'
   | 'NOT_HOST'
   | 'GAME_OVER'
+  | 'NO_ROOMS_FOR_FLOOR'
   | 'INVARIANT_VIOLATION';
 
 export interface RuleError {

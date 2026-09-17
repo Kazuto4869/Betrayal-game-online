@@ -117,11 +117,12 @@ export function killExplorer(
     ...working,
     phase: nextPhase,
     result,
+    turnDeadline: nextPhase === 'game_over' ? null : working.turnDeadline,
     players: {
       ...working.players,
       [seat]: nextPlayer,
     },
-    activeSeat: nextActive,
+    activeSeat: nextPhase === 'game_over' ? null : nextActive,
   };
 
   if (working.activeSeat === seat && nextActive && nextPhase !== 'game_over') {

@@ -8,6 +8,7 @@
 import {
   ContentFileSchema,
   FloorSchema,
+  NEUTRAL_ROOM_IDS,
   type Card,
   type Content,
   type ContentFile,
@@ -74,8 +75,14 @@ export function buildContent(raw: unknown, source = 'unknown'): Content {
     hauntsById[h.id] = h;
   }
 
+  const hauntChart = file.hauntChart ?? [];
+  const hauntByOmenAndRoom: Record<string, number> = {};
+  for (const entry of hauntChart) {
+    hauntByOmenAndRoom[`${entry.omenCardId}:${entry.roomTileId}`] = entry.hauntId;
+  }
+
   return {
-    hash: hashContent(file),
+    hash: hashContent(stripPrivateHauntBooks(file)),
     characters: file.characters,
     charactersById,
     tiles: file.tiles,
@@ -86,8 +93,20 @@ export function buildContent(raw: unknown, source = 'unknown'): Content {
     deckCards,
     haunts,
     hauntsById,
+    hauntChart,
+    hauntByOmenAndRoom,
     house: file.house,
     deckTiles: buildTileDeck(file),
+  };
+}
+
+export function stripPrivateHauntBooks(file: ContentFile): ContentFile {
+  return {
+    ...file,
+    haunts: file.haunts?.map((h) => {
+      const { traitor: _t, heroes: _h, ...publicHaunt } = h;
+      return publicHaunt as Haunt;
+    }),
   };
 }
 
@@ -179,6 +198,71 @@ function assertTilesCoherent(file: ContentFile, source: string): void {
     }
     if (new Set(tile.floors).size !== tile.floors.length) {
       throw new ContentError(`Tile ${tile.id} lists a floor twice`, source);
+    }
+
+    // Duplicate room action IDs, empty action effects, once-per-game cadence validation
+    const seenActionIds = new Set<string>();
+    for (const action of tile.actions ?? []) {
+      if (seenActionIds.has(action.id)) {
+        throw new ContentError(
+          `Tile ${tile.id} has duplicate room action id: ${action.id}`,
+          source,
+        );
+      }
+      seenActionIds.add(action.id);
+
+      if (!action.effects || action.effects.length === 0) {
+        throw new ContentError(
+          `Tile ${tile.id} action ${action.id} has empty executable effects`,
+          source,
+        );
+      }
+
+      if (action.cadence.kind === 'once_per_game') {
+        if (!action.cadence.key || !action.cadence.scope) {
+          throw new ContentError(
+            `Tile ${tile.id} action ${action.id} has once-per-game cadence lacking a persistent flag key or scope`,
+            source,
+          );
+        }
+      }
+    }
+
+    // Crossing metadata on a tile without two appropriate exits
+    if (tile.crossing) {
+      const doorCount = Object.values(tile.doors).filter(Boolean).length;
+      if (doorCount < 2) {
+        throw new ContentError(
+          `Tile ${tile.id} specifies crossing metadata without two appropriate exits (has ${doorCount} door)`,
+          source,
+        );
+      }
+      if (tile.crossing.sides && !tile.crossing.sides.every((s) => tile.doors[s])) {
+        throw new ContentError(
+          `Tile ${tile.id} specifies crossing sides ${tile.crossing.sides.join(', ')} without matching doors`,
+          source,
+        );
+      }
+    }
+
+    // Rule text validation: neutral rooms must NOT have ruleText; executable hooks must have ruleText
+    const isNeutral = (NEUTRAL_ROOM_IDS as readonly string[]).includes(tile.id);
+    if (isNeutral && tile.ruleText && tile.ruleText.trim().length > 0) {
+      throw new ContentError(`Neutral room ${tile.id} must not have ruleText`, source);
+    }
+
+    const hasExecutableHook =
+      (tile.onEnter && tile.onEnter.length > 0) ||
+      (tile.onExit && tile.onExit.length > 0) ||
+      (tile.onEndTurn && tile.onEndTurn.length > 0) ||
+      tile.crossing !== undefined ||
+      (tile.actions && tile.actions.length > 0);
+
+    if (hasExecutableHook && (!tile.ruleText || tile.ruleText.trim().length === 0)) {
+      throw new ContentError(
+        `Tile ${tile.id} has an executable room hook or special mechanic but is missing ruleText`,
+        source,
+      );
     }
   }
 

@@ -12,6 +12,7 @@ import type {
   CardId,
   GameAction,
   GameState,
+  PlacedId,
   PublicSeat,
   RoomCode,
   SeatId,
@@ -68,6 +69,7 @@ export interface Store {
   presentationQueue: PresentationItem[];
   activeCardDraw: CardDrawInfo | null;
   activeRoll: RollInfo | null;
+  selectedTileId: PlacedId | null;
 
   conn: Connection | null;
 
@@ -77,10 +79,14 @@ export interface Store {
   joinRoom: (code: RoomCode) => void;
   send: (action: GameAction) => void;
   sendChat: (text: string) => void;
+  selectTile: (id: PlacedId | null) => void;
   dismissError: () => void;
   dismissCardDraw: () => void;
   dismissRoll: () => void;
   dismissPresentation: () => void;
+  isBriefingOpen: boolean;
+  openBriefing: () => void;
+  closeBriefing: () => void;
 }
 
 let logId = 0;
@@ -110,8 +116,22 @@ export const useStore = create<Store>((set, get) => ({
   presentationQueue: [],
   activeCardDraw: null,
   activeRoll: null,
+  selectedTileId: null,
+  isBriefingOpen: false,
 
   conn: null,
+
+  openBriefing() {
+    set({ isBriefingOpen: true });
+  },
+
+  closeBriefing() {
+    set({ isBriefingOpen: false });
+  },
+
+  selectTile(id: PlacedId | null) {
+    set({ selectedTileId: id });
+  },
 
   async init() {
     if (get().conn) return;

@@ -4,7 +4,7 @@ import { reduce } from './reduce.js';
 import { checkInvariants } from './invariants.js';
 import { startedGame } from './testing.js';
 import type { GameState } from '@bahoth/shared';
-import { traitValue } from './selectors.js';
+import { traitValue, getLegalActions } from './selectors.js';
 
 const content = fixtureContent();
 
@@ -81,7 +81,7 @@ describe('M4: Haunt Roll, Haunt Trigger, and Combat', () => {
         hauntId: 1,
         traitorSeat: opponent,
         revealed: true,
-        acknowledged: [],
+        acknowledged: [...g.state.turnOrder],
       },
       players: {
         ...g.state.players,
@@ -120,7 +120,7 @@ describe('M4: Haunt Roll, Haunt Trigger, and Combat', () => {
         hauntId: 1,
         traitorSeat: opponent,
         revealed: true,
-        acknowledged: [],
+        acknowledged: [...g.state.turnOrder],
       },
       players: {
         ...g.state.players,
@@ -165,7 +165,7 @@ describe('M4: Haunt Roll, Haunt Trigger, and Combat', () => {
         hauntId: 1,
         traitorSeat: null,
         revealed: true,
-        acknowledged: [],
+        acknowledged: [...g.state.turnOrder],
       },
       monsters: {
         'monster.mummy': {
@@ -231,6 +231,382 @@ describe('M4: Haunt Roll, Haunt Trigger, and Combat', () => {
 
     expect(res.error).toBeUndefined();
     expect(res.state.tokens[0]!.flags['completed']).toBe(true);
+    expect(checkInvariants(res.state)).toEqual([]);
+  });
+});
+
+describe('Monster Turns and Monster Phase (Task 12)', () => {
+  it('enters monster phase after traitor explorer turn ends with living monsters', () => {
+    const g = startedGame();
+    const traitor = g.state.turnOrder[1]!;
+    const loc = g.state.players[traitor]!.location!;
+
+    const state: GameState = {
+      ...g.state,
+      phase: 'haunt',
+      activeSeat: traitor,
+      haunt: {
+        hauntId: 1,
+        traitorSeat: traitor,
+        revealed: true,
+        acknowledged: [...g.state.turnOrder],
+      },
+      players: {
+        ...g.state.players,
+        [traitor]: { ...g.state.players[traitor]!, isTraitor: true },
+      },
+      monsters: {
+        'monster.mummy': {
+          id: 'monster.mummy',
+          def: 'The Mummy',
+          location: loc,
+          isDead: false,
+          flags: { might: 5, speed: 3, stunned: false },
+        },
+      },
+      monsterTurn: null,
+    };
+
+    const res = reduce(state, { t: 'END_TURN', seat: traitor }, content);
+    expect(res.error).toBeUndefined();
+    expect(res.state.monsterTurn).toBeDefined();
+    expect(res.state.monsterTurn?.controllingSeat).toBe(traitor);
+    expect(res.state.monsterTurn?.activeMonsterId).toBeNull();
+    expect(res.state.activeSeat).toBe(traitor);
+    expect(checkInvariants(res.state)).toEqual([]);
+  });
+
+  it('rejects monster actions from non-controlling seats', () => {
+    const g = startedGame();
+    const traitor = g.state.turnOrder[1]!;
+    const hero0 = g.state.turnOrder[0]!;
+    const loc = g.state.players[traitor]!.location!;
+
+    const state: GameState = {
+      ...g.state,
+      phase: 'haunt',
+      activeSeat: traitor,
+      haunt: {
+        hauntId: 1,
+        traitorSeat: traitor,
+        revealed: true,
+        acknowledged: [...g.state.turnOrder],
+      },
+      monsters: {
+        'monster.mummy': {
+          id: 'monster.mummy',
+          def: 'The Mummy',
+          location: loc,
+          isDead: false,
+          flags: { might: 5, speed: 3, stunned: false },
+        },
+      },
+      monsterTurn: {
+        activeMonsterId: null,
+        actedMonsterIds: [],
+        movesLeft: 0,
+        hasAttacked: false,
+        rolledSpeed: null,
+        controllingSeat: traitor,
+      },
+    };
+
+    const res = reduce(
+      state,
+      { t: 'START_MONSTER', seat: hero0, monsterId: 'monster.mummy' },
+      content,
+    );
+    expect(res.error?.code).toBe('NOT_YOUR_TURN');
+
+    const heroLegal = getLegalActions(state, hero0, content);
+    expect(heroLegal).toEqual([]);
+
+    const traitorLegal = getLegalActions(state, traitor, content);
+    expect(
+      traitorLegal.some(
+        (a) => a.t === 'START_MONSTER' && a.monsterId === 'monster.mummy',
+      ),
+    ).toBe(true);
+    expect(traitorLegal.some((a) => a.t === 'END_MONSTER_PHASE')).toBe(true);
+  });
+
+  it('rolls Speed with guaranteed min 1 move even on 0, moves monster and respects hero slowing', () => {
+    const g = startedGame();
+    const traitor = g.state.turnOrder[1]!;
+    const hero0 = g.state.turnOrder[0]!;
+    const hero1 = g.state.turnOrder[2]!;
+    const startLoc = g.state.players[traitor]!.location!;
+    const dest = Object.keys(g.state.board.placed).find((id) => id !== startLoc)!;
+
+    const state: GameState = {
+      ...g.state,
+      phase: 'haunt',
+      activeSeat: traitor,
+      haunt: {
+        hauntId: 1,
+        traitorSeat: traitor,
+        revealed: true,
+        acknowledged: [...g.state.turnOrder],
+      },
+      players: {
+        ...g.state.players,
+        [traitor]: { ...g.state.players[traitor]!, isTraitor: true, location: startLoc },
+        [hero0]: { ...g.state.players[hero0]!, location: startLoc },
+        [hero1]: { ...g.state.players[hero1]!, location: dest },
+      },
+      monsters: {
+        'monster.mummy': {
+          id: 'monster.mummy',
+          def: 'The Mummy',
+          location: startLoc,
+          isDead: false,
+          flags: { might: 5, speed: 1, stunned: false },
+        },
+      },
+      monsterTurn: {
+        activeMonsterId: null,
+        actedMonsterIds: [],
+        movesLeft: 0,
+        hasAttacked: false,
+        rolledSpeed: null,
+        controllingSeat: traitor,
+      },
+    };
+
+    const resStart = reduce(
+      state,
+      { t: 'START_MONSTER', seat: traitor, monsterId: 'monster.mummy' },
+      content,
+    );
+    expect(resStart.error).toBeUndefined();
+    expect(resStart.state.monsterTurn?.activeMonsterId).toBe('monster.mummy');
+    expect(resStart.state.monsterTurn?.movesLeft).toBeGreaterThanOrEqual(1);
+
+    const lowMoveState: GameState = {
+      ...resStart.state,
+      monsterTurn: {
+        ...resStart.state.monsterTurn!,
+        movesLeft: 1,
+      },
+    };
+    const resFailMove = reduce(
+      lowMoveState,
+      { t: 'MOVE_MONSTER', seat: traitor, monsterId: 'monster.mummy', to: dest },
+      content,
+    );
+    expect(resFailMove.error?.code).toBe('ILLEGAL_MOVE');
+    expect(resFailMove.error?.message).toContain('heroes requires 2 moves');
+
+    const enoughMoveState: GameState = {
+      ...resStart.state,
+      monsterTurn: {
+        ...resStart.state.monsterTurn!,
+        movesLeft: 2,
+      },
+    };
+    const resMove = reduce(
+      enoughMoveState,
+      { t: 'MOVE_MONSTER', seat: traitor, monsterId: 'monster.mummy', to: dest },
+      content,
+    );
+    expect(resMove.error).toBeUndefined();
+    expect(resMove.state.monsters['monster.mummy']!.location).toBe(dest);
+    expect(resMove.state.monsterTurn?.movesLeft).toBe(0);
+    expect(checkInvariants(resMove.state)).toEqual([]);
+  });
+
+  it('monster attacks hero and deals damage; hero winning does NOT stun monster on monster turn', () => {
+    const g = startedGame();
+    const traitor = g.state.turnOrder[1]!;
+    const hero0 = g.state.turnOrder[0]!;
+    const loc = g.state.players[traitor]!.location!;
+
+    const state: GameState = {
+      ...g.state,
+      phase: 'haunt',
+      activeSeat: traitor,
+      haunt: {
+        hauntId: 1,
+        traitorSeat: traitor,
+        revealed: true,
+        acknowledged: [...g.state.turnOrder],
+      },
+      players: {
+        ...g.state.players,
+        [hero0]: {
+          ...g.state.players[hero0]!,
+          location: loc,
+          traits: { ...g.state.players[hero0]!.traits, might: 8 },
+        },
+      },
+      monsters: {
+        'monster.mummy': {
+          id: 'monster.mummy',
+          def: 'The Mummy',
+          location: loc,
+          isDead: false,
+          flags: { might: 1, speed: 3, stunned: false },
+        },
+      },
+      monsterTurn: {
+        activeMonsterId: 'monster.mummy',
+        actedMonsterIds: [],
+        movesLeft: 2,
+        hasAttacked: false,
+        rolledSpeed: 3,
+        controllingSeat: traitor,
+      },
+    };
+
+    const res = reduce(
+      state,
+      {
+        t: 'MONSTER_ATTACK',
+        seat: traitor,
+        monsterId: 'monster.mummy',
+        target: { kind: 'seat', seatId: hero0 },
+        trait: 'might',
+      },
+      content,
+    );
+    expect(res.error).toBeUndefined();
+    expect(res.state.monsterTurn?.hasAttacked).toBe(true);
+    expect(res.state.monsters['monster.mummy']!.flags['stunned']).toBe(false);
+    expect(res.state.monsters['monster.mummy']!.isDead).toBe(false);
+    expect(checkInvariants(res.state)).toEqual([]);
+  });
+
+  it('stunned monster clears stun when started and cannot move or attack that turn', () => {
+    const g = startedGame();
+    const traitor = g.state.turnOrder[1]!;
+    const loc = g.state.players[traitor]!.location!;
+
+    const state: GameState = {
+      ...g.state,
+      phase: 'haunt',
+      activeSeat: traitor,
+      haunt: {
+        hauntId: 1,
+        traitorSeat: traitor,
+        revealed: true,
+        acknowledged: [...g.state.turnOrder],
+      },
+      monsters: {
+        'monster.mummy': {
+          id: 'monster.mummy',
+          def: 'The Mummy',
+          location: loc,
+          isDead: false,
+          flags: { might: 5, speed: 3, stunned: true },
+        },
+      },
+      monsterTurn: {
+        activeMonsterId: null,
+        actedMonsterIds: [],
+        movesLeft: 0,
+        hasAttacked: false,
+        rolledSpeed: null,
+        controllingSeat: traitor,
+      },
+    };
+
+    const res = reduce(
+      state,
+      { t: 'START_MONSTER', seat: traitor, monsterId: 'monster.mummy' },
+      content,
+    );
+    expect(res.error).toBeUndefined();
+    expect(res.state.monsters['monster.mummy']!.flags['stunned']).toBe(false);
+    expect(
+      res.state.monsterTurn === null ||
+        res.state.monsterTurn.actedMonsterIds.includes('monster.mummy'),
+    ).toBe(true);
+    expect(checkInvariants(res.state)).toEqual([]);
+  });
+
+  it('advances round to first living hero after monster phase ends', () => {
+    const g = startedGame();
+    const traitor = g.state.turnOrder[2]!;
+    const hero0 = g.state.turnOrder[0]!;
+    const loc = g.state.players[traitor]!.location!;
+
+    const state: GameState = {
+      ...g.state,
+      phase: 'haunt',
+      activeSeat: traitor,
+      haunt: {
+        hauntId: 1,
+        traitorSeat: traitor,
+        revealed: true,
+        acknowledged: [...g.state.turnOrder],
+      },
+      monsters: {
+        'monster.mummy': {
+          id: 'monster.mummy',
+          def: 'The Mummy',
+          location: loc,
+          isDead: false,
+          flags: { might: 5, speed: 3, stunned: false },
+        },
+      },
+      monsterTurn: {
+        activeMonsterId: null,
+        actedMonsterIds: ['monster.mummy'],
+        movesLeft: 0,
+        hasAttacked: false,
+        rolledSpeed: null,
+        controllingSeat: traitor,
+      },
+    };
+
+    const beforeRound = state.round;
+    const res = reduce(state, { t: 'END_MONSTER_PHASE', seat: traitor }, content);
+    expect(res.error).toBeUndefined();
+    expect(res.state.monsterTurn).toBeNull();
+    expect(res.state.activeSeat).toBe(hero0);
+    expect(res.state.round).toBe(beforeRound + 1);
+    expect(checkInvariants(res.state)).toEqual([]);
+  });
+
+  it('dead traitor with living monsters still runs monster phase at end of hero rounds', () => {
+    const g = startedGame();
+    const hero0 = g.state.turnOrder[0]!;
+    const hero1 = g.state.turnOrder[1]!;
+    const traitor = g.state.turnOrder[2]!;
+    const loc = g.state.players[hero0]!.location!;
+
+    const state: GameState = {
+      ...g.state,
+      phase: 'haunt',
+      activeSeat: hero1,
+      turnOrder: [hero0, hero1, traitor],
+      haunt: {
+        hauntId: 1,
+        traitorSeat: traitor,
+        revealed: true,
+        acknowledged: [hero0, hero1, traitor],
+      },
+      players: {
+        ...g.state.players,
+        [traitor]: { ...g.state.players[traitor]!, isTraitor: true, isDead: true },
+      },
+      monsters: {
+        'monster.mummy': {
+          id: 'monster.mummy',
+          def: 'The Mummy',
+          location: loc,
+          isDead: false,
+          flags: { might: 5, speed: 3, stunned: false },
+        },
+      },
+      monsterTurn: null,
+    };
+
+    const res = reduce(state, { t: 'END_TURN', seat: hero1 }, content);
+    expect(res.error).toBeUndefined();
+    expect(res.state.monsterTurn).toBeDefined();
+    expect(res.state.monsterTurn?.controllingSeat).toBe(traitor);
+    expect(res.state.activeSeat).toBe(traitor);
     expect(checkInvariants(res.state)).toEqual([]);
   });
 });

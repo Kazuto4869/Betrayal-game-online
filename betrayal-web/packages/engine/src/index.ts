@@ -8,6 +8,7 @@ export {
   getLegalActions,
   isCharacterTaken,
   isLegalAction,
+  isRoomActionEligible,
   nextSeatInOrder,
   takenColours,
   traitValue,
@@ -29,7 +30,22 @@ export {
   killExplorer,
   type TraitOperationResult,
 } from './traits.js';
-export { beginTurnFor, findPath, getConnections, getReachable } from './movement.js';
+export {
+  beginTurnFor,
+  findPath,
+  getConnections,
+  getCrossingBarrier,
+  getDogConnections,
+  getDogPath,
+  getDogReachableRooms,
+  getMonsterConnections,
+  getMonsterLeaveCost,
+  getMonsterReachable,
+  getReachable,
+  getStepDirection,
+  rotateDir,
+  type CrossingBarrier,
+} from './movement.js';
 export {
   playGame,
   replay,

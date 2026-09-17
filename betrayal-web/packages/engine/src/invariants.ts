@@ -329,6 +329,30 @@ export function checkInvariants(state: GameState): string[] {
     }
   }
 
+  // 10. monsterTurn coherence.
+  if (state.monsterTurn !== null) {
+    if (state.phase !== 'haunt') {
+      problems.push(`monsterTurn is active during non-haunt phase ${state.phase}`);
+    }
+    if (state.activeSeat !== state.monsterTurn.controllingSeat) {
+      problems.push(
+        `activeSeat ${state.activeSeat} does not match monsterTurn controllingSeat ${state.monsterTurn.controllingSeat}`,
+      );
+    }
+    if (
+      state.monsterTurn.activeMonsterId !== null &&
+      (!state.monsters[state.monsterTurn.activeMonsterId] ||
+        state.monsters[state.monsterTurn.activeMonsterId]!.isDead)
+    ) {
+      problems.push(
+        `monsterTurn references non-existent or dead monster ${state.monsterTurn.activeMonsterId}`,
+      );
+    }
+    if (state.monsterTurn.movesLeft < 0) {
+      problems.push(`monsterTurn has negative movesLeft: ${state.monsterTurn.movesLeft}`);
+    }
+  }
+
   return problems;
 }
 

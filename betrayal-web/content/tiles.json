@@ -13,7 +13,10 @@
       "symbol": null,
       "copies": 1,
       "staticLinks": [],
-      "onEnter": []
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": []
     },
     {
       "id": "tile.foyer",
@@ -28,7 +31,10 @@
       "symbol": null,
       "copies": 1,
       "staticLinks": [],
-      "onEnter": []
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": []
     },
     {
       "id": "tile.grand_staircase",
@@ -49,7 +55,10 @@
           "twoWay": true
         }
       ],
-      "onEnter": []
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": []
     },
     {
       "id": "tile.servants_quarters",
@@ -64,7 +73,10 @@
       "symbol": "omen",
       "copies": 1,
       "staticLinks": [],
-      "onEnter": []
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": []
     },
     {
       "id": "tile.storeroom",
@@ -79,7 +91,10 @@
       "symbol": "item",
       "copies": 1,
       "staticLinks": [],
-      "onEnter": []
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": []
     },
     {
       "id": "tile.operating_laboratory",
@@ -94,40 +109,10 @@
       "symbol": "event",
       "copies": 1,
       "staticLinks": [],
-      "onEnter": [
-        {
-          "e": "roll",
-          "who": "actor",
-          "trait": "knowledge",
-          "reason": "Operating Lab (Knowledge Roll)",
-          "branches": [
-            {
-              "min": 4,
-              "effects": [
-                {
-                  "e": "trait",
-                  "who": "actor",
-                  "trait": "knowledge",
-                  "delta": 1
-                },
-                {
-                  "e": "log",
-                  "text": "You master surgical techniques! Gain 1 Knowledge."
-                }
-              ]
-            },
-            {
-              "min": 0,
-              "effects": [
-                {
-                  "e": "log",
-                  "text": "The gruesome surgical instruments yield no answers."
-                }
-              ]
-            }
-          ]
-        }
-      ]
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": []
     },
     {
       "id": "tile.research_laboratory",
@@ -142,40 +127,10 @@
       "symbol": "event",
       "copies": 1,
       "staticLinks": [],
-      "onEnter": [
-        {
-          "e": "roll",
-          "who": "actor",
-          "trait": "knowledge",
-          "reason": "Research Lab (Knowledge Roll)",
-          "branches": [
-            {
-              "min": 4,
-              "effects": [
-                {
-                  "e": "trait",
-                  "who": "actor",
-                  "trait": "knowledge",
-                  "delta": 1
-                },
-                {
-                  "e": "log",
-                  "text": "You conduct successful experiments! Gain 1 Knowledge."
-                }
-              ]
-            },
-            {
-              "min": 0,
-              "effects": [
-                {
-                  "e": "log",
-                  "text": "The chemicals fizzle out with no result."
-                }
-              ]
-            }
-          ]
-        }
-      ]
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": []
     },
     {
       "id": "tile.stairs_from_basement",
@@ -196,7 +151,11 @@
           "twoWay": true
         }
       ],
-      "onEnter": []
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": [],
+      "ruleText": "Leads to and from the Foyer."
     },
     {
       "id": "tile.underground_lake",
@@ -211,7 +170,10 @@
       "symbol": "event",
       "copies": 1,
       "staticLinks": [],
-      "onEnter": []
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": []
     },
     {
       "id": "tile.wine_cellar",
@@ -226,7 +188,10 @@
       "symbol": "item",
       "copies": 1,
       "staticLinks": [],
-      "onEnter": []
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": []
     },
     {
       "id": "tile.balcony",
@@ -241,7 +206,10 @@
       "symbol": "omen",
       "copies": 1,
       "staticLinks": [],
-      "onEnter": []
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": []
     },
     {
       "id": "tile.master_bedroom",
@@ -256,7 +224,10 @@
       "symbol": "omen",
       "copies": 1,
       "staticLinks": [],
-      "onEnter": []
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": []
     },
     {
       "id": "tile.bedroom",
@@ -271,7 +242,10 @@
       "symbol": "event",
       "copies": 1,
       "staticLinks": [],
-      "onEnter": []
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": []
     },
     {
       "id": "tile.coal_chute",
@@ -290,13 +264,19 @@
         {
           "e": "move",
           "who": "actor",
-          "to": { "landing": "basement" }
+          "to": {
+            "landing": "basement"
+          }
         },
         {
           "e": "log",
-          "text": "Whoosh! You slide down the Coal Chute straight into the Basement Landing!"
+          "text": "You slide down the Coal Chute into the Basement Landing!"
         }
-      ]
+      ],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": [],
+      "ruleText": "When you enter, slide immediately to the Basement Landing (counts as 1 space of movement). You cannot end your turn here."
     },
     {
       "id": "tile.gardens",
@@ -311,36 +291,10 @@
       "symbol": "event",
       "copies": 1,
       "staticLinks": [],
-      "onEnter": [
-        {
-          "e": "if",
-          "c": {
-            "k": "flag",
-            "scope": "seat",
-            "key": "healed_gardens",
-            "op": "=",
-            "value": 0
-          },
-          "then": [
-            {
-              "e": "trait",
-              "who": "actor",
-              "trait": "might",
-              "delta": 1
-            },
-            {
-              "e": "set_flag",
-              "scope": "seat",
-              "key": "healed_gardens",
-              "value": 1
-            },
-            {
-              "e": "log",
-              "text": "The fresh floral scent revitalizes your strength! Gain 1 Might (once per explorer)."
-            }
-          ]
-        }
-      ]
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": []
     },
     {
       "id": "tile.ballroom",
@@ -355,7 +309,10 @@
       "symbol": "event",
       "copies": 1,
       "staticLinks": [],
-      "onEnter": []
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": []
     },
     {
       "id": "tile.dining_room",
@@ -370,7 +327,10 @@
       "symbol": "omen",
       "copies": 1,
       "staticLinks": [],
-      "onEnter": []
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": []
     },
     {
       "id": "tile.patio",
@@ -385,7 +345,10 @@
       "symbol": "event",
       "copies": 1,
       "staticLinks": [],
-      "onEnter": []
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": []
     },
     {
       "id": "tile.kitchen",
@@ -400,7 +363,10 @@
       "symbol": "omen",
       "copies": 1,
       "staticLinks": [],
-      "onEnter": []
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": []
     },
     {
       "id": "tile.abandoned_room",
@@ -415,7 +381,10 @@
       "symbol": "omen",
       "copies": 1,
       "staticLinks": [],
-      "onEnter": []
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": []
     },
     {
       "id": "tile.conservatory",
@@ -430,7 +399,10 @@
       "symbol": "event",
       "copies": 1,
       "staticLinks": [],
-      "onEnter": []
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": []
     },
     {
       "id": "tile.charred_room",
@@ -445,7 +417,10 @@
       "symbol": "omen",
       "copies": 1,
       "staticLinks": [],
-      "onEnter": []
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": []
     },
     {
       "id": "tile.bloody_room",
@@ -460,7 +435,10 @@
       "symbol": "item",
       "copies": 1,
       "staticLinks": [],
-      "onEnter": []
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": []
     },
     {
       "id": "tile.organ_room",
@@ -475,7 +453,10 @@
       "symbol": "event",
       "copies": 1,
       "staticLinks": [],
-      "onEnter": []
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": []
     },
     {
       "id": "tile.statuary_corridor",
@@ -490,7 +471,10 @@
       "symbol": "event",
       "copies": 1,
       "staticLinks": [],
-      "onEnter": []
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": []
     },
     {
       "id": "tile.creaky_hallway",
@@ -505,7 +489,10 @@
       "symbol": null,
       "copies": 1,
       "staticLinks": [],
-      "onEnter": []
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": []
     },
     {
       "id": "tile.dusty_hallway",
@@ -520,7 +507,10 @@
       "symbol": null,
       "copies": 1,
       "staticLinks": [],
-      "onEnter": []
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": []
     },
     {
       "id": "tile.game_room",
@@ -535,7 +525,10 @@
       "symbol": "event",
       "copies": 1,
       "staticLinks": [],
-      "onEnter": []
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": []
     },
     {
       "id": "tile.tower",
@@ -550,7 +543,16 @@
       "symbol": "event",
       "copies": 1,
       "staticLinks": [],
-      "onEnter": []
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": [],
+      "ruleText": "Attempt a Might roll of 3+ to cross. If you fail, you stop moving and remain on this side.",
+      "crossing": {
+        "trait": "might",
+        "threshold": 3,
+        "sides": ["e", "w"]
+      }
     },
     {
       "id": "tile.gallery",
@@ -565,7 +567,50 @@
       "symbol": "omen",
       "copies": 1,
       "staticLinks": [],
-      "onEnter": []
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": [
+        {
+          "id": "action.gallery.fall_to_ballroom",
+          "name": "Fall to Ballroom",
+          "cadence": {
+            "kind": "optional"
+          },
+          "effects": [
+            {
+              "e": "move",
+              "who": "actor",
+              "to": {
+                "tile": "tile.ballroom"
+              }
+            },
+            {
+              "e": "prompt",
+              "who": "actor",
+              "prompt": {
+                "kind": "choose_trait",
+                "traits": ["speed", "might"]
+              },
+              "then": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": {
+                    "ref": "chosen"
+                  },
+                  "delta": -1
+                },
+                {
+                  "e": "log",
+                  "text": "You leap over the gallery railing and crash into the Ballroom below!"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "ruleText": "You may choose to fall to the Ballroom if it is in the house. If you do, take 1 die of physical damage."
     },
     {
       "id": "tile.catacombs",
@@ -580,7 +625,16 @@
       "symbol": "omen",
       "copies": 1,
       "staticLinks": [],
-      "onEnter": []
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": [],
+      "ruleText": "Attempt a Sanity roll of 6+ to cross. If you fail, you stop moving and remain on this side.",
+      "crossing": {
+        "trait": "sanity",
+        "threshold": 6,
+        "sides": ["n", "s"]
+      }
     },
     {
       "id": "tile.chasm",
@@ -595,40 +649,16 @@
       "symbol": null,
       "copies": 1,
       "staticLinks": [],
-      "onEnter": [
-        {
-          "e": "roll",
-          "who": "actor",
-          "trait": "speed",
-          "reason": "Chasm Crossing (Speed Roll)",
-          "branches": [
-            {
-              "min": 3,
-              "effects": [
-                {
-                  "e": "log",
-                  "text": "You leap cleanly across the bottomless chasm!"
-                }
-              ]
-            },
-            {
-              "min": 0,
-              "effects": [
-                {
-                  "e": "trait",
-                  "who": "actor",
-                  "trait": "speed",
-                  "delta": -1
-                },
-                {
-                  "e": "log",
-                  "text": "You stumble on the jagged edge! Lose 1 Speed."
-                }
-              ]
-            }
-          ]
-        }
-      ]
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": [],
+      "ruleText": "Attempt a Speed roll of 3+ to cross. If you fail, you stop moving and remain on this side.",
+      "crossing": {
+        "trait": "speed",
+        "threshold": 3,
+        "sides": ["e", "w"]
+      }
     },
     {
       "id": "tile.junk_room",
@@ -643,19 +673,20 @@
       "symbol": "omen",
       "copies": 1,
       "staticLinks": [],
-      "onEnter": [
+      "onEnter": [],
+      "onExit": [
         {
           "e": "roll",
           "who": "actor",
           "trait": "might",
-          "reason": "Junk Room (Might Roll)",
+          "reason": "Junk Room Exit (Might Roll)",
           "branches": [
             {
               "min": 3,
               "effects": [
                 {
                   "e": "log",
-                  "text": "You navigate through the piles of debris with ease."
+                  "text": "You navigate past the junk and debris safely."
                 }
               ]
             },
@@ -670,13 +701,16 @@
                 },
                 {
                   "e": "log",
-                  "text": "Jagged metal and sharp glass scratch your legs! Lose 1 Speed."
+                  "text": "Sharp junk scratches you as you exit! Lose 1 Speed."
                 }
               ]
             }
           ]
         }
-      ]
+      ],
+      "onEndTurn": [],
+      "actions": [],
+      "ruleText": "When exiting, attempt a Might roll of 3+. On failure, lose 1 Speed but continue moving."
     },
     {
       "id": "tile.chapel",
@@ -691,15 +725,20 @@
       "symbol": "event",
       "copies": 1,
       "staticLinks": [],
-      "onEnter": [
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [
         {
           "e": "if",
           "c": {
-            "k": "flag",
-            "scope": "seat",
-            "key": "blessed_chapel",
-            "op": "=",
-            "value": 0
+            "k": "not",
+            "c": {
+              "k": "flag",
+              "scope": "tile",
+              "key": "spent",
+              "op": "=",
+              "value": true
+            }
           },
           "then": [
             {
@@ -710,17 +749,19 @@
             },
             {
               "e": "set_flag",
-              "scope": "seat",
-              "key": "blessed_chapel",
-              "value": 1
+              "scope": "tile",
+              "key": "spent",
+              "value": true
             },
             {
               "e": "log",
-              "text": "The serene sanctuary calms your soul! Gain 1 Sanity (once per explorer)."
+              "text": "The serene sanctuary calms your soul! Gain 1 Sanity (once per game)."
             }
           ]
         }
-      ]
+      ],
+      "actions": [],
+      "ruleText": "Once per game, if you end your turn here (or upon first discovery), gain 1 Sanity."
     },
     {
       "id": "tile.gymnasium",
@@ -735,15 +776,20 @@
       "symbol": "omen",
       "copies": 1,
       "staticLinks": [],
-      "onEnter": [
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [
         {
           "e": "if",
           "c": {
-            "k": "flag",
-            "scope": "seat",
-            "key": "trained_gym",
-            "op": "=",
-            "value": 0
+            "k": "not",
+            "c": {
+              "k": "flag",
+              "scope": "tile",
+              "key": "spent",
+              "op": "=",
+              "value": true
+            }
           },
           "then": [
             {
@@ -754,17 +800,19 @@
             },
             {
               "e": "set_flag",
-              "scope": "seat",
-              "key": "trained_gym",
-              "value": 1
+              "scope": "tile",
+              "key": "spent",
+              "value": true
             },
             {
               "e": "log",
-              "text": "You train on the vintage equipment. Gain 1 Speed (once per explorer)."
+              "text": "You train on the vintage equipment. Gain 1 Speed (once per game)."
             }
           ]
         }
-      ]
+      ],
+      "actions": [],
+      "ruleText": "Once per game, if you end your turn here (or upon first discovery), gain 1 Speed."
     },
     {
       "id": "tile.the_pentagram_chamber",
@@ -779,119 +827,20 @@
       "symbol": "omen",
       "copies": 1,
       "staticLinks": [],
-      "onEnter": []
-    },
-    {
-      "id": "tile.library",
-      "name": "Library",
-      "doors": {
-        "n": false,
-        "e": false,
-        "s": true,
-        "w": true
-      },
-      "floors": ["ground", "upper"],
-      "symbol": "event",
-      "copies": 1,
-      "staticLinks": [],
-      "onEnter": [
-        {
-          "e": "if",
-          "c": {
-            "k": "flag",
-            "scope": "seat",
-            "key": "studied_library",
-            "op": "=",
-            "value": 0
-          },
-          "then": [
-            {
-              "e": "trait",
-              "who": "actor",
-              "trait": "knowledge",
-              "delta": 1
-            },
-            {
-              "e": "set_flag",
-              "scope": "seat",
-              "key": "studied_library",
-              "value": 1
-            },
-            {
-              "e": "log",
-              "text": "You study the arcane tomes on the shelves! Gain 1 Knowledge (once per explorer)."
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "tile.attic",
-      "name": "Attic",
-      "doors": {
-        "n": false,
-        "e": false,
-        "s": true,
-        "w": false
-      },
-      "floors": ["upper"],
-      "symbol": "event",
-      "copies": 1,
-      "staticLinks": [],
-      "onEnter": []
-    },
-    {
-      "id": "tile.furnace_room",
-      "name": "Furnace Room",
-      "doors": {
-        "n": true,
-        "e": false,
-        "s": true,
-        "w": true
-      },
-      "floors": ["basement"],
-      "symbol": "omen",
-      "copies": 1,
-      "staticLinks": [],
-      "onEnter": [
-        {
-          "e": "trait",
-          "who": "actor",
-          "trait": "might",
-          "delta": -1
-        },
-        {
-          "e": "log",
-          "text": "The searing heat of the Furnace Room scorches you! Lose 1 Might."
-        }
-      ]
-    },
-    {
-      "id": "tile.graveyard",
-      "name": "Graveyard",
-      "doors": {
-        "n": false,
-        "e": false,
-        "s": true,
-        "w": false
-      },
-      "floors": ["ground"],
-      "symbol": "event",
-      "copies": 1,
-      "staticLinks": [],
-      "onEnter": [
+      "onEnter": [],
+      "onExit": [
         {
           "e": "roll",
           "who": "actor",
-          "trait": "sanity",
-          "reason": "Graveyard (Sanity Roll)",
+          "trait": "knowledge",
+          "reason": "Pentagram Chamber Exit (Knowledge Roll)",
           "branches": [
             {
               "min": 4,
               "effects": [
                 {
                   "e": "log",
-                  "text": "You walk past the quiet headstones peacefully."
+                  "text": "You resist the dark influence as you exit."
                 }
               ]
             },
@@ -906,13 +855,213 @@
                 },
                 {
                   "e": "log",
-                  "text": "Restless spirits whisper from their graves! Lose 1 Sanity."
+                  "text": "Dark whispers tear at your mind as you exit! Lose 1 Sanity."
                 }
               ]
             }
           ]
         }
-      ]
+      ],
+      "onEndTurn": [],
+      "actions": [],
+      "ruleText": "When exiting, attempt a Knowledge roll of 4+. On failure, lose 1 Sanity but continue moving."
+    },
+    {
+      "id": "tile.library",
+      "name": "Library",
+      "doors": {
+        "n": false,
+        "e": false,
+        "s": true,
+        "w": true
+      },
+      "floors": ["ground", "upper"],
+      "symbol": "event",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [
+        {
+          "e": "if",
+          "c": {
+            "k": "not",
+            "c": {
+              "k": "flag",
+              "scope": "tile",
+              "key": "spent",
+              "op": "=",
+              "value": true
+            }
+          },
+          "then": [
+            {
+              "e": "trait",
+              "who": "actor",
+              "trait": "knowledge",
+              "delta": 1
+            },
+            {
+              "e": "set_flag",
+              "scope": "tile",
+              "key": "spent",
+              "value": true
+            },
+            {
+              "e": "log",
+              "text": "You study the arcane tomes on the shelves! Gain 1 Knowledge (once per game)."
+            }
+          ]
+        }
+      ],
+      "actions": [],
+      "ruleText": "Once per game, if you end your turn here (or upon first discovery), gain 1 Knowledge."
+    },
+    {
+      "id": "tile.attic",
+      "name": "Attic",
+      "doors": {
+        "n": false,
+        "e": false,
+        "s": true,
+        "w": false
+      },
+      "floors": ["upper"],
+      "symbol": "event",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": [],
+      "onExit": [
+        {
+          "e": "roll",
+          "who": "actor",
+          "trait": "speed",
+          "reason": "Attic Exit (Speed Roll)",
+          "branches": [
+            {
+              "min": 3,
+              "effects": [
+                {
+                  "e": "log",
+                  "text": "You squeeze through the low attic doorway safely."
+                }
+              ]
+            },
+            {
+              "min": 0,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "might",
+                  "delta": -1
+                },
+                {
+                  "e": "log",
+                  "text": "You hit a low beam while exiting! Lose 1 Might."
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "onEndTurn": [],
+      "actions": [],
+      "ruleText": "When exiting, attempt a Speed roll of 3+. On failure, lose 1 Might but continue moving."
+    },
+    {
+      "id": "tile.furnace_room",
+      "name": "Furnace Room",
+      "doors": {
+        "n": true,
+        "e": false,
+        "s": true,
+        "w": true
+      },
+      "floors": ["basement"],
+      "symbol": "omen",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [
+        {
+          "e": "prompt",
+          "who": "actor",
+          "prompt": {
+            "kind": "choose_trait",
+            "traits": ["speed", "might"]
+          },
+          "then": [
+            {
+              "e": "trait",
+              "who": "actor",
+              "trait": {
+                "ref": "chosen"
+              },
+              "delta": -1
+            },
+            {
+              "e": "log",
+              "text": "The searing heat scorches you! You suffer 1 physical damage."
+            }
+          ]
+        }
+      ],
+      "actions": [],
+      "ruleText": "If you end your turn here (or upon first discovery), take 1 point of physical damage (choose Speed or Might)."
+    },
+    {
+      "id": "tile.graveyard",
+      "name": "Graveyard",
+      "doors": {
+        "n": false,
+        "e": false,
+        "s": true,
+        "w": false
+      },
+      "floors": ["ground"],
+      "symbol": "event",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": [],
+      "onExit": [
+        {
+          "e": "roll",
+          "who": "actor",
+          "trait": "sanity",
+          "reason": "Graveyard Exit (Sanity Roll)",
+          "branches": [
+            {
+              "min": 4,
+              "effects": [
+                {
+                  "e": "log",
+                  "text": "You leave the graves undisturbed."
+                }
+              ]
+            },
+            {
+              "min": 0,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "knowledge",
+                  "delta": -1
+                },
+                {
+                  "e": "log",
+                  "text": "Horrific visions cloud your thoughts as you leave! Lose 1 Knowledge."
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "onEndTurn": [],
+      "actions": [],
+      "ruleText": "When exiting, attempt a Sanity roll of 4+. On failure, lose 1 Knowledge but continue moving."
     },
     {
       "id": "tile.larder",
@@ -927,15 +1076,20 @@
       "symbol": "item",
       "copies": 1,
       "staticLinks": [],
-      "onEnter": [
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [
         {
           "e": "if",
           "c": {
-            "k": "flag",
-            "scope": "seat",
-            "key": "eaten_larder",
-            "op": "=",
-            "value": 0
+            "k": "not",
+            "c": {
+              "k": "flag",
+              "scope": "tile",
+              "key": "spent",
+              "op": "=",
+              "value": true
+            }
           },
           "then": [
             {
@@ -946,17 +1100,19 @@
             },
             {
               "e": "set_flag",
-              "scope": "seat",
-              "key": "eaten_larder",
-              "value": 1
+              "scope": "tile",
+              "key": "spent",
+              "value": true
             },
             {
               "e": "log",
-              "text": "You find preserved rations and eat heartily! Gain 1 Might (once per explorer)."
+              "text": "You find preserved rations and eat heartily! Gain 1 Might (once per game)."
             }
           ]
         }
-      ]
+      ],
+      "actions": [],
+      "ruleText": "Once per game, if you end your turn here (or upon first discovery), gain 1 Might."
     },
     {
       "id": "tile.crypt",
@@ -971,18 +1127,34 @@
       "symbol": "event",
       "copies": 1,
       "staticLinks": [],
-      "onEnter": [
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [
         {
-          "e": "trait",
+          "e": "prompt",
           "who": "actor",
-          "trait": "sanity",
-          "delta": -1
-        },
-        {
-          "e": "log",
-          "text": "An eerie chill from the tombs pierces your mind! Lose 1 Sanity."
+          "prompt": {
+            "kind": "choose_trait",
+            "traits": ["sanity", "knowledge"]
+          },
+          "then": [
+            {
+              "e": "trait",
+              "who": "actor",
+              "trait": {
+                "ref": "chosen"
+              },
+              "delta": -1
+            },
+            {
+              "e": "log",
+              "text": "An eerie chill from the tombs pierces your mind! You suffer 1 mental damage."
+            }
+          ]
         }
-      ]
+      ],
+      "actions": [],
+      "ruleText": "If you end your turn here (or upon first discovery), take 1 point of mental damage (choose Sanity or Knowledge)."
     },
     {
       "id": "tile.the_vault",
@@ -997,40 +1169,55 @@
       "symbol": "event",
       "copies": 1,
       "staticLinks": [],
-      "onEnter": [
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": [
         {
-          "e": "roll",
-          "who": "actor",
-          "trait": "knowledge",
-          "reason": "Cracking The Vault (Knowledge Roll)",
-          "branches": [
+          "id": "action.the_vault.open",
+          "name": "Open Vault",
+          "cadence": {
+            "kind": "once_per_game",
+            "key": "vault_empty",
+            "scope": "tile"
+          },
+          "effects": [
             {
-              "min": 6,
-              "effects": [
+              "e": "roll",
+              "who": "actor",
+              "trait": "knowledge",
+              "reason": "Opening The Vault (Knowledge Roll)",
+              "branches": [
                 {
-                  "e": "trait",
-                  "who": "actor",
-                  "trait": "knowledge",
-                  "delta": 1
+                  "min": 6,
+                  "effects": [
+                    {
+                      "e": "set_flag",
+                      "scope": "tile",
+                      "key": "vault_empty",
+                      "value": true
+                    },
+                    {
+                      "e": "log",
+                      "text": "Click! You crack the intricate vault combination! The vault is open and empty (draw 2 Item cards)."
+                    }
+                  ]
                 },
                 {
-                  "e": "log",
-                  "text": "Click! You crack the intricate vault mechanism! Gain 1 Knowledge."
-                }
-              ]
-            },
-            {
-              "min": 0,
-              "effects": [
-                {
-                  "e": "log",
-                  "text": "The reinforced vault door remains firmly locked (requires 6+ Knowledge)."
+                  "min": 0,
+                  "effects": [
+                    {
+                      "e": "log",
+                      "text": "The heavy vault door remains locked (requires 6+ Knowledge)."
+                    }
+                  ]
                 }
               ]
             }
           ]
         }
-      ]
+      ],
+      "ruleText": "While inside, you may attempt a Knowledge roll of 6+ to open and empty the vault, drawing 2 Item cards."
     },
     {
       "id": "tile.upper_landing",
@@ -1045,7 +1232,10 @@
       "symbol": null,
       "copies": 1,
       "staticLinks": [],
-      "onEnter": []
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": []
     },
     {
       "id": "tile.basement_landing",
@@ -1060,7 +1250,10 @@
       "symbol": null,
       "copies": 1,
       "staticLinks": [],
-      "onEnter": []
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": []
     },
     {
       "id": "tile.collapsed_room",
@@ -1072,63 +1265,47 @@
         "w": true
       },
       "floors": ["ground", "upper"],
-      "symbol": "event",
+      "symbol": null,
       "copies": 1,
       "staticLinks": [],
-      "onEnter": [
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": [
         {
-          "e": "roll",
-          "who": "actor",
-          "trait": "speed",
-          "reason": "Collapsed Room (Speed Roll)",
-          "branches": [
+          "id": "action.collapsed_room.fall",
+          "name": "Jump to Basement",
+          "cadence": {
+            "kind": "optional"
+          },
+          "effects": [
             {
-              "min": 5,
-              "effects": [
-                {
-                  "e": "log",
-                  "text": "You leap swiftly across the crumbling floor to safety!"
-                }
-              ]
-            },
-            {
-              "min": 0,
-              "effects": [
-                {
-                  "e": "trait",
-                  "who": "actor",
-                  "trait": "might",
-                  "delta": -1
-                },
-                {
-                  "e": "move",
-                  "who": "actor",
-                  "to": { "landing": "basement" }
-                },
-                {
-                  "e": "log",
-                  "text": "The floor gives way! You plummet into the Basement Landing and take 1 Might damage."
-                }
-              ]
+              "e": "log",
+              "text": "You jump down through the hole in the Collapsed Room!"
             }
           ]
         }
-      ]
+      ],
+      "ruleText": "On first discovery: Speed 5+ to avoid falling. On failure: draw and place a basement tile, fall there, and take 1 die of physical damage. Later entrants may ignore or choose to fall."
     },
     {
       "id": "tile.mystic_elevator",
       "name": "Mystic Elevator",
       "doors": {
         "n": true,
-        "e": true,
-        "s": true,
-        "w": true
+        "e": false,
+        "s": false,
+        "w": false
       },
       "floors": ["basement", "ground", "upper"],
       "symbol": null,
       "copies": 1,
       "staticLinks": [],
-      "onEnter": []
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": [],
+      "ruleText": "Once per turn on entry: roll 2 dice to move this room next to an open door on: 4 Any floor, 3 Upper, 2 Ground, 1 Basement, 0 Basement + take 1 die physical damage."
     }
   ],
   "house": {

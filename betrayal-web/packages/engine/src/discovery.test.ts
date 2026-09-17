@@ -9,7 +9,7 @@ import { describe, expect, it } from 'vitest';
 import { buildContent, fixtureContent, type Content, type Tile } from '@bahoth/content';
 import { DIRS, rotateDoors, type Doors, type Rotation } from '@bahoth/shared';
 import { makeRng } from './rng.js';
-import { drawTile, legalRotations } from './discovery.js';
+import { drawTile, legalRotations, wouldSealFloor } from './discovery.js';
 
 function tile(id: string, doors: Partial<Doors>, opts: Partial<Tile> = {}): Tile {
   return {
@@ -21,6 +21,9 @@ function tile(id: string, doors: Partial<Doors>, opts: Partial<Tile> = {}): Tile
     copies: 1,
     staticLinks: [],
     onEnter: [],
+    onExit: [],
+    onEndTurn: [],
+    actions: [],
     ...opts,
   };
 }
@@ -48,25 +51,13 @@ describe('legalRotations', () => {
   });
 
   it('collapses an opposite-door tile to one rotation (180-degree symmetric)', () => {
-    // A door on n and s is unchanged by a 180-degree turn — n and s swap,
-    // but the effective set {n,s} comes back identical — so only one
-    // distinct rotation survives the dedup, same as the four-door tile.
-    // (This is why the two-DISTINCT-rotation case below needs adjacent
-    // doors, not opposite ones: opposite doors are 180-symmetric and can
-    // never produce two different effective door sets.)
     const t = tile('tile.through_hall', { n: true, s: true });
-    // Every direction is a legal entry (rotate 90 degrees and the doors face
-    // e/w instead), but the dedup still collapses each to one rotation.
     for (const entry of DIRS) {
       expect(legalRotations(t, entry)).toHaveLength(1);
     }
   });
 
   it('gives two distinct rotations for an adjacent two-door tile on either door', () => {
-    // Doors on n and e have no rotational symmetry: the four rotations
-    // produce four distinct door sets ({n,e}, {e,s}, {s,w}, {w,n}). Entered
-    // from n, both the 0-degree set ({n,e}) and the 270-degree set ({w,n})
-    // put a door on n, and they are genuinely different placements.
     const t = tile('tile.corner', { n: true, e: true });
     const rots = legalRotations(t, 'n');
     expect(rots).toHaveLength(2);
@@ -77,10 +68,6 @@ describe('legalRotations', () => {
   });
 
   it('is never empty for any fixture tile at any entry direction', () => {
-    // A property, since moveThrough relies on this exact fact: every tile
-    // that can be drawn has at least one door, and legalRotations must
-    // always find a way to face it at the entry (assertTilesCoherent
-    // already rejects a tile with no doors at all).
     for (const t of content.tiles) {
       for (const entry of DIRS) {
         expect(
@@ -92,11 +79,7 @@ describe('legalRotations', () => {
   });
 });
 
-describe('drawTile', () => {
-  // Three preplaced landings (one per floor, so buildContent's coherence
-  // checks pass) plus deck tiles covering every floor, so content.deckTiles
-  // itself is never empty on any floor — a separate requirement from the
-  // literal `deck` arrays each test hands to `drawTile` below.
+describe('drawTile (Official 2E Shared-Stack Algorithm)', () => {
   const landG = tile('tile.land_ground', { n: true }, { floors: ['ground'] });
   const landB = tile('tile.land_basement', { n: true }, { floors: ['basement'] });
   const landU = tile('tile.land_upper', { n: true }, { floors: ['upper'] });
@@ -122,41 +105,117 @@ describe('drawTile', () => {
     'discovery.test.ts',
   );
 
-  it('skips a tile illegal on the floor and returns the first legal one', () => {
+  it('skips a tile illegal on the floor, sets it aside in discard, and returns first legal one without burning RNG', () => {
     const rng = makeRng(1);
-    const draw = drawTile([bDeck.id, b.id, c.id], 'ground', groundContent, rng);
+    const draw = drawTile([bDeck.id, b.id, c.id], [], 'ground', groundContent, rng);
     expect(draw).not.toBeNull();
     expect(draw!.tileId).toBe(b.id);
+    expect(draw!.deck).toEqual([c.id]);
+    expect(draw!.discard).toEqual([bDeck.id]);
+    // Does not burn RNG while drawing from current live stack
+    expect(draw!.rng).toEqual(rng);
   });
 
-  it('keeps the passed-over tiles in the returned deck, minus the drawn one', () => {
+  it('preserves order of remaining deck and accumulates set-aside tiles in discard', () => {
     const rng = makeRng(1);
-    const deck = [bDeck.id, bDeck.id, b.id, c.id];
-    const draw = drawTile(deck, 'ground', groundContent, rng);
+    const deck = [bDeck.id, uDeck.id, b.id, c.id, d.id];
+    const draw = drawTile(deck, ['tile.existing_discard'], 'ground', groundContent, rng);
     expect(draw).not.toBeNull();
     expect(draw!.tileId).toBe(b.id);
-    // Multiset preserved: two copies of the passed-over tile plus `c`
-    // (never reached) remain; `b` (drawn) is gone.
-    expect([...draw!.deck].sort()).toEqual([bDeck.id, bDeck.id, c.id].sort());
+    expect(draw!.deck).toEqual([c.id, d.id]);
+    expect(draw!.discard).toEqual(['tile.existing_discard', bDeck.id, uDeck.id]);
+    expect(draw!.rng).toEqual(rng);
   });
 
   it('does not burn a random number on a plain top-of-deck draw', () => {
     const rng = makeRng(1);
-    const draw = drawTile([b.id, c.id, d.id], 'ground', groundContent, rng);
+    const draw = drawTile([b.id, c.id, d.id], [], 'ground', groundContent, rng);
     expect(draw).not.toBeNull();
     expect(draw!.rng).toEqual(rng);
+    expect(draw!.deck).toEqual([c.id, d.id]);
+    expect(draw!.discard).toEqual([]);
   });
 
-  it('burns randomness when it has to reshuffle passed-over tiles', () => {
+  it('burns randomness only when live deck is exhausted and discard must be reshuffled', () => {
     const rng = makeRng(1);
-    const draw = drawTile([bDeck.id, b.id, c.id], 'ground', groundContent, rng);
+    // Live deck has only basement tiles, discard has ground tile `b`
+    const draw = drawTile([bDeck.id], [b.id], 'ground', groundContent, rng);
     expect(draw).not.toBeNull();
+    expect(draw!.tileId).toBe(b.id);
+    // RNG was burned to reshuffle discard into the new live deck
     expect(draw!.rng).not.toEqual(rng);
   });
 
-  it('returns null when no tile in the deck may go on the floor', () => {
+  it('returns null when neither deck nor discard contains a tile for the floor', () => {
     const rng = makeRng(1);
-    const draw = drawTile([bDeck.id], 'upper', groundContent, rng);
+    const draw = drawTile([bDeck.id], [], 'upper', groundContent, rng);
     expect(draw).toBeNull();
+  });
+});
+
+describe('wouldSealFloor (2E Rulebook Floor Sealing Invariant)', () => {
+  const deadEndTile = tile('tile.dead_end', { s: true }); // Only 1 door at south
+  const crossTile = tile('tile.cross', { n: true, e: true, s: true, w: true });
+
+  it('returns false when other open doorways exist on the floor', () => {
+    const startTile = tile('tile.start', { n: true, e: true }); // Two doors: n and e
+    const board = {
+      placed: {
+        'placed.start': {
+          id: 'placed.start',
+          tileId: startTile.id,
+          floor: 'ground' as const,
+          x: 0,
+          y: 0,
+          rotation: 0 as const,
+          doors: startTile.doors,
+          discoveredBy: '0' as const,
+          flags: {},
+        },
+      },
+      index: {
+        basement: {},
+        ground: { '0,0': 'placed.start' },
+        upper: {},
+      },
+    };
+
+    // Placing deadEnd at (0, -1) [north of start]. South door connects to start (0, 0).
+    // East doorway of start at (1, 0) remains open!
+    const seals = wouldSealFloor(board, deadEndTile, 0, 'ground', 0, -1);
+    expect(seals).toBe(false);
+  });
+
+  it('returns true when this is the only open doorway on the floor and placing the tile leaves no open doors', () => {
+    const startTile = tile('tile.start', { n: true }); // ONLY one door at north
+    const board = {
+      placed: {
+        'placed.start': {
+          id: 'placed.start',
+          tileId: startTile.id,
+          floor: 'ground' as const,
+          x: 0,
+          y: 0,
+          rotation: 0 as const,
+          doors: startTile.doors,
+          discoveredBy: '0' as const,
+          flags: {},
+        },
+      },
+      index: {
+        basement: {},
+        ground: { '0,0': 'placed.start' },
+        upper: {},
+      },
+    };
+
+    // Placing deadEnd at (0, -1) [north of start]. Its south door connects to start.
+    // Zero other doors exist, so floor would have 0 open doorways!
+    const seals = wouldSealFloor(board, deadEndTile, 0, 'ground', 0, -1);
+    expect(seals).toBe(true);
+
+    // If placing a 4-door room instead, it provides north, east, west doors to empty space!
+    const sealsCross = wouldSealFloor(board, crossTile, 0, 'ground', 0, -1);
+    expect(sealsCross).toBe(false);
   });
 });

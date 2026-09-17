@@ -212,6 +212,14 @@ export function isRotateTilePayload(p: unknown): p is RotateTilePayload {
  * engine, which already imports both, narrows this back to `Effect[]` when
  * it reads a payload it wrote itself.
  */
+export interface MovementContinuation {
+  kind: 'move';
+  seat: SeatId;
+  from: PlacedId;
+  to: PlacedId;
+  remainingSteps: PlacedId[];
+}
+
 export interface EffectResume {
   actor: SeatId;
   /** Effects to run once everything below finishes — the rest of the flat
@@ -219,6 +227,8 @@ export interface EffectResume {
    * the list AFTER the whole loop. */
   remaining: unknown[];
   discardCardId?: CardId | undefined;
+  thenEndTurn?: boolean | undefined;
+  movement?: MovementContinuation | undefined;
   forEach?:
     | {
         /** Seats whose `body` hasn't started yet. */
@@ -273,12 +283,45 @@ export interface TokenState {
   flags: Flags;
 }
 
+export interface HauntSection {
+  title: string;
+  text?: string | undefined;
+  bullets?: string[] | undefined;
+  steps?: string[] | undefined;
+}
+
+export interface HauntSideContent {
+  goal: string;
+  rules: string[];
+  win?: unknown[] | undefined;
+  intro?: string | undefined;
+  rightNow?: string[] | undefined;
+  whatYouKnow?: string[] | undefined;
+  winWhen?: string | undefined;
+  specialAttackRules?: string[] | undefined;
+  ifYouWin?: string | undefined;
+  additionalSections?: HauntSection[] | undefined;
+}
+
+export interface HauntBriefing {
+  hauntId: HauntId;
+  title: string;
+  role: 'hero' | 'traitor' | 'hidden';
+  side: HauntSideContent;
+}
+
 export interface HauntState {
   hauntId: HauntId;
   traitorSeat: SeatId | null;
   revealed: boolean;
   /** Seats that have acknowledged their private instructions. */
   acknowledged: SeatId[];
+  /** Redacted per-seat: only the viewer's private briefing is present */
+  briefing?: HauntBriefing | undefined;
+  /** Internal server-only side data before redaction (stripped by redactFor) */
+  heroSide?: HauntSideContent | undefined;
+  traitorSide?: HauntSideContent | undefined;
+  hauntTitle?: string | undefined;
 }
 
 export type GameOutcome = 'heroes' | 'traitor' | 'draw' | 'abandoned';
@@ -327,11 +370,23 @@ export interface GameState {
   tileDeck: TileId[];
   /** Present only on redacted states, where `tileDeck` has been emptied. */
   tileDeckCount?: number;
+  /** Incompatible tiles set aside face down until the live tileDeck is exhausted (2E shared-stack rule). */
+  tileDiscard?: TileId[];
   decks: Record<DeckKind, DeckState>;
   omensDrawn: number;
   haunt: HauntState | null;
   pending: PendingPrompt | null;
   monsters: Record<MonsterId, MonsterState>;
+  monsterTurn: MonsterTurnState | null;
   tokens: TokenState[];
   result: GameResult | null;
+}
+
+export interface MonsterTurnState {
+  activeMonsterId: MonsterId | null;
+  actedMonsterIds: MonsterId[];
+  movesLeft: number;
+  hasAttacked: boolean;
+  rolledSpeed?: number | null | undefined;
+  controllingSeat: SeatId;
 }

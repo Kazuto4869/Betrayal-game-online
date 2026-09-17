@@ -1,5 +1,4 @@
 {
-  "_comment": "PLACEHOLDER CONTENT. Invented room names, doors, and floors, not the printed ones. The shapes are real — door counts, floor restrictions, symbol mix, and the four kinds of static link all exercise the movement graph — but no value here is transcribed from the physical game. Real content is supplied by the operator in CONTENT_DIR and is gitignored. See docs/01-overview.md#intellectual-property-position.",
   "tiles": [
     {
       "id": "tile.entrance_hall",
@@ -7,18 +6,17 @@
       "doors": {
         "n": true,
         "e": false,
-        "s": false,
-        "w": false
+        "s": true,
+        "w": true
       },
       "floors": ["ground"],
       "symbol": null,
-      "staticLinks": [
-        {
-          "kind": "to_tile",
-          "target": "tile.basement_landing",
-          "twoWay": true
-        }
-      ]
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": []
     },
     {
       "id": "tile.foyer",
@@ -30,7 +28,13 @@
         "w": true
       },
       "floors": ["ground"],
-      "symbol": null
+      "symbol": null,
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": []
     },
     {
       "id": "tile.grand_staircase",
@@ -38,18 +42,1182 @@
       "doors": {
         "n": false,
         "e": false,
-        "s": true,
-        "w": false
+        "s": false,
+        "w": true
       },
       "floors": ["ground"],
       "symbol": null,
+      "copies": 1,
       "staticLinks": [
         {
           "kind": "to_tile",
           "target": "tile.upper_landing",
           "twoWay": true
         }
-      ]
+      ],
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": []
+    },
+    {
+      "id": "tile.servants_quarters",
+      "name": "Servant's Quarters",
+      "doors": {
+        "n": true,
+        "e": true,
+        "s": true,
+        "w": true
+      },
+      "floors": ["basement", "upper"],
+      "symbol": "omen",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": []
+    },
+    {
+      "id": "tile.storeroom",
+      "name": "Storeroom",
+      "doors": {
+        "n": true,
+        "e": false,
+        "s": false,
+        "w": false
+      },
+      "floors": ["basement", "upper"],
+      "symbol": "item",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": []
+    },
+    {
+      "id": "tile.operating_laboratory",
+      "name": "Operating Laboratory",
+      "doors": {
+        "n": false,
+        "e": true,
+        "s": true,
+        "w": false
+      },
+      "floors": ["basement", "upper"],
+      "symbol": "event",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": []
+    },
+    {
+      "id": "tile.research_laboratory",
+      "name": "Research Laboratory",
+      "doors": {
+        "n": true,
+        "e": false,
+        "s": true,
+        "w": false
+      },
+      "floors": ["basement", "upper"],
+      "symbol": "event",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": []
+    },
+    {
+      "id": "tile.stairs_from_basement",
+      "name": "Stairs from Basement",
+      "doors": {
+        "n": true,
+        "e": false,
+        "s": true,
+        "w": false
+      },
+      "floors": ["basement"],
+      "symbol": null,
+      "copies": 1,
+      "staticLinks": [
+        {
+          "kind": "to_tile",
+          "target": "tile.foyer",
+          "twoWay": true
+        }
+      ],
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": [],
+      "ruleText": "Leads to and from the Foyer."
+    },
+    {
+      "id": "tile.underground_lake",
+      "name": "Underground Lake",
+      "doors": {
+        "n": true,
+        "e": true,
+        "s": false,
+        "w": false
+      },
+      "floors": ["basement"],
+      "symbol": "event",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": []
+    },
+    {
+      "id": "tile.wine_cellar",
+      "name": "Wine Cellar",
+      "doors": {
+        "n": true,
+        "e": false,
+        "s": true,
+        "w": false
+      },
+      "floors": ["basement"],
+      "symbol": "item",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": []
+    },
+    {
+      "id": "tile.balcony",
+      "name": "Balcony",
+      "doors": {
+        "n": true,
+        "e": false,
+        "s": true,
+        "w": false
+      },
+      "floors": ["upper"],
+      "symbol": "omen",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": []
+    },
+    {
+      "id": "tile.master_bedroom",
+      "name": "Master Bedroom",
+      "doors": {
+        "n": true,
+        "e": false,
+        "s": false,
+        "w": true
+      },
+      "floors": ["upper"],
+      "symbol": "omen",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": []
+    },
+    {
+      "id": "tile.bedroom",
+      "name": "Bedroom",
+      "doors": {
+        "n": false,
+        "e": true,
+        "s": false,
+        "w": true
+      },
+      "floors": ["upper"],
+      "symbol": "event",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": []
+    },
+    {
+      "id": "tile.coal_chute",
+      "name": "Coal Chute",
+      "doors": {
+        "n": true,
+        "e": false,
+        "s": false,
+        "w": false
+      },
+      "floors": ["ground"],
+      "symbol": null,
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": [
+        {
+          "e": "move",
+          "who": "actor",
+          "to": {
+            "landing": "basement"
+          }
+        },
+        {
+          "e": "log",
+          "text": "You slide down the Coal Chute into the Basement Landing!"
+        }
+      ],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": [],
+      "ruleText": "When you enter, slide immediately to the Basement Landing (counts as 1 space of movement). You cannot end your turn here."
+    },
+    {
+      "id": "tile.gardens",
+      "name": "Gardens",
+      "doors": {
+        "n": true,
+        "e": false,
+        "s": true,
+        "w": false
+      },
+      "floors": ["ground"],
+      "symbol": "event",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": []
+    },
+    {
+      "id": "tile.ballroom",
+      "name": "Ballroom",
+      "doors": {
+        "n": true,
+        "e": true,
+        "s": true,
+        "w": true
+      },
+      "floors": ["ground"],
+      "symbol": "event",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": []
+    },
+    {
+      "id": "tile.dining_room",
+      "name": "Dining Room",
+      "doors": {
+        "n": true,
+        "e": true,
+        "s": false,
+        "w": false
+      },
+      "floors": ["ground"],
+      "symbol": "omen",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": []
+    },
+    {
+      "id": "tile.patio",
+      "name": "Patio",
+      "doors": {
+        "n": true,
+        "e": false,
+        "s": true,
+        "w": true
+      },
+      "floors": ["ground"],
+      "symbol": "event",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": []
+    },
+    {
+      "id": "tile.kitchen",
+      "name": "Kitchen",
+      "doors": {
+        "n": true,
+        "e": true,
+        "s": false,
+        "w": false
+      },
+      "floors": ["basement", "ground"],
+      "symbol": "omen",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": []
+    },
+    {
+      "id": "tile.abandoned_room",
+      "name": "Abandoned Room",
+      "doors": {
+        "n": true,
+        "e": true,
+        "s": true,
+        "w": true
+      },
+      "floors": ["basement", "ground"],
+      "symbol": "omen",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": []
+    },
+    {
+      "id": "tile.conservatory",
+      "name": "Conservatory",
+      "doors": {
+        "n": true,
+        "e": false,
+        "s": false,
+        "w": false
+      },
+      "floors": ["ground", "upper"],
+      "symbol": "event",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": []
+    },
+    {
+      "id": "tile.charred_room",
+      "name": "Charred Room",
+      "doors": {
+        "n": true,
+        "e": true,
+        "s": true,
+        "w": true
+      },
+      "floors": ["ground", "upper"],
+      "symbol": "omen",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": []
+    },
+    {
+      "id": "tile.bloody_room",
+      "name": "Bloody Room",
+      "doors": {
+        "n": true,
+        "e": true,
+        "s": true,
+        "w": true
+      },
+      "floors": ["ground", "upper"],
+      "symbol": "item",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": []
+    },
+    {
+      "id": "tile.organ_room",
+      "name": "Organ Room",
+      "doors": {
+        "n": false,
+        "e": false,
+        "s": true,
+        "w": true
+      },
+      "floors": ["basement", "ground", "upper"],
+      "symbol": "event",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": []
+    },
+    {
+      "id": "tile.statuary_corridor",
+      "name": "Statuary Corridor",
+      "doors": {
+        "n": true,
+        "e": false,
+        "s": true,
+        "w": false
+      },
+      "floors": ["basement", "ground", "upper"],
+      "symbol": "event",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": []
+    },
+    {
+      "id": "tile.creaky_hallway",
+      "name": "Creaky Hallway",
+      "doors": {
+        "n": true,
+        "e": true,
+        "s": true,
+        "w": true
+      },
+      "floors": ["basement", "ground", "upper"],
+      "symbol": null,
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": []
+    },
+    {
+      "id": "tile.dusty_hallway",
+      "name": "Dusty Hallway",
+      "doors": {
+        "n": true,
+        "e": true,
+        "s": true,
+        "w": true
+      },
+      "floors": ["basement", "ground", "upper"],
+      "symbol": null,
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": []
+    },
+    {
+      "id": "tile.game_room",
+      "name": "Game Room",
+      "doors": {
+        "n": true,
+        "e": false,
+        "s": true,
+        "w": true
+      },
+      "floors": ["basement", "ground", "upper"],
+      "symbol": "event",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": []
+    },
+    {
+      "id": "tile.tower",
+      "name": "Tower",
+      "doors": {
+        "n": false,
+        "e": true,
+        "s": false,
+        "w": true
+      },
+      "floors": ["upper"],
+      "symbol": "event",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": [],
+      "ruleText": "Attempt a Might roll of 3+ to cross. If you fail, you stop moving and remain on this side.",
+      "crossing": {
+        "trait": "might",
+        "threshold": 3,
+        "sides": ["e", "w"]
+      }
+    },
+    {
+      "id": "tile.gallery",
+      "name": "Gallery",
+      "doors": {
+        "n": true,
+        "e": false,
+        "s": true,
+        "w": false
+      },
+      "floors": ["upper"],
+      "symbol": "omen",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": [
+        {
+          "id": "action.gallery.fall_to_ballroom",
+          "name": "Fall to Ballroom",
+          "cadence": {
+            "kind": "optional"
+          },
+          "effects": [
+            {
+              "e": "move",
+              "who": "actor",
+              "to": {
+                "tile": "tile.ballroom"
+              }
+            },
+            {
+              "e": "prompt",
+              "who": "actor",
+              "prompt": {
+                "kind": "choose_trait",
+                "traits": ["speed", "might"]
+              },
+              "then": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": {
+                    "ref": "chosen"
+                  },
+                  "delta": -1
+                },
+                {
+                  "e": "log",
+                  "text": "You leap over the gallery railing and crash into the Ballroom below!"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "ruleText": "You may choose to fall to the Ballroom if it is in the house. If you do, take 1 die of physical damage."
+    },
+    {
+      "id": "tile.catacombs",
+      "name": "Catacombs",
+      "doors": {
+        "n": true,
+        "e": false,
+        "s": true,
+        "w": false
+      },
+      "floors": ["basement"],
+      "symbol": "omen",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": [],
+      "ruleText": "Attempt a Sanity roll of 6+ to cross. If you fail, you stop moving and remain on this side.",
+      "crossing": {
+        "trait": "sanity",
+        "threshold": 6,
+        "sides": ["n", "s"]
+      }
+    },
+    {
+      "id": "tile.chasm",
+      "name": "Chasm",
+      "doors": {
+        "n": false,
+        "e": true,
+        "s": false,
+        "w": true
+      },
+      "floors": ["basement"],
+      "symbol": null,
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": [],
+      "ruleText": "Attempt a Speed roll of 3+ to cross. If you fail, you stop moving and remain on this side.",
+      "crossing": {
+        "trait": "speed",
+        "threshold": 3,
+        "sides": ["e", "w"]
+      }
+    },
+    {
+      "id": "tile.junk_room",
+      "name": "Junk Room",
+      "doors": {
+        "n": true,
+        "e": true,
+        "s": true,
+        "w": true
+      },
+      "floors": ["basement", "ground", "upper"],
+      "symbol": "omen",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": [],
+      "onExit": [
+        {
+          "e": "roll",
+          "who": "actor",
+          "trait": "might",
+          "reason": "Junk Room Exit (Might Roll)",
+          "branches": [
+            {
+              "min": 3,
+              "effects": [
+                {
+                  "e": "log",
+                  "text": "You navigate past the junk and debris safely."
+                }
+              ]
+            },
+            {
+              "min": 0,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "speed",
+                  "delta": -1
+                },
+                {
+                  "e": "log",
+                  "text": "Sharp junk scratches you as you exit! Lose 1 Speed."
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "onEndTurn": [],
+      "actions": [],
+      "ruleText": "When exiting, attempt a Might roll of 3+. On failure, lose 1 Speed but continue moving."
+    },
+    {
+      "id": "tile.chapel",
+      "name": "Chapel",
+      "doors": {
+        "n": true,
+        "e": false,
+        "s": false,
+        "w": false
+      },
+      "floors": ["ground", "upper"],
+      "symbol": "event",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [
+        {
+          "e": "if",
+          "c": {
+            "k": "not",
+            "c": {
+              "k": "flag",
+              "scope": "tile",
+              "key": "spent",
+              "op": "=",
+              "value": true
+            }
+          },
+          "then": [
+            {
+              "e": "trait",
+              "who": "actor",
+              "trait": "sanity",
+              "delta": 1
+            },
+            {
+              "e": "set_flag",
+              "scope": "tile",
+              "key": "spent",
+              "value": true
+            },
+            {
+              "e": "log",
+              "text": "The serene sanctuary calms your soul! Gain 1 Sanity (once per game)."
+            }
+          ]
+        }
+      ],
+      "actions": [],
+      "ruleText": "Once per game, if you end your turn here (or upon first discovery), gain 1 Sanity."
+    },
+    {
+      "id": "tile.gymnasium",
+      "name": "Gymnasium",
+      "doors": {
+        "n": false,
+        "e": true,
+        "s": true,
+        "w": false
+      },
+      "floors": ["basement", "upper"],
+      "symbol": "omen",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [
+        {
+          "e": "if",
+          "c": {
+            "k": "not",
+            "c": {
+              "k": "flag",
+              "scope": "tile",
+              "key": "spent",
+              "op": "=",
+              "value": true
+            }
+          },
+          "then": [
+            {
+              "e": "trait",
+              "who": "actor",
+              "trait": "speed",
+              "delta": 1
+            },
+            {
+              "e": "set_flag",
+              "scope": "tile",
+              "key": "spent",
+              "value": true
+            },
+            {
+              "e": "log",
+              "text": "You train on the vintage equipment. Gain 1 Speed (once per game)."
+            }
+          ]
+        }
+      ],
+      "actions": [],
+      "ruleText": "Once per game, if you end your turn here (or upon first discovery), gain 1 Speed."
+    },
+    {
+      "id": "tile.the_pentagram_chamber",
+      "name": "The Pentagram Chamber",
+      "doors": {
+        "n": false,
+        "e": true,
+        "s": false,
+        "w": false
+      },
+      "floors": ["basement"],
+      "symbol": "omen",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": [],
+      "onExit": [
+        {
+          "e": "roll",
+          "who": "actor",
+          "trait": "knowledge",
+          "reason": "Pentagram Chamber Exit (Knowledge Roll)",
+          "branches": [
+            {
+              "min": 4,
+              "effects": [
+                {
+                  "e": "log",
+                  "text": "You resist the dark influence as you exit."
+                }
+              ]
+            },
+            {
+              "min": 0,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "sanity",
+                  "delta": -1
+                },
+                {
+                  "e": "log",
+                  "text": "Dark whispers tear at your mind as you exit! Lose 1 Sanity."
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "onEndTurn": [],
+      "actions": [],
+      "ruleText": "When exiting, attempt a Knowledge roll of 4+. On failure, lose 1 Sanity but continue moving."
+    },
+    {
+      "id": "tile.library",
+      "name": "Library",
+      "doors": {
+        "n": false,
+        "e": false,
+        "s": true,
+        "w": true
+      },
+      "floors": ["ground", "upper"],
+      "symbol": "event",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [
+        {
+          "e": "if",
+          "c": {
+            "k": "not",
+            "c": {
+              "k": "flag",
+              "scope": "tile",
+              "key": "spent",
+              "op": "=",
+              "value": true
+            }
+          },
+          "then": [
+            {
+              "e": "trait",
+              "who": "actor",
+              "trait": "knowledge",
+              "delta": 1
+            },
+            {
+              "e": "set_flag",
+              "scope": "tile",
+              "key": "spent",
+              "value": true
+            },
+            {
+              "e": "log",
+              "text": "You study the arcane tomes on the shelves! Gain 1 Knowledge (once per game)."
+            }
+          ]
+        }
+      ],
+      "actions": [],
+      "ruleText": "Once per game, if you end your turn here (or upon first discovery), gain 1 Knowledge."
+    },
+    {
+      "id": "tile.attic",
+      "name": "Attic",
+      "doors": {
+        "n": false,
+        "e": false,
+        "s": true,
+        "w": false
+      },
+      "floors": ["upper"],
+      "symbol": "event",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": [],
+      "onExit": [
+        {
+          "e": "roll",
+          "who": "actor",
+          "trait": "speed",
+          "reason": "Attic Exit (Speed Roll)",
+          "branches": [
+            {
+              "min": 3,
+              "effects": [
+                {
+                  "e": "log",
+                  "text": "You squeeze through the low attic doorway safely."
+                }
+              ]
+            },
+            {
+              "min": 0,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "might",
+                  "delta": -1
+                },
+                {
+                  "e": "log",
+                  "text": "You hit a low beam while exiting! Lose 1 Might."
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "onEndTurn": [],
+      "actions": [],
+      "ruleText": "When exiting, attempt a Speed roll of 3+. On failure, lose 1 Might but continue moving."
+    },
+    {
+      "id": "tile.furnace_room",
+      "name": "Furnace Room",
+      "doors": {
+        "n": true,
+        "e": false,
+        "s": true,
+        "w": true
+      },
+      "floors": ["basement"],
+      "symbol": "omen",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [
+        {
+          "e": "prompt",
+          "who": "actor",
+          "prompt": {
+            "kind": "choose_trait",
+            "traits": ["speed", "might"]
+          },
+          "then": [
+            {
+              "e": "trait",
+              "who": "actor",
+              "trait": {
+                "ref": "chosen"
+              },
+              "delta": -1
+            },
+            {
+              "e": "log",
+              "text": "The searing heat scorches you! You suffer 1 physical damage."
+            }
+          ]
+        }
+      ],
+      "actions": [],
+      "ruleText": "If you end your turn here (or upon first discovery), take 1 point of physical damage (choose Speed or Might)."
+    },
+    {
+      "id": "tile.graveyard",
+      "name": "Graveyard",
+      "doors": {
+        "n": false,
+        "e": false,
+        "s": true,
+        "w": false
+      },
+      "floors": ["ground"],
+      "symbol": "event",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": [],
+      "onExit": [
+        {
+          "e": "roll",
+          "who": "actor",
+          "trait": "sanity",
+          "reason": "Graveyard Exit (Sanity Roll)",
+          "branches": [
+            {
+              "min": 4,
+              "effects": [
+                {
+                  "e": "log",
+                  "text": "You leave the graves undisturbed."
+                }
+              ]
+            },
+            {
+              "min": 0,
+              "effects": [
+                {
+                  "e": "trait",
+                  "who": "actor",
+                  "trait": "knowledge",
+                  "delta": -1
+                },
+                {
+                  "e": "log",
+                  "text": "Horrific visions cloud your thoughts as you leave! Lose 1 Knowledge."
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "onEndTurn": [],
+      "actions": [],
+      "ruleText": "When exiting, attempt a Sanity roll of 4+. On failure, lose 1 Knowledge but continue moving."
+    },
+    {
+      "id": "tile.larder",
+      "name": "Larder",
+      "doors": {
+        "n": true,
+        "e": false,
+        "s": true,
+        "w": false
+      },
+      "floors": ["basement"],
+      "symbol": "item",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [
+        {
+          "e": "if",
+          "c": {
+            "k": "not",
+            "c": {
+              "k": "flag",
+              "scope": "tile",
+              "key": "spent",
+              "op": "=",
+              "value": true
+            }
+          },
+          "then": [
+            {
+              "e": "trait",
+              "who": "actor",
+              "trait": "might",
+              "delta": 1
+            },
+            {
+              "e": "set_flag",
+              "scope": "tile",
+              "key": "spent",
+              "value": true
+            },
+            {
+              "e": "log",
+              "text": "You find preserved rations and eat heartily! Gain 1 Might (once per game)."
+            }
+          ]
+        }
+      ],
+      "actions": [],
+      "ruleText": "Once per game, if you end your turn here (or upon first discovery), gain 1 Might."
+    },
+    {
+      "id": "tile.crypt",
+      "name": "Crypt",
+      "doors": {
+        "n": true,
+        "e": false,
+        "s": false,
+        "w": false
+      },
+      "floors": ["basement"],
+      "symbol": "event",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [
+        {
+          "e": "prompt",
+          "who": "actor",
+          "prompt": {
+            "kind": "choose_trait",
+            "traits": ["sanity", "knowledge"]
+          },
+          "then": [
+            {
+              "e": "trait",
+              "who": "actor",
+              "trait": {
+                "ref": "chosen"
+              },
+              "delta": -1
+            },
+            {
+              "e": "log",
+              "text": "An eerie chill from the tombs pierces your mind! You suffer 1 mental damage."
+            }
+          ]
+        }
+      ],
+      "actions": [],
+      "ruleText": "If you end your turn here (or upon first discovery), take 1 point of mental damage (choose Sanity or Knowledge)."
+    },
+    {
+      "id": "tile.the_vault",
+      "name": "The Vault",
+      "doors": {
+        "n": true,
+        "e": false,
+        "s": false,
+        "w": false
+      },
+      "floors": ["basement", "upper"],
+      "symbol": "event",
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": [
+        {
+          "id": "action.the_vault.open",
+          "name": "Open Vault",
+          "cadence": {
+            "kind": "once_per_game",
+            "key": "vault_empty",
+            "scope": "tile"
+          },
+          "effects": [
+            {
+              "e": "roll",
+              "who": "actor",
+              "trait": "knowledge",
+              "reason": "Opening The Vault (Knowledge Roll)",
+              "branches": [
+                {
+                  "min": 6,
+                  "effects": [
+                    {
+                      "e": "set_flag",
+                      "scope": "tile",
+                      "key": "vault_empty",
+                      "value": true
+                    },
+                    {
+                      "e": "log",
+                      "text": "Click! You crack the intricate vault combination! The vault is open and empty (draw 2 Item cards)."
+                    }
+                  ]
+                },
+                {
+                  "min": 0,
+                  "effects": [
+                    {
+                      "e": "log",
+                      "text": "The heavy vault door remains locked (requires 6+ Knowledge)."
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "ruleText": "While inside, you may attempt a Knowledge roll of 6+ to open and empty the vault, drawing 2 Item cards."
     },
     {
       "id": "tile.upper_landing",
@@ -57,11 +1225,17 @@
       "doors": {
         "n": true,
         "e": true,
-        "s": false,
+        "s": true,
         "w": true
       },
       "floors": ["upper"],
-      "symbol": null
+      "symbol": null,
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": []
     },
     {
       "id": "tile.basement_landing",
@@ -69,581 +1243,69 @@
       "doors": {
         "n": true,
         "e": true,
-        "s": false,
-        "w": true
-      },
-      "floors": ["basement"],
-      "symbol": null
-    },
-    {
-      "id": "tile.sunken_cistern",
-      "name": "Sunken Cistern",
-      "doors": {
-        "n": true,
-        "e": false,
-        "s": true,
-        "w": false
-      },
-      "floors": ["basement"],
-      "symbol": "event"
-    },
-    {
-      "id": "tile.root_cellar",
-      "name": "Root Cellar",
-      "doors": {
-        "n": true,
-        "e": true,
-        "s": false,
-        "w": false
-      },
-      "floors": ["basement"],
-      "symbol": "item"
-    },
-    {
-      "id": "tile.fungal_grotto",
-      "name": "Fungal Grotto",
-      "doors": {
-        "n": true,
-        "e": false,
-        "s": false,
-        "w": false
-      },
-      "floors": ["basement"],
-      "symbol": "omen"
-    },
-    {
-      "id": "tile.slate_undercroft",
-      "name": "Slate Undercroft",
-      "doors": {
-        "n": true,
-        "e": true,
         "s": true,
         "w": true
       },
       "floors": ["basement"],
-      "symbol": null
-    },
-    {
-      "id": "tile.rat_warren",
-      "name": "Rat Warren",
-      "doors": {
-        "n": true,
-        "e": true,
-        "s": false,
-        "w": true
-      },
-      "floors": ["basement"],
-      "symbol": "event"
-    },
-    {
-      "id": "tile.drowned_stair",
-      "name": "Drowned Stair",
-      "doors": {
-        "n": true,
-        "e": false,
-        "s": true,
-        "w": false
-      },
-      "floors": ["basement"],
-      "symbol": null
-    },
-    {
-      "id": "tile.coal_seam",
-      "name": "Coal Seam",
-      "doors": {
-        "n": true,
-        "e": false,
-        "s": false,
-        "w": false
-      },
-      "floors": ["basement"],
-      "symbol": "item"
-    },
-    {
-      "id": "tile.hidden_stair",
-      "name": "Hidden Stair",
-      "doors": {
-        "n": true,
-        "e": false,
-        "s": true,
-        "w": false
-      },
-      "floors": ["ground"],
       "symbol": null,
-      "staticLinks": [
-        {
-          "kind": "to_tile",
-          "target": "tile.upper_landing",
-          "twoWay": true
-        }
-      ]
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": []
     },
     {
-      "id": "tile.rattling_lift",
-      "name": "Rattling Lift",
-      "doors": {
-        "n": false,
-        "e": false,
-        "s": true,
-        "w": false
-      },
-      "floors": ["ground"],
-      "symbol": null,
-      "staticLinks": [
-        {
-          "kind": "to_floor",
-          "floor": "basement",
-          "landing": "tile.basement_landing",
-          "twoWay": true
-        },
-        {
-          "kind": "to_floor",
-          "floor": "upper",
-          "landing": "tile.upper_landing",
-          "twoWay": true
-        }
-      ]
-    },
-    {
-      "id": "tile.sun_porch",
-      "name": "Sun Porch",
-      "doors": {
-        "n": true,
-        "e": false,
-        "s": false,
-        "w": true
-      },
-      "floors": ["ground"],
-      "symbol": "event"
-    },
-    {
-      "id": "tile.mud_room",
-      "name": "Mud Room",
-      "doors": {
-        "n": true,
-        "e": true,
-        "s": true,
-        "w": false
-      },
-      "floors": ["ground"],
-      "symbol": null
-    },
-    {
-      "id": "tile.linen_press",
-      "name": "Linen Press",
-      "doors": {
-        "n": false,
-        "e": false,
-        "s": true,
-        "w": false
-      },
-      "floors": ["upper"],
-      "symbol": "item"
-    },
-    {
-      "id": "tile.moth_closet",
-      "name": "Moth Closet",
-      "doors": {
-        "n": false,
-        "e": true,
-        "s": false,
-        "w": false
-      },
-      "floors": ["upper"],
-      "symbol": "omen"
-    },
-    {
-      "id": "tile.balcony_walk",
-      "name": "Balcony Walk",
+      "id": "tile.collapsed_room",
+      "name": "Collapsed Room",
       "doors": {
         "n": true,
         "e": true,
         "s": true,
         "w": true
-      },
-      "floors": ["upper"],
-      "symbol": "event"
-    },
-    {
-      "id": "tile.coal_slide",
-      "name": "Coal Slide",
-      "doors": {
-        "n": true,
-        "e": false,
-        "s": true,
-        "w": false
       },
       "floors": ["ground", "upper"],
       "symbol": null,
-      "staticLinks": [
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": [
         {
-          "kind": "oneway_drop",
-          "floor": "basement"
+          "id": "action.collapsed_room.fall",
+          "name": "Jump to Basement",
+          "cadence": {
+            "kind": "optional"
+          },
+          "effects": [
+            {
+              "e": "log",
+              "text": "You jump down through the hole in the Collapsed Room!"
+            }
+          ]
         }
-      ]
+      ],
+      "ruleText": "On first discovery: Speed 5+ to avoid falling. On failure: draw and place a basement tile, fall there, and take 1 die of physical damage. Later entrants may ignore or choose to fall."
     },
     {
-      "id": "tile.dusty_parlour",
-      "name": "Dusty Parlour",
-      "doors": {
-        "n": true,
-        "e": true,
-        "s": true,
-        "w": false
-      },
-      "floors": ["ground", "upper"],
-      "symbol": "event"
-    },
-    {
-      "id": "tile.clock_room",
-      "name": "Clock Room",
-      "doors": {
-        "n": true,
-        "e": true,
-        "s": false,
-        "w": false
-      },
-      "floors": ["ground", "upper"],
-      "symbol": "omen"
-    },
-    {
-      "id": "tile.portrait_corridor",
-      "name": "Portrait Corridor",
-      "doors": {
-        "n": true,
-        "e": false,
-        "s": true,
-        "w": false
-      },
-      "floors": ["ground", "upper"],
-      "symbol": null
-    },
-    {
-      "id": "tile.smoking_lounge",
-      "name": "Smoking Lounge",
-      "doors": {
-        "n": true,
-        "e": true,
-        "s": false,
-        "w": true
-      },
-      "floors": ["ground", "upper"],
-      "symbol": "item"
-    },
-    {
-      "id": "tile.card_room",
-      "name": "Card Room",
+      "id": "tile.mystic_elevator",
+      "name": "Mystic Elevator",
       "doors": {
         "n": true,
         "e": false,
         "s": false,
-        "w": true
-      },
-      "floors": ["ground", "upper"],
-      "symbol": "event"
-    },
-    {
-      "id": "tile.sewing_room",
-      "name": "Sewing Room",
-      "doors": {
-        "n": false,
-        "e": false,
-        "s": true,
-        "w": true
-      },
-      "floors": ["ground", "upper"],
-      "symbol": null
-    },
-    {
-      "id": "tile.guest_suite",
-      "name": "Guest Suite",
-      "doors": {
-        "n": true,
-        "e": true,
-        "s": true,
-        "w": true
-      },
-      "floors": ["ground", "upper"],
-      "symbol": "item"
-    },
-    {
-      "id": "tile.scullery_hatch",
-      "name": "Scullery Hatch",
-      "doors": {
-        "n": true,
-        "e": true,
-        "s": false,
         "w": false
       },
-      "floors": ["basement", "ground"],
+      "floors": ["basement", "ground", "upper"],
       "symbol": null,
-      "staticLinks": [
-        {
-          "kind": "to_tile",
-          "target": "tile.dumbwaiter_shaft",
-          "twoWay": true
-        }
-      ]
-    },
-    {
-      "id": "tile.stone_pantry",
-      "name": "Stone Pantry",
-      "doors": {
-        "n": true,
-        "e": false,
-        "s": true,
-        "w": true
-      },
-      "floors": ["basement", "ground"],
-      "symbol": "event"
-    },
-    {
-      "id": "tile.dumbwaiter_shaft",
-      "name": "Dumbwaiter Shaft",
-      "doors": {
-        "n": false,
-        "e": false,
-        "s": true,
-        "w": false
-      },
-      "floors": ["basement", "ground", "upper"],
-      "symbol": null
-    },
-    {
-      "id": "tile.cracked_solarium",
-      "name": "Cracked Solarium",
-      "doors": {
-        "n": true,
-        "e": true,
-        "s": true,
-        "w": true
-      },
-      "floors": ["basement", "ground", "upper"],
-      "symbol": "omen"
-    },
-    {
-      "id": "tile.long_hallway",
-      "name": "Long Hallway",
-      "doors": {
-        "n": true,
-        "e": false,
-        "s": true,
-        "w": false
-      },
-      "floors": ["basement", "ground", "upper"],
-      "symbol": null
-    },
-    {
-      "id": "tile.bent_corridor",
-      "name": "Bent Corridor",
-      "doors": {
-        "n": true,
-        "e": true,
-        "s": false,
-        "w": false
-      },
-      "floors": ["basement", "ground", "upper"],
-      "symbol": null
-    },
-    {
-      "id": "tile.junction_hall",
-      "name": "Junction Hall",
-      "doors": {
-        "n": true,
-        "e": true,
-        "s": true,
-        "w": false
-      },
-      "floors": ["basement", "ground", "upper"],
-      "symbol": null
-    },
-    {
-      "id": "tile.echo_chamber",
-      "name": "Echo Chamber",
-      "doors": {
-        "n": true,
-        "e": true,
-        "s": true,
-        "w": true
-      },
-      "floors": ["basement", "ground", "upper"],
-      "symbol": "event"
-    },
-    {
-      "id": "tile.mirror_alcove",
-      "name": "Mirror Alcove",
-      "doors": {
-        "n": false,
-        "e": false,
-        "s": true,
-        "w": false
-      },
-      "floors": ["basement", "ground", "upper"],
-      "symbol": "omen"
-    },
-    {
-      "id": "tile.dust_closet",
-      "name": "Dust Closet",
-      "doors": {
-        "n": true,
-        "e": false,
-        "s": false,
-        "w": false
-      },
-      "floors": ["basement", "ground", "upper"],
-      "symbol": "item"
-    },
-    {
-      "id": "tile.spider_nook",
-      "name": "Spider Nook",
-      "doors": {
-        "n": false,
-        "e": true,
-        "s": false,
-        "w": true
-      },
-      "floors": ["basement", "ground", "upper"],
-      "symbol": "event"
-    },
-    {
-      "id": "tile.candle_room",
-      "name": "Candle Room",
-      "doors": {
-        "n": true,
-        "e": false,
-        "s": false,
-        "w": true
-      },
-      "floors": ["basement", "ground", "upper"],
-      "symbol": "item"
-    },
-    {
-      "id": "tile.quiet_study",
-      "name": "Quiet Study",
-      "doors": {
-        "n": true,
-        "e": true,
-        "s": false,
-        "w": false
-      },
-      "floors": ["basement", "ground", "upper"],
-      "symbol": "event"
-    },
-    {
-      "id": "tile.old_washroom",
-      "name": "Old Washroom",
-      "doors": {
-        "n": false,
-        "e": false,
-        "s": true,
-        "w": true
-      },
-      "floors": ["basement", "ground", "upper"],
-      "symbol": null
-    },
-    {
-      "id": "tile.cold_gallery",
-      "name": "Cold Gallery",
-      "doors": {
-        "n": true,
-        "e": false,
-        "s": true,
-        "w": true
-      },
-      "floors": ["basement", "ground", "upper"],
-      "symbol": "omen"
-    },
-    {
-      "id": "tile.storage_run",
-      "name": "Storage Run",
-      "doors": {
-        "n": true,
-        "e": true,
-        "s": true,
-        "w": false
-      },
-      "floors": ["basement", "ground", "upper"],
-      "symbol": "item"
-    },
-    {
-      "id": "tile.narrow_passage",
-      "name": "Narrow Passage",
-      "doors": {
-        "n": false,
-        "e": true,
-        "s": false,
-        "w": true
-      },
-      "floors": ["basement", "ground", "upper"],
-      "symbol": null
-    },
-    {
-      "id": "tile.blocked_shaft",
-      "name": "Blocked Shaft",
-      "doors": {
-        "n": true,
-        "e": false,
-        "s": false,
-        "w": false
-      },
-      "floors": ["basement", "ground", "upper"],
-      "symbol": "event"
-    },
-    {
-      "id": "tile.bare_room",
-      "name": "Bare Room",
-      "doors": {
-        "n": true,
-        "e": true,
-        "s": true,
-        "w": true
-      },
-      "floors": ["basement", "ground", "upper"],
-      "symbol": null
-    },
-    {
-      "id": "tile.record_room",
-      "name": "Record Room",
-      "doors": {
-        "n": true,
-        "e": false,
-        "s": false,
-        "w": true
-      },
-      "floors": ["basement", "ground", "upper"],
-      "symbol": "event",
-      "onEnter": [
-        {
-          "e": "trait",
-          "who": "actor",
-          "trait": "knowledge",
-          "delta": 1
-        }
-      ]
-    },
-    {
-      "id": "tile.iron_door_room",
-      "name": "Iron Door Room",
-      "doors": {
-        "n": true,
-        "e": false,
-        "s": true,
-        "w": false
-      },
-      "floors": ["basement", "ground", "upper"],
-      "symbol": "item"
-    },
-    {
-      "id": "tile.hollow_hall",
-      "name": "Hollow Hall",
-      "doors": {
-        "n": true,
-        "e": true,
-        "s": false,
-        "w": true
-      },
-      "floors": ["basement", "ground", "upper"],
-      "symbol": "omen"
+      "copies": 1,
+      "staticLinks": [],
+      "onEnter": [],
+      "onExit": [],
+      "onEndTurn": [],
+      "actions": [],
+      "ruleText": "Once per turn on entry: roll 2 dice to move this room next to an open door on: 4 Any floor, 3 Upper, 2 Ground, 1 Basement, 0 Basement + take 1 die physical damage."
     }
   ],
   "house": {
@@ -667,7 +1329,7 @@
         "floor": "ground",
         "x": 0,
         "y": 0,
-        "rotation": 0
+        "rotation": 270
       },
       {
         "tileId": "tile.upper_landing",

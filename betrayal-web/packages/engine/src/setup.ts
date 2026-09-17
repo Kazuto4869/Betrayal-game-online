@@ -50,6 +50,7 @@ export function createInitialState({
     // could not be shuffled before the game exists, and nothing reads it in
     // the lobby.
     tileDeck: [],
+    tileDiscard: [],
     decks: {
       item: { draw: [], discard: [], inPlay: [] },
       event: { draw: [], discard: [], inPlay: [] },
@@ -59,6 +60,7 @@ export function createInitialState({
     haunt: null,
     pending: null,
     monsters: {},
+    monsterTurn: null,
     tokens: [],
     result: null,
   };

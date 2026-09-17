@@ -198,11 +198,11 @@ describe('getConnections', () => {
 
   it('a two-way to_tile link is traversable from both ends, declared on only one', () => {
     const g = startedGame();
-    const entrance = placedIdFor('ground', 0, 2);
-    const basement = placedIdFor('basement', 0, 0);
-    // Declared only on the entrance hall in fixtures/tiles.json.
-    expect(getConnections(g.state, entrance, content)).toContain(basement);
-    expect(getConnections(g.state, basement, content)).toContain(entrance);
+    const grandStaircase = placedIdFor('ground', 0, 0);
+    const upperLanding = placedIdFor('upper', 0, 0);
+    // Declared only on Grand Staircase in tiles.json.
+    expect(getConnections(g.state, grandStaircase, content)).toContain(upperLanding);
+    expect(getConnections(g.state, upperLanding, content)).toContain(grandStaircase);
   });
 
   it('a to_floor link arrives at that floor landing', () => {

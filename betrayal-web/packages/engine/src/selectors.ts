@@ -13,15 +13,23 @@ import {
   type CharId,
   type GameAction,
   type GameState,
+  type PlacedTile,
   type PlayerState,
   type Rotation,
   type SeatId,
   type Trait,
 } from '@bahoth/shared';
-import type { Content } from '@bahoth/content';
+import type { Content, RoomAction } from '@bahoth/content';
 import { getOpenDoorways } from './discovery.js';
 import { legalAnswersFor } from './prompts.js';
-import { getReachable } from './movement.js';
+import {
+  getCrossingBarrier,
+  getDogReachableRooms,
+  getMonsterReachable,
+  getReachable,
+} from './movement.js';
+
+export { getCrossingBarrier, getDogReachableRooms, getMonsterReachable };
 
 /**
  * Seat ids are `seat_<n>` assigned in join order, so ordering by that number
@@ -156,6 +164,52 @@ export function traitValue(
   return Math.max(0, baseValue + passive + temp);
 }
 
+export function isRoomActionEligible(
+  state: GameState,
+  seat: SeatId,
+  action: RoomAction,
+  placed: PlacedTile,
+  _content: Content,
+): boolean {
+  const player = state.players[seat];
+  if (!player || player.isDead || player.location !== placed.id) return false;
+
+  // Once-per-game cadence (e.g. Vault)
+  if (action.cadence.kind === 'once_per_game') {
+    if (action.cadence.scope === 'tile') {
+      if (placed.flags[action.cadence.key]) return false;
+    } else {
+      if (state.flags[action.cadence.key]) return false;
+    }
+  }
+
+  // Once-per-turn attempt limit (e.g. Vault even after failure)
+  if (player.flags[`attempted_action:${action.id}`]) {
+    return false;
+  }
+
+  // Specific room action eligibility:
+  // Gallery: Ballroom must be placed in the house
+  if (action.id === 'action.gallery.fall_to_ballroom') {
+    const ballroomPlaced = Object.values(state.board.placed).some(
+      (t) => t.tileId === 'tile.ballroom',
+    );
+    if (!ballroomPlaced) return false;
+  }
+
+  // Vault: cannot be already empty
+  if (action.id === 'action.the_vault.open') {
+    if (placed.flags['vault_empty']) return false;
+  }
+
+  // Collapsed Room: jump down to basement
+  if (action.id === 'action.collapsed_room.fall') {
+    return true;
+  }
+
+  return true;
+}
+
 export function isCharacterTaken(
   state: GameState,
   charId: CharId,
@@ -201,6 +255,81 @@ export function getLegalActions(
   if (!player) return [];
   // A seat the table has voted out is a spectator with a body on the board.
   if (player.removed) return [];
+
+  // Haunt briefing readiness gate: until all living participants acknowledge,
+  // ordinary gameplay is blocked. Living unacknowledged seats can only ACK_HAUNT_BRIEFING.
+  if (state.haunt && state.haunt.revealed) {
+    const livingParticipants = state.turnOrder.filter((s) => {
+      const p = state.players[s];
+      return p && !p.isDead && !p.removed;
+    });
+    const ackSet = new Set(state.haunt.acknowledged);
+    const pendingBriefing = livingParticipants.some((s) => !ackSet.has(s));
+    if (pendingBriefing) {
+      if (!ackSet.has(seat) && !player.isDead && !player.removed) {
+        return [{ t: 'ACK_HAUNT_BRIEFING' as const, seat }];
+      }
+      return [];
+    }
+  }
+
+  // Monster phase: only the controlling traitor can command monsters
+  if (state.monsterTurn !== null) {
+    if (state.activeSeat !== seat || state.monsterTurn.controllingSeat !== seat) {
+      return [];
+    }
+    const monsterActions: GameAction[] = [];
+    if (state.monsterTurn.activeMonsterId === null) {
+      for (const m of Object.values(state.monsters)) {
+        if (!m.isDead && !state.monsterTurn.actedMonsterIds.includes(m.id)) {
+          monsterActions.push({ t: 'START_MONSTER', seat, monsterId: m.id });
+        }
+      }
+      monsterActions.push({ t: 'END_MONSTER_PHASE', seat });
+      monsterActions.push({ t: 'END_TURN', seat });
+    } else {
+      const activeMonsterId = state.monsterTurn.activeMonsterId;
+      const monster = state.monsters[activeMonsterId];
+      if (monster && monster.location) {
+        if (state.monsterTurn.movesLeft > 0) {
+          const reachable = getMonsterReachable(
+            state,
+            monster.location,
+            state.monsterTurn.movesLeft,
+            content,
+          );
+          for (const to of reachable) {
+            monsterActions.push({
+              t: 'MOVE_MONSTER',
+              seat,
+              monsterId: activeMonsterId,
+              to,
+            });
+          }
+        }
+        if (!state.monsterTurn.hasAttacked) {
+          for (const other of Object.values(state.players)) {
+            if (
+              !other.isDead &&
+              !other.removed &&
+              !other.isTraitor &&
+              other.location === monster.location
+            ) {
+              monsterActions.push({
+                t: 'MONSTER_ATTACK',
+                seat,
+                monsterId: activeMonsterId,
+                target: { kind: 'seat', seatId: other.seatId },
+                trait: 'might',
+              });
+            }
+          }
+        }
+      }
+      monsterActions.push({ t: 'END_MONSTER_TURN', seat, monsterId: activeMonsterId });
+    }
+    return monsterActions;
+  }
 
   // A pending prompt blocks everything except the seat that must answer it.
   if (state.pending) {
@@ -296,6 +425,32 @@ export function getLegalActions(
             actions.push({ t: 'PICKUP', seat, cardIds: [cardId] });
           }
         }
+        if (
+          (player.items.includes('omen.dog') || player.omens.includes('omen.dog')) &&
+          !player.usedCardsThisTurn?.includes('omen.dog') &&
+          !player.flags['dog_used_this_turn'] &&
+          player.location
+        ) {
+          const dogDestinations = getDogReachableRooms(state, player.location, content);
+          for (const dest of dogDestinations) {
+            actions.push({ t: 'COMMAND_DOG', seat, destination: dest });
+            for (const c of [...player.items, ...player.omens]) {
+              if (
+                c !== 'omen.dog' &&
+                c !== 'omen.bite' &&
+                !content.cardsById[c]?.isCompanion
+              ) {
+                actions.push({ t: 'COMMAND_DOG', seat, destination: dest, cardId: c });
+              }
+            }
+            const destPlaced = state.board.placed[dest];
+            for (const c of destPlaced?.droppedItems ?? []) {
+              if (c !== 'omen.bite' && !content.cardsById[c]?.isCompanion) {
+                actions.push({ t: 'COMMAND_DOG', seat, destination: dest, cardId: c });
+              }
+            }
+          }
+        }
         if (state.phase === 'haunt' && !player.hasAttackedThisTurn && player.location) {
           for (const other of Object.values(state.players)) {
             if (
@@ -313,7 +468,33 @@ export function getLegalActions(
             }
           }
         }
-        actions.push({ t: 'END_TURN', seat });
+        if (player.location) {
+          const placed = state.board.placed[player.location];
+          if (placed) {
+            const tileDef = content.tilesById[placed.tileId];
+            if (tileDef?.actions) {
+              for (const action of tileDef.actions) {
+                if (isRoomActionEligible(state, seat, action, placed, content)) {
+                  actions.push({ t: 'ROOM_ACTION', seat, actionId: action.id });
+                }
+              }
+            }
+            const hasIncompleteToken = Boolean(
+              state.tokens?.some(
+                (t) => t.location === player.location && !t.flags?.['completed'],
+              ),
+            );
+            if (hasIncompleteToken) {
+              actions.push({ t: 'ROOM_ACTION', seat, actionId: 'interact_token' });
+            }
+          }
+        }
+        const currentPlaced = player.location
+          ? state.board.placed[player.location]
+          : null;
+        if (currentPlaced?.tileId !== 'tile.coal_chute') {
+          actions.push({ t: 'END_TURN', seat });
+        }
       }
       break;
     }

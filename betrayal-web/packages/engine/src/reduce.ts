@@ -11,6 +11,7 @@
  */
 
 import {
+  DIR_ORDER,
   MAX_PLAYERS,
   MIN_PLAYERS,
   OPPOSITE,
@@ -24,11 +25,14 @@ import {
   type BoardState,
   type CardId,
   type Dir,
+  type Floor,
   type GameAction,
   type GameEvent,
   type GameState,
   type MonsterId,
   type MonsterState,
+  type MonsterTurnState,
+  type MovementContinuation,
   type PendingPrompt,
   type PlacedId,
   type PlacedTile,
@@ -39,12 +43,13 @@ import {
   type RuleErrorCode,
   type SeatId,
   type TargetRef,
+  type TileId,
   type TokenState,
   type Trait,
 } from '@bahoth/shared';
-import type { Character, Content } from '@bahoth/content';
+import type { Character, Content, Effect, Tile } from '@bahoth/content';
 import { checkInvariants } from './invariants.js';
-import { drawTile, legalRotations } from './discovery.js';
+import { drawTile, legalRotations, wouldSealFloor } from './discovery.js';
 import { resumeEffects, runEffects } from './effects.js';
 import {
   armPromptDeadline,
@@ -58,13 +63,23 @@ import {
   canStart,
   getHostSeat,
   isCharacterTaken,
+  isRoomActionEligible,
   nextSeatInOrder,
   takenColours,
   traitValue,
   getWeaponAttackModifier,
 } from './selectors.js';
-import { beginTurnFor, findPath } from './movement.js';
-import { rollDice, shuffle } from './rng.js';
+import {
+  beginTurnFor,
+  findPath,
+  getCrossingBarrier,
+  getDogReachableRooms,
+  getMonsterConnections,
+  getMonsterLeaveCost,
+  getStepDirection,
+  rotateDir,
+} from './movement.js';
+import { makeRng, rollDice, shuffle } from './rng.js';
 
 export interface ReduceResult {
   state: GameState;
@@ -119,8 +134,81 @@ function fail(code: RuleErrorCode, message: string): ReduceResult {
   return { state: {} as GameState, events: [], error: { code, message } };
 }
 
+export function isHauntBriefingPending(state: GameState): boolean {
+  if (!state.haunt || !state.haunt.revealed) return false;
+  const livingParticipants = state.turnOrder.filter((s) => {
+    const p = state.players[s];
+    return p && !p.isDead && !p.removed;
+  });
+  const ackSet = new Set(state.haunt.acknowledged);
+  return livingParticipants.some((s) => !ackSet.has(s));
+}
+
+function ackHauntBriefing(state: GameState, seat: SeatId): ReduceResult {
+  if (!state.haunt || !state.haunt.revealed) {
+    return fail('WRONG_PHASE', 'No active haunt briefing to acknowledge');
+  }
+  const player = state.players[seat];
+  if (!player || !state.turnOrder.includes(seat) || player.isDead || player.removed) {
+    return fail('UNKNOWN_SEAT', 'Seat is not an active living participant');
+  }
+  if (state.haunt.acknowledged.includes(seat)) {
+    return { state, events: [] };
+  }
+  const nextAcknowledged = [...state.haunt.acknowledged, seat];
+  const nextState: GameState = {
+    ...state,
+    haunt: {
+      ...state.haunt,
+      acknowledged: nextAcknowledged,
+    },
+  };
+  return {
+    state: nextState,
+    events: [{ t: 'log', text: `${player.name} is ready.` }],
+  };
+}
+
 function dispatch(state: GameState, action: GameAction, content: Content): ReduceResult {
+  if (isHauntBriefingPending(state)) {
+    const allowed = [
+      'ACK_HAUNT_BRIEFING',
+      'DISCONNECT',
+      'RECONNECT',
+      'TICK',
+      'VOTE_REMOVE',
+      'CONCEDE',
+    ];
+    if (!allowed.includes(action.t)) {
+      return fail(
+        'WRONG_PHASE',
+        'Waiting for all active players to acknowledge haunt briefing',
+      );
+    }
+  }
+
+  if (state.monsterTurn !== null) {
+    const allowedDuringMonsterPhase = [
+      'START_MONSTER',
+      'MOVE_MONSTER',
+      'MONSTER_ATTACK',
+      'END_MONSTER_TURN',
+      'END_MONSTER_PHASE',
+      'END_TURN',
+      'CONCEDE',
+      'DISCONNECT',
+      'RECONNECT',
+      'TICK',
+      'VOTE_REMOVE',
+    ];
+    if (!allowedDuringMonsterPhase.includes(action.t)) {
+      return fail('WRONG_PHASE', 'Cannot perform explorer actions during monster phase');
+    }
+  }
+
   switch (action.t) {
+    case 'ACK_HAUNT_BRIEFING':
+      return ackHauntBriefing(state, action.seat);
     case 'JOIN':
       return join(state, action.seat, action.name);
     case 'CHOOSE_CHAR':
@@ -155,6 +243,25 @@ function dispatch(state: GameState, action: GameAction, content: Content): Reduc
       return dropItems(state, action.seat, action.cardIds, content);
     case 'PICKUP':
       return pickupItems(state, action.seat, action.cardIds, content);
+    case 'COMMAND_DOG':
+      return commandDog(state, action.seat, action.destination, action.cardId, content);
+    case 'START_MONSTER':
+      return startMonster(state, action.seat, action.monsterId, content);
+    case 'MOVE_MONSTER':
+      return moveMonster(state, action.seat, action.monsterId, action.to, content);
+    case 'MONSTER_ATTACK':
+      return monsterAttack(
+        state,
+        action.seat,
+        action.monsterId,
+        action.target,
+        action.trait,
+        content,
+      );
+    case 'END_MONSTER_TURN':
+      return endMonsterTurn(state, action.seat, action.monsterId, content);
+    case 'END_MONSTER_PHASE':
+      return endMonsterPhase(state, action.seat, content);
     case 'ATTACK':
       return attack(state, action.seat, action.target, action.trait, content);
     case 'ROOM_ACTION':
@@ -356,6 +463,7 @@ function startGame(state: GameState, seat: SeatId, content: Content): ReduceResu
     turnDeadline: null,
     board,
     tileDeck,
+    tileDiscard: [],
     decks: {
       item: { draw: itemDeck, discard: [], inPlay: [] },
       event: { draw: eventDeck, discard: [], inPlay: [] },
@@ -415,33 +523,188 @@ function move(
     );
   }
 
-  let nextState = state;
+  return executePath(state, seat, path, false, content);
+}
+
+/**
+ * Executes movement along a path of PlacedIds one step at a time.
+ * For each step:
+ * 1. Checks if current location has onExit effects (skipped on the first step if skipFirstExit is true).
+ * 2. If onExit runs and suspends on a prompt, stores MovementContinuation in resume.movement and returns.
+ * 3. If player dies during onExit, halts movement immediately.
+ * 4. Otherwise, enters the next step, decrements movesLeft, emits moved event.
+ * 5. Once all steps complete, runs the destination's onEnter effects if present.
+ */
+function executePath(
+  state: GameState,
+  seat: SeatId,
+  path: PlacedId[],
+  skipFirstExit: boolean,
+  content: Content,
+): ReduceResult {
+  let workingState = state;
   const events: GameEvent[] = [];
+  const player = workingState.players[seat];
+  if (!player || player.isDead || player.location === null) {
+    return { state: workingState, events };
+  }
+
   let from = player.location;
-  for (const step of path) {
-    const p = nextState.players[seat]!;
-    nextState = {
-      ...nextState,
+  for (let i = 0; i < path.length; i++) {
+    const step = path[i]!;
+    const shouldRunExit = !(i === 0 && skipFirstExit);
+
+    if (shouldRunExit) {
+      const fromPlaced = workingState.board.placed[from];
+      if (fromPlaced) {
+        const fromTileDef = content.tilesById[fromPlaced.tileId];
+        if (fromTileDef && fromTileDef.onExit.length > 0) {
+          const exitOutcome = runEffects(
+            workingState,
+            fromTileDef.onExit,
+            { actor: seat },
+            content,
+          );
+          workingState = exitOutcome.state;
+          events.push(...exitOutcome.events);
+
+          if (workingState.pending !== null) {
+            const remainingSteps = path.slice(i);
+            const movement: MovementContinuation = {
+              kind: 'move',
+              seat,
+              from,
+              to: path[path.length - 1]!,
+              remainingSteps,
+            };
+            if (isEffectPromptPayload(workingState.pending.payload)) {
+              workingState = {
+                ...workingState,
+                pending: {
+                  ...workingState.pending,
+                  payload: {
+                    ...workingState.pending.payload,
+                    resume: {
+                      ...workingState.pending.payload.resume,
+                      movement,
+                    },
+                  },
+                },
+              };
+            }
+            return { state: workingState, events };
+          }
+
+          const pNow = workingState.players[seat];
+          if (!pNow || pNow.isDead || pNow.location === null) {
+            return { state: workingState, events };
+          }
+        }
+      }
+    }
+
+    const p = workingState.players[seat]!;
+
+    const barrier = getCrossingBarrier(
+      workingState,
+      seat,
+      from,
+      step,
+      p.cameFrom,
+      content,
+    );
+    if (barrier) {
+      if (!workingState.rng) {
+        return fail('INVARIANT_VIOLATION', 'Cannot roll dice from a redacted state');
+      }
+      const diceCount = Math.max(
+        1,
+        Math.min(8, traitValue(workingState, seat, barrier.trait, content)),
+      );
+      const [dice, total, nextRng] = rollDice(workingState.rng, diceCount);
+      workingState = { ...workingState, rng: nextRng };
+      events.push({
+        t: 'rolled',
+        seat,
+        dice,
+        total,
+        reason: `${barrier.fromTileDef.name} Barrier`,
+      });
+
+      if (total >= barrier.threshold) {
+        events.push({
+          t: 'log',
+          text: `${p.name} rolled ${total} (needed ${barrier.threshold}+) and successfully crossed the ${barrier.fromTileDef.name} barrier.`,
+        });
+      } else {
+        events.push({
+          t: 'log',
+          text: `${p.name} rolled ${total} (needed ${barrier.threshold}+) and failed to cross the ${barrier.fromTileDef.name} barrier.`,
+        });
+        workingState = {
+          ...workingState,
+          players: {
+            ...workingState.players,
+            [seat]: {
+              ...p,
+              movesLeft: 0,
+            },
+          },
+        };
+        return { state: workingState, events };
+      }
+    }
+
+    const nextFlags = { ...p.flags };
+    if (nextFlags[`barrier_side:${from}`]) {
+      delete nextFlags[`barrier_side:${from}`];
+    }
+    const stepPlaced = workingState.board.placed[step];
+    const fromPlaced = workingState.board.placed[from];
+    if (stepPlaced && fromPlaced) {
+      const stepDef = content.tilesById[stepPlaced.tileId];
+      if (stepDef?.crossing) {
+        const entrySide = getStepDirection(stepPlaced, fromPlaced);
+        if (entrySide) {
+          nextFlags[`barrier_side:${step}`] = entrySide;
+        }
+      }
+    }
+
+    workingState = {
+      ...workingState,
       players: {
-        ...nextState.players,
-        [seat]: { ...p, location: step, cameFrom: from, movesLeft: p.movesLeft - 1 },
+        ...workingState.players,
+        [seat]: {
+          ...p,
+          flags: nextFlags,
+          location: step,
+          cameFrom: from,
+          movesLeft: p.movesLeft - 1,
+        },
       },
     };
     events.push({ t: 'moved', seat, from, to: step });
     from = step;
   }
 
-  const destPlaced = nextState.board.placed[to];
+  const destId = path[path.length - 1]!;
+  const destPlaced = workingState.board.placed[destId];
   if (destPlaced) {
     const tileDef = content.tilesById[destPlaced.tileId];
     if (tileDef && tileDef.onEnter.length > 0) {
-      const outcome = runEffects(nextState, tileDef.onEnter, { actor: seat }, content);
-      nextState = outcome.state;
+      const outcome = runEffects(workingState, tileDef.onEnter, { actor: seat }, content);
+      workingState = outcome.state;
       events.push(...outcome.events);
+    }
+    if (destPlaced.tileId === 'tile.mystic_elevator') {
+      const elevOutcome = resolveMysticElevator(workingState, seat, destId, content);
+      workingState = elevOutcome.state;
+      events.push(...elevOutcome.events);
     }
   }
 
-  return { state: nextState, events };
+  return { state: workingState, events };
 }
 
 /**
@@ -498,36 +761,148 @@ function moveThrough(
     );
   }
 
+  const crossingEvents: GameEvent[] = [];
+  if (tileDef.crossing && tileDef.crossing.sides) {
+    const sideA = rotateDir(tileDef.crossing.sides[0], location.rotation);
+    const sideB = rotateDir(tileDef.crossing.sides[1], location.rotation);
+    if (dir === sideA || dir === sideB) {
+      let entryDir: Dir | null = null;
+      if (player.cameFrom) {
+        const cfPlaced = state.board.placed[player.cameFrom];
+        if (cfPlaced) entryDir = getStepDirection(location, cfPlaced);
+      }
+      if (!entryDir) {
+        const flag = player.flags[`barrier_side:${location.id}`];
+        if (flag === 'n' || flag === 'e' || flag === 's' || flag === 'w') {
+          entryDir = flag;
+        }
+      }
+      if (entryDir && dir !== entryDir) {
+        if (!state.rng) {
+          return fail('INVARIANT_VIOLATION', 'Cannot roll dice from a redacted state');
+        }
+        const diceCount = Math.max(
+          1,
+          Math.min(8, traitValue(state, seat, tileDef.crossing.trait, content)),
+        );
+        const [dice, total, nextRng] = rollDice(state.rng, diceCount);
+        state = { ...state, rng: nextRng };
+        crossingEvents.push({
+          t: 'rolled',
+          seat,
+          dice,
+          total,
+          reason: `${tileDef.name} Barrier`,
+        });
+        if (total < tileDef.crossing.threshold) {
+          crossingEvents.push({
+            t: 'log',
+            text: `${player.name} rolled ${total} (needed ${tileDef.crossing.threshold}+) and failed to cross the ${tileDef.name} barrier.`,
+          });
+          return {
+            state: {
+              ...state,
+              players: {
+                ...state.players,
+                [seat]: {
+                  ...player,
+                  movesLeft: 0,
+                },
+              },
+            },
+            events: crossingEvents,
+          };
+        }
+        crossingEvents.push({
+          t: 'log',
+          text: `${player.name} rolled ${total} (needed ${tileDef.crossing.threshold}+) and successfully crossed the ${tileDef.name} barrier.`,
+        });
+      }
+    }
+  }
+
   const rng = state.rng;
   if (!rng) {
     return fail('INVARIANT_VIOLATION', 'Cannot draw a tile from a redacted state');
   }
-  const draw = drawTile(state.tileDeck, location.floor, content, rng);
-  if (!draw) {
-    return fail(
-      'ILLEGAL_MOVE',
-      `No room left that can be built on the ${location.floor}`,
+
+  let curDeck = state.tileDeck;
+  let curDiscard = state.tileDiscard ?? [];
+  let curRng = rng;
+  let drawnTileId: TileId | null = null;
+  let validRotations: Rotation[] = [];
+  let drawnTileDef: Tile | null = null;
+  // Guard against infinite loops: track tile IDs whose every legal rotation
+  // would seal the floor.  Once we see the same tile again (after a reshuffle)
+  // we know every remaining candidate seals, and must bail.
+  const sealingTiles = new Set<TileId>();
+
+  while (true) {
+    const draw = drawTile(curDeck, curDiscard, location.floor, content, curRng);
+    if (!draw) {
+      return fail(
+        'NO_ROOMS_FOR_FLOOR',
+        `No remaining room tiles can be placed on the ${location.floor}`,
+      );
+    }
+    curDeck = draw.deck;
+    curDiscard = draw.discard;
+    curRng = draw.rng;
+    const def = content.tilesById[draw.tileId]!;
+    const rots = legalRotations(def, OPPOSITE[dir]);
+    const nonSealing = rots.filter(
+      (r) => !wouldSealFloor(state.board, def, r, location.floor, nx, ny, content),
     );
+    if (nonSealing.length > 0) {
+      drawnTileId = draw.tileId;
+      drawnTileDef = def;
+      validRotations = nonSealing;
+      break;
+    }
+    // All rotations of this tile would seal off the floor.
+    if (sealingTiles.has(draw.tileId)) {
+      // We've seen this tile before — every remaining eligible tile seals.
+      return fail(
+        'NO_ROOMS_FOR_FLOOR',
+        `All remaining room tiles for ${location.floor} would seal the floor`,
+      );
+    }
+    sealingTiles.add(draw.tileId);
+    // 2E Rulebook (page 9): set it aside in discard and draw another!
+    curDiscard = [...curDiscard, draw.tileId];
   }
 
   // The tile is committed from here: it is off the deck in `withDraw`
   // regardless of which path below actually places it.
-  const withDraw: GameState = { ...state, tileDeck: draw.deck, rng: draw.rng };
-  const drawnTileDef = content.tilesById[draw.tileId]!;
-  const rots = legalRotations(drawnTileDef, OPPOSITE[dir]);
+  const withDraw: GameState = {
+    ...state,
+    tileDeck: curDeck,
+    tileDiscard: curDiscard,
+    rng: curRng,
+  };
   const payload: RotateTilePayload = {
-    tileId: draw.tileId,
+    tileId: drawnTileId,
     floor: location.floor,
     x: nx,
     y: ny,
     from: location.id,
     dir,
-    legalRotations: rots,
+    legalRotations: validRotations,
   };
 
-  if (rots.length === 1) {
+  if (validRotations.length === 1) {
     // No decision to make (open question 7: auto-apply).
-    return finishDiscovery(withDraw, seat, payload, rots[0]!, content);
+    const finishRes = finishDiscovery(
+      withDraw,
+      seat,
+      payload,
+      validRotations[0]!,
+      content,
+    );
+    return {
+      ...finishRes,
+      events: [...crossingEvents, ...finishRes.events],
+    };
   }
 
   // `deadline` starts null and is armed by the next TICK (prompts.ts), for the
@@ -536,12 +911,13 @@ function moveThrough(
     seatId: seat,
     kind: 'rotate_tile',
     payload,
-    defaultAnswer: rots[0]!,
+    defaultAnswer: validRotations[0]!,
   });
 
   return {
     state: { ...withDraw, pending },
     events: [
+      ...crossingEvents,
       // docs/07-ui.md#73 asks for exactly this line for the other players.
       { t: 'log', text: `${player.name} is placing the ${drawnTileDef.name}…` },
     ],
@@ -603,22 +979,49 @@ function finishDiscovery(
   const tileDef = content.tilesById[payload.tileId];
   const hasSymbol = Boolean(tileDef?.symbol);
   const movesLeft = hasSymbol ? 0 : player.movesLeft - 1;
+  const fromPlaced = state.board.placed[payload.from];
+  const nextFlags = { ...player.flags };
+  if (fromPlaced && tileDef?.crossing) {
+    const entrySide = getStepDirection(placed, fromPlaced);
+    if (entrySide) {
+      nextFlags[`barrier_side:${id}`] = entrySide;
+    }
+  }
+  if (nextFlags[`barrier_side:${payload.from}`]) {
+    delete nextFlags[`barrier_side:${payload.from}`];
+  }
 
   const players = {
     ...state.players,
     [seat]: {
       ...player,
+      flags: nextFlags,
       location: id,
       cameFrom: payload.from,
       movesLeft,
     },
   };
 
+  const fromTileDef = fromPlaced ? content.tilesById[fromPlaced.tileId] : undefined;
+
   let workingState: GameState = { ...state, board, players, pending: null };
-  const events: GameEvent[] = [
-    { t: 'discovered', seat, placed },
-    { t: 'moved', seat, from: payload.from, to: id },
-  ];
+  const events: GameEvent[] = [{ t: 'discovered', seat, placed }];
+
+  if (fromTileDef && fromTileDef.onExit.length > 0) {
+    const exitOutcome = runEffects(
+      workingState,
+      fromTileDef.onExit,
+      { actor: seat },
+      content,
+    );
+    workingState = exitOutcome.state;
+    events.push(...exitOutcome.events);
+    if (workingState.pending !== null) {
+      return { state: workingState, events };
+    }
+  }
+
+  events.push({ t: 'moved', seat, from: payload.from, to: id });
 
   if (tileDef?.symbol && workingState.decks[tileDef.symbol]) {
     const symbol = tileDef.symbol;
@@ -742,6 +1145,71 @@ function finishDiscovery(
     events.push(...resolved.events);
   }
 
+  if (payload.tileId === 'tile.collapsed_room') {
+    const colOutcome = resolveCollapsedRoomDiscovery(workingState, seat, id, content);
+    workingState = colOutcome.state;
+    events.push(...colOutcome.events);
+  }
+
+  if (payload.tileId === 'tile.mystic_elevator') {
+    const elevOutcome = resolveMysticElevator(workingState, seat, id, content);
+    workingState = elevOutcome.state;
+    events.push(...elevOutcome.events);
+  }
+
+  if (tileDef && tileDef.onEndTurn && tileDef.onEndTurn.length > 0) {
+    if (
+      workingState.pending !== null &&
+      isEffectPromptPayload(workingState.pending.payload)
+    ) {
+      workingState = {
+        ...workingState,
+        pending: {
+          ...workingState.pending,
+          payload: {
+            ...workingState.pending.payload,
+            resume: {
+              ...workingState.pending.payload.resume,
+              remaining: [
+                ...workingState.pending.payload.resume.remaining,
+                ...tileDef.onEndTurn,
+                {
+                  e: 'set_flag',
+                  scope: 'seat',
+                  key: `room_end_resolved_${id}`,
+                  value: true,
+                },
+              ],
+            },
+          },
+        },
+      };
+    } else if (workingState.pending === null) {
+      const roomEndOutcome = runEffects(
+        workingState,
+        tileDef.onEndTurn,
+        { actor: seat },
+        content,
+      );
+      workingState = roomEndOutcome.state;
+      events.push(...roomEndOutcome.events);
+
+      const currP = workingState.players[seat];
+      if (currP) {
+        workingState = {
+          ...workingState,
+          players: {
+            ...workingState.players,
+            [seat]: {
+              ...currP,
+              flags: { ...currP.flags, [`room_end_resolved_${id}`]: true },
+            },
+          },
+        };
+      }
+    }
+  }
+
   return { state: workingState, events };
 }
 
@@ -841,7 +1309,64 @@ function resumePrompt(
         };
       }
     }
-    return { state: outcomeState, events: outcome.events };
+    const events = [...outcome.events];
+    const movement = prompt.payload.resume.movement;
+    if (movement) {
+      if (outcomeState.pending === null) {
+        const moveRes = executePath(
+          outcomeState,
+          movement.seat,
+          movement.remainingSteps,
+          true,
+          content,
+        );
+        outcomeState = moveRes.state;
+        events.push(...moveRes.events);
+      } else if (isEffectPromptPayload(outcomeState.pending.payload)) {
+        outcomeState = {
+          ...outcomeState,
+          pending: {
+            ...outcomeState.pending,
+            payload: {
+              ...outcomeState.pending.payload,
+              resume: {
+                ...outcomeState.pending.payload.resume,
+                movement,
+              },
+            },
+          },
+        };
+      }
+    }
+    const thenEndTurn = prompt.payload.resume.thenEndTurn;
+    if (thenEndTurn) {
+      if (outcomeState.pending === null) {
+        const finishRes = finishEndTurn(
+          outcomeState,
+          prompt.payload.resume.actor,
+          content,
+        );
+        if (!finishRes.error) {
+          outcomeState = finishRes.state;
+          events.push(...finishRes.events);
+        }
+      } else if (isEffectPromptPayload(outcomeState.pending.payload)) {
+        outcomeState = {
+          ...outcomeState,
+          pending: {
+            ...outcomeState.pending,
+            payload: {
+              ...outcomeState.pending.payload,
+              resume: {
+                ...outcomeState.pending.payload.resume,
+                thenEndTurn: true,
+              },
+            },
+          },
+        };
+      }
+    }
+    return { state: outcomeState, events };
   }
   return { state: { ...state, pending: null }, events: [] };
 }
@@ -895,13 +1420,7 @@ function rotateTile(
   return answerPrompt(state, seat, null, rotation, content);
 }
 
-function endTurn(state: GameState, seat: SeatId, content: Content): ReduceResult {
-  if (!['explore', 'haunt'].includes(state.phase)) {
-    return fail('WRONG_PHASE', `Cannot end a turn during ${state.phase}`);
-  }
-  if (state.activeSeat !== seat) return fail('NOT_YOUR_TURN', 'It is not your turn');
-  if (state.pending) return fail('PROMPT_PENDING', 'Answer the pending prompt first');
-
+function finishEndTurn(state: GameState, seat: SeatId, content: Content): ReduceResult {
   const next = nextSeatInOrder(state, seat);
   if (!next) return fail('INVARIANT_VIOLATION', 'No seat to pass the turn to');
 
@@ -911,8 +1430,16 @@ function endTurn(state: GameState, seat: SeatId, content: Content): ReduceResult
 
   const player = state.players[seat];
   const endingFlags = player ? { ...player.flags } : undefined;
-  if (endingFlags && 'adrenaline_speed' in endingFlags) {
-    delete endingFlags['adrenaline_speed'];
+  if (endingFlags) {
+    if ('adrenaline_speed' in endingFlags) {
+      delete endingFlags['adrenaline_speed'];
+    }
+    delete endingFlags['dog_used_this_turn'];
+    for (const key of Object.keys(endingFlags)) {
+      if (key.startsWith('room_end_resolved_') || key.startsWith('attempted_action:')) {
+        delete endingFlags[key];
+      }
+    }
   }
   const players = player
     ? {
@@ -925,6 +1452,42 @@ function endTurn(state: GameState, seat: SeatId, content: Content): ReduceResult
         },
       }
     : state.players;
+
+  const livingMonsters = Object.values(state.monsters).filter((m) => !m.isDead);
+  const traitorSeat = state.haunt?.traitorSeat;
+  const isTraitorTurn = traitorSeat && seat === traitorSeat;
+
+  if (
+    state.phase === 'haunt' &&
+    livingMonsters.length > 0 &&
+    traitorSeat &&
+    (isTraitorTurn || (wrapped && state.players[traitorSeat]?.isDead))
+  ) {
+    const nextState: GameState = {
+      ...state,
+      players,
+      activeSeat: traitorSeat,
+      turnDeadline: null,
+      monsterTurn: {
+        activeMonsterId: null,
+        actedMonsterIds: [],
+        movesLeft: 0,
+        hasAttacked: false,
+        rolledSpeed: null,
+        controllingSeat: traitorSeat,
+      },
+    };
+    return {
+      state: nextState,
+      events: [
+        { t: 'turn_ended', seat },
+        {
+          t: 'log',
+          text: `Monster Phase begins. ${state.players[traitorSeat]?.name ?? 'Traitor'} commands the monsters.`,
+        },
+      ],
+    };
+  }
 
   // The clock is disarmed, not re-armed: the next TICK arms it with the
   // budget that suits whoever is now active. beginTurnFor gives `next` its
@@ -946,6 +1509,94 @@ function endTurn(state: GameState, seat: SeatId, content: Content): ReduceResult
       { t: 'turn_started', seat: next, round },
     ],
   };
+}
+
+function endTurn(state: GameState, seat: SeatId, content: Content): ReduceResult {
+  if (state.monsterTurn !== null) {
+    if (state.activeSeat !== seat || state.monsterTurn.controllingSeat !== seat) {
+      return fail('NOT_YOUR_TURN', 'It is not your turn');
+    }
+    if (state.monsterTurn.activeMonsterId !== null) {
+      return fail(
+        'ILLEGAL_MOVE',
+        'Finish active monster turn before ending monster phase',
+      );
+    }
+    return endMonsterPhase(state, seat, content);
+  }
+
+  if (!['explore', 'haunt'].includes(state.phase)) {
+    return fail('WRONG_PHASE', `Cannot end a turn during ${state.phase}`);
+  }
+  if (state.activeSeat !== seat) return fail('NOT_YOUR_TURN', 'It is not your turn');
+  if (state.pending) return fail('PROMPT_PENDING', 'Answer the pending prompt first');
+
+  const player = state.players[seat];
+  if (!player) return fail('UNKNOWN_SEAT', `No such seat: ${seat}`);
+
+  const locId = player.location;
+  const placed = locId ? state.board.placed[locId] : null;
+  if (placed?.tileId === 'tile.coal_chute') {
+    return fail('ILLEGAL_MOVE', 'Cannot end turn on Coal Chute');
+  }
+  const tileDef = placed ? content.tilesById[placed.tileId] : null;
+  const alreadyResolved = locId
+    ? Boolean(player.flags[`room_end_resolved_${locId}`])
+    : false;
+
+  if (
+    locId &&
+    tileDef &&
+    tileDef.onEndTurn &&
+    tileDef.onEndTurn.length > 0 &&
+    !alreadyResolved
+  ) {
+    const roomOutcome = runEffects(state, tileDef.onEndTurn, { actor: seat }, content);
+    let workingState = roomOutcome.state;
+    const events = [...roomOutcome.events];
+
+    const updatedPlayer = workingState.players[seat];
+    if (updatedPlayer) {
+      workingState = {
+        ...workingState,
+        players: {
+          ...workingState.players,
+          [seat]: {
+            ...updatedPlayer,
+            flags: {
+              ...updatedPlayer.flags,
+              [`room_end_resolved_${locId}`]: true,
+            },
+          },
+        },
+      };
+    }
+
+    if (workingState.pending !== null) {
+      if (isEffectPromptPayload(workingState.pending.payload)) {
+        workingState = {
+          ...workingState,
+          pending: {
+            ...workingState.pending,
+            payload: {
+              ...workingState.pending.payload,
+              resume: {
+                ...workingState.pending.payload.resume,
+                thenEndTurn: true,
+              },
+            },
+          },
+        };
+      }
+      return { state: workingState, events };
+    }
+
+    const finishRes = finishEndTurn(workingState, seat, content);
+    if (finishRes.error) return finishRes;
+    return { state: finishRes.state, events: [...events, ...finishRes.events] };
+  }
+
+  return finishEndTurn(state, seat, content);
 }
 
 // --- connection ------------------------------------------------------------
@@ -1167,6 +1818,8 @@ function concede(state: GameState, seat: SeatId, content: Content): ReduceResult
       state: {
         ...working,
         phase: 'game_over',
+        turnDeadline: null,
+        activeSeat: null,
         result: { outcome: 'abandoned', winners: [], reason: 'Everyone conceded' },
       },
       events: [
@@ -1358,6 +2011,37 @@ function tick(state: GameState, now: number, content: Content): ReduceResult {
   };
 }
 
+const CHAR_AGES: Record<string, number> = {
+  'char.heather_granville': 18,
+  'char.jenny_leclerc': 21,
+  'char.ox_bellows': 23,
+  'char.darrin_flash_williams': 20,
+  'char.vivian_lopez': 42,
+  'char.madame_zostra': 37,
+  'char.missy_dubourde': 9,
+  'char.zoe_ingstrom': 8,
+  'char.peter_akimoto': 13,
+  'char.brandon_jaspers': 12,
+  'char.professor_longfellow': 57,
+  'char.father_rhinehardt': 62,
+};
+
+function breakTie(
+  candidates: SeatId[],
+  revealerSeat: SeatId,
+  turnOrder: SeatId[],
+): SeatId {
+  if (candidates.length === 0) return revealerSeat;
+  if (candidates.includes(revealerSeat)) return revealerSeat;
+  const revIdx = turnOrder.indexOf(revealerSeat);
+  const sorted = [...candidates].sort((a, b) => {
+    const distA = (turnOrder.indexOf(a) - revIdx + turnOrder.length) % turnOrder.length;
+    const distB = (turnOrder.indexOf(b) - revIdx + turnOrder.length) % turnOrder.length;
+    return distA - distB;
+  });
+  return sorted[0]!;
+}
+
 function triggerHaunt(
   state: GameState,
   revealerSeat: SeatId,
@@ -1366,20 +2050,15 @@ function triggerHaunt(
   content: Content,
 ): { state: GameState; events: GameEvent[] } {
   let hauntId = 1;
-  if (omenCardId.includes('holy_symbol') || omenCardId.includes('symbol')) hauntId = 1;
-  else if (omenCardId.includes('spirit_board') || omenCardId.includes('board'))
-    hauntId = 2;
-  else if (omenCardId.includes('bite')) hauntId = 5;
-  else if (omenCardId.includes('ring')) hauntId = 10;
-  else if (omenCardId.includes('skull')) hauntId = 16;
-  else {
+  const hauntKey = `${omenCardId}:${tileId}`;
+  if (content.hauntByOmenAndRoom && content.hauntByOmenAndRoom[hauntKey]) {
+    hauntId = content.hauntByOmenAndRoom[hauntKey]!;
+  } else if (content.haunts && content.haunts.length > 0) {
     const list = content.haunts;
-    if (list.length > 0) {
-      let sum = 0;
-      for (let i = 0; i < omenCardId.length; i++) sum += omenCardId.charCodeAt(i);
-      for (let i = 0; i < tileId.length; i++) sum += tileId.charCodeAt(i);
-      hauntId = list[sum % list.length]!.id;
-    }
+    let sum = 0;
+    for (let i = 0; i < omenCardId.length; i++) sum += omenCardId.charCodeAt(i);
+    for (let i = 0; i < tileId.length; i++) sum += tileId.charCodeAt(i);
+    hauntId = list[sum % list.length]!.id;
   }
 
   const hauntDef = content.hauntsById[hauntId] ?? content.haunts[0];
@@ -1395,8 +2074,93 @@ function triggerHaunt(
       traitorSeat = revealerSeat;
       break;
     case 'none':
+    case 'hidden':
       traitorSeat = null;
       break;
+    case 'left_of_revealer': {
+      const eligible = livingSeats.filter((s) => s !== revealerSeat);
+      traitorSeat =
+        eligible.length > 0
+          ? breakTie(eligible, revealerSeat, state.turnOrder)
+          : revealerSeat;
+      break;
+    }
+    case 'specific_character_or_trait': {
+      const match = livingSeats.find(
+        (s) => state.players[s]?.charId === traitorRule.characterId,
+      );
+      if (match) {
+        traitorSeat = match;
+      } else {
+        const candidates = livingSeats;
+        let bestVal = traitorRule.fallbackComparison === 'highest' ? -Infinity : Infinity;
+        let tied: SeatId[] = [];
+        for (const s of candidates) {
+          const val = traitValue(state, s, traitorRule.fallbackTrait, content);
+          if (traitorRule.fallbackComparison === 'highest') {
+            if (val > bestVal) {
+              bestVal = val;
+              tied = [s];
+            } else if (val === bestVal) {
+              tied.push(s);
+            }
+          } else {
+            if (val < bestVal) {
+              bestVal = val;
+              tied = [s];
+            } else if (val === bestVal) {
+              tied.push(s);
+            }
+          }
+        }
+        traitorSeat = breakTie(tied, revealerSeat, state.turnOrder);
+      }
+      break;
+    }
+    case 'specific_character_or_left': {
+      const match = livingSeats.find(
+        (s) => state.players[s]?.charId === traitorRule.characterId,
+      );
+      if (match) {
+        traitorSeat = match;
+      } else {
+        const eligible = livingSeats.filter((s) => s !== revealerSeat);
+        traitorSeat =
+          eligible.length > 0
+            ? breakTie(eligible, revealerSeat, state.turnOrder)
+            : revealerSeat;
+      }
+      break;
+    }
+    case 'age': {
+      const candidates = traitorRule.excludeRevealer
+        ? livingSeats.filter((s) => s !== revealerSeat)
+        : livingSeats;
+      const pool = candidates.length > 0 ? candidates : livingSeats;
+      let targetAge = traitorRule.comparison === 'oldest' ? -Infinity : Infinity;
+      let tied: SeatId[] = [];
+      for (const s of pool) {
+        const charId = state.players[s]?.charId;
+        const age: number = charId ? (CHAR_AGES[charId] ?? 30) : 30;
+        if (traitorRule.comparison === 'oldest') {
+          if (age > targetAge) {
+            targetAge = age;
+            tied = [s];
+          } else if (age === targetAge) {
+            tied.push(s);
+          }
+        } else {
+          if (age < targetAge) {
+            targetAge = age;
+            tied = [s];
+          } else if (age === targetAge) {
+            tied.push(s);
+          }
+        }
+      }
+      traitorSeat = breakTie(tied, revealerSeat, state.turnOrder);
+      break;
+    }
     case 'holder': {
       const holder = livingSeats.find((s) => {
         const p = state.players[s]!;
@@ -1408,29 +2172,41 @@ function triggerHaunt(
       break;
     }
     case 'highest': {
+      const candidates = traitorRule.excludeRevealer
+        ? livingSeats.filter((s) => s !== revealerSeat)
+        : livingSeats;
+      const pool = candidates.length > 0 ? candidates : livingSeats;
       let bestVal = -Infinity;
-      let bestSeat: SeatId | null = null;
-      for (const s of livingSeats) {
+      let tied: SeatId[] = [];
+      for (const s of pool) {
         const val = traitValue(state, s, traitorRule.trait, content);
         if (val > bestVal) {
           bestVal = val;
-          bestSeat = s;
+          tied = [s];
+        } else if (val === bestVal) {
+          tied.push(s);
         }
       }
-      traitorSeat = bestSeat ?? revealerSeat;
+      traitorSeat = breakTie(tied, revealerSeat, state.turnOrder);
       break;
     }
     case 'lowest': {
+      const candidates = traitorRule.excludeRevealer
+        ? livingSeats.filter((s) => s !== revealerSeat)
+        : livingSeats;
+      const pool = candidates.length > 0 ? candidates : livingSeats;
       let worstVal = Infinity;
-      let worstSeat: SeatId | null = null;
-      for (const s of livingSeats) {
+      let tied: SeatId[] = [];
+      for (const s of pool) {
         const val = traitValue(state, s, traitorRule.trait, content);
         if (val < worstVal) {
           worstVal = val;
-          worstSeat = s;
+          tied = [s];
+        } else if (val === worstVal) {
+          tied.push(s);
         }
       }
-      traitorSeat = worstSeat ?? revealerSeat;
+      traitorSeat = breakTie(tied, revealerSeat, state.turnOrder);
       break;
     }
   }
@@ -1504,17 +2280,31 @@ function triggerHaunt(
     });
   }
 
+  let nextTurnOrder = state.turnOrder;
+  if (traitorSeat && state.turnOrder.includes(traitorSeat)) {
+    const tIdx = state.turnOrder.indexOf(traitorSeat);
+    nextTurnOrder = [
+      ...state.turnOrder.slice(tIdx + 1),
+      ...state.turnOrder.slice(0, tIdx + 1),
+    ];
+  }
+
   const nextState: GameState = {
     ...state,
     phase: 'haunt',
+    turnOrder: nextTurnOrder,
     players: nextPlayers,
     monsters: nextMonsters,
+    monsterTurn: null,
     tokens: nextTokens,
     haunt: {
       hauntId,
       traitorSeat,
       revealed: true,
       acknowledged: [],
+      heroSide: hauntDef?.heroes,
+      traitorSide: hauntDef?.traitor,
+      hauntTitle: hauntDef?.name,
     },
   };
 
@@ -1777,11 +2567,597 @@ function pickupItems(
   return { state: nextState, events };
 }
 
+function commandDog(
+  state: GameState,
+  seat: SeatId,
+  destination: PlacedId,
+  cardId: CardId | undefined,
+  content: Content,
+): ReduceResult {
+  if (!['explore', 'haunt'].includes(state.phase)) {
+    return fail('WRONG_PHASE', `Cannot command Dog during ${state.phase}`);
+  }
+  if (state.activeSeat !== seat) return fail('NOT_YOUR_TURN', 'It is not your turn');
+  if (state.pending !== null) {
+    return fail('ILLEGAL_MOVE', 'Cannot command Dog while a prompt is pending');
+  }
+  const player = state.players[seat];
+  if (!player || player.isDead || player.removed || player.location === null) {
+    return fail('ILLEGAL_MOVE', 'Cannot command Dog');
+  }
+  if (!player.items.includes('omen.dog') && !player.omens.includes('omen.dog')) {
+    return fail('ILLEGAL_MOVE', 'Player does not have the Dog');
+  }
+  if (
+    player.usedCardsThisTurn?.includes('omen.dog') ||
+    player.flags['dog_used_this_turn']
+  ) {
+    return fail('ILLEGAL_MOVE', 'Dog can only be commanded once per turn');
+  }
+
+  const reachable = getDogReachableRooms(state, player.location, content);
+  if (!reachable.includes(destination)) {
+    return fail('ILLEGAL_MOVE', 'Destination room is not reachable by the Dog');
+  }
+
+  const destTile = state.board.placed[destination];
+  if (!destTile) {
+    return fail('ILLEGAL_MOVE', 'Destination room does not exist');
+  }
+
+  let nextPlayerItems = [...player.items];
+  let nextPlayerOmens = [...player.omens];
+  let nextDestDropped = [...(destTile.droppedItems ?? [])];
+  let logText = '';
+  const destName = content.tilesById[destTile.tileId]?.name ?? 'destination';
+
+  if (cardId) {
+    const isOwnerItem = player.items.includes(cardId);
+    const isOwnerOmen = player.omens.includes(cardId);
+    const isDestDropped = nextDestDropped.includes(cardId);
+    const cardDef = content.cardsById[cardId];
+
+    if (cardDef?.isCompanion || cardId === 'omen.dog' || cardId === 'omen.bite') {
+      return fail(
+        'ILLEGAL_MOVE',
+        `Dog cannot carry or fetch companion or Bite (${cardId})`,
+      );
+    }
+
+    if (isOwnerItem || isOwnerOmen) {
+      // Carry from owner and drop at destination
+      if (isOwnerItem) {
+        nextPlayerItems = nextPlayerItems.filter((c) => c !== cardId);
+      } else {
+        nextPlayerOmens = nextPlayerOmens.filter((c) => c !== cardId);
+      }
+      nextDestDropped.push(cardId);
+      logText = `${player.name} sent the Dog carrying ${cardDef?.name ?? cardId} to ${destName}.`;
+    } else if (isDestDropped) {
+      // Fetch from destination floor to owner
+      nextDestDropped = nextDestDropped.filter((c) => c !== cardId);
+      if (cardDef?.deck === 'omen') {
+        nextPlayerOmens.push(cardId);
+      } else {
+        nextPlayerItems.push(cardId);
+      }
+      logText = `${player.name} sent the Dog to fetch ${cardDef?.name ?? cardId} from ${destName}.`;
+    } else {
+      return fail('ILLEGAL_MOVE', `Card ${cardId} is not available to carry or fetch`);
+    }
+  } else {
+    logText = `${player.name} sent the Dog to ${destName}.`;
+  }
+
+  const usedCards = [...(player.usedCardsThisTurn ?? []), 'omen.dog'];
+  const nextPlayerFlags = {
+    ...player.flags,
+    dog_used_this_turn: true,
+  };
+
+  const nextState: GameState = {
+    ...state,
+    board: {
+      ...state.board,
+      placed: {
+        ...state.board.placed,
+        [destination]: {
+          ...destTile,
+          droppedItems: nextDestDropped,
+          flags: { ...destTile.flags, dropped: nextDestDropped.join(',') },
+        },
+      },
+    },
+    players: {
+      ...state.players,
+      [seat]: {
+        ...player,
+        items: nextPlayerItems,
+        omens: nextPlayerOmens,
+        usedCardsThisTurn: usedCards,
+        flags: nextPlayerFlags,
+      },
+    },
+    flags: {
+      ...state.flags,
+      dog_last_run: destination,
+    },
+  };
+
+  return {
+    state: nextState,
+    events: [{ t: 'log', text: logText }],
+  };
+}
+
+function drawItemCard(
+  state: GameState,
+  seat: SeatId,
+  content: Content,
+): { state: GameState; events: GameEvent[] } {
+  let workingState = state;
+  const events: GameEvent[] = [];
+  let deck = workingState.decks.item;
+  if (deck.draw.length === 0 && deck.discard.length > 0 && workingState.rng) {
+    const [shuffled, newRng] = shuffle(workingState.rng, deck.discard);
+    deck = { ...deck, draw: shuffled, discard: [] };
+    workingState = {
+      ...workingState,
+      rng: newRng,
+      decks: { ...workingState.decks, item: deck },
+    };
+  }
+
+  if (deck.draw.length > 0) {
+    const cardId = deck.draw[0]!;
+    const nextDraw = deck.draw.slice(1);
+    const cardDef = content.cardsById[cardId];
+    events.push({ t: 'drew_card', seat, deck: 'item', cardId });
+
+    const nextInPlay = [...deck.inPlay, cardId];
+    const nextDeck = { ...deck, draw: nextDraw, inPlay: nextInPlay };
+    const currentPlayer = workingState.players[seat]!;
+    workingState = {
+      ...workingState,
+      decks: { ...workingState.decks, item: nextDeck },
+      players: {
+        ...workingState.players,
+        [seat]: { ...currentPlayer, items: [...currentPlayer.items, cardId] },
+      },
+    };
+    if (cardDef?.onDraw && cardDef.onDraw.length > 0) {
+      const effOutcome = runEffects(
+        workingState,
+        cardDef.onDraw,
+        { actor: seat },
+        content,
+      );
+      workingState = effOutcome.state;
+      events.push(...effOutcome.events);
+    }
+  }
+  return { state: workingState, events };
+}
+
+/** WIP: will be wired into movement/discovery flow in Task 9. */
+export function resolveMysticElevator(
+  state: GameState,
+  seat: SeatId,
+  elevatorPlacedId: PlacedId,
+  content: Content,
+): { state: GameState; events: GameEvent[] } {
+  const player = state.players[seat];
+  if (!player) return { state, events: [] };
+  const turnKey = `elevator_moved_${state.round}_${seat}`;
+  if (state.flags[turnKey]) {
+    return { state, events: [] };
+  }
+
+  const events: GameEvent[] = [];
+  let workingState: GameState = {
+    ...state,
+    flags: { ...state.flags, [turnKey]: true },
+  };
+
+  const rng = workingState.rng ?? makeRng(12345);
+  const [dice, total, nextRng] = rollDice(rng, 2);
+  workingState = { ...workingState, rng: nextRng };
+  events.push({
+    t: 'rolled',
+    seat,
+    dice,
+    total,
+    reason: 'Mystic Elevator Destination Roll',
+  });
+
+  let targetFloors: Floor[];
+  let damage = 0;
+
+  if (total >= 4) {
+    targetFloors = ['upper', 'ground', 'basement'];
+  } else if (total === 3) {
+    targetFloors = ['upper'];
+  } else if (total === 2) {
+    targetFloors = ['ground'];
+  } else if (total === 1) {
+    targetFloors = ['basement'];
+  } else {
+    targetFloors = ['basement'];
+    damage = 1;
+  }
+
+  let destinationFound: {
+    floor: Floor;
+    x: number;
+    y: number;
+    rotation: Rotation;
+  } | null = null;
+
+  const placedElevator = workingState.board.placed[elevatorPlacedId];
+  if (!placedElevator) return { state: workingState, events };
+  const elevDef = content.tilesById[placedElevator.tileId]!;
+
+  for (const floor of targetFloors) {
+    const placedOnFloor = Object.values(workingState.board.placed).filter(
+      (p) => p.floor === floor && p.id !== elevatorPlacedId,
+    );
+    for (const placed of placedOnFloor) {
+      const pDef = content.tilesById[placed.tileId];
+      if (!pDef) continue;
+      const pDoors = rotateDoors(pDef.doors, placed.rotation);
+      for (const dir of DIR_ORDER) {
+        if (!pDoors[dir]) continue;
+        const [nx, ny] = neighbourCell(placed.x, placed.y, dir);
+        if (
+          !workingState.board.index[floor][cellKey(nx, ny)] &&
+          !(
+            placedElevator.floor === floor &&
+            placedElevator.x === nx &&
+            placedElevator.y === ny
+          )
+        ) {
+          const rots = legalRotations(elevDef, OPPOSITE[dir]);
+          if (rots.length > 0) {
+            destinationFound = {
+              floor,
+              x: nx,
+              y: ny,
+              rotation: rots[0]!,
+            };
+            break;
+          }
+        }
+      }
+      if (destinationFound) break;
+    }
+    if (destinationFound) break;
+  }
+
+  if (destinationFound) {
+    const oldFloor = placedElevator.floor;
+    const oldKey = cellKey(placedElevator.x, placedElevator.y);
+    const newId = placedIdFor(
+      destinationFound.floor,
+      destinationFound.x,
+      destinationFound.y,
+    );
+
+    const nextIndex: Record<Floor, Record<string, PlacedId>> = {
+      ...workingState.board.index,
+      [oldFloor]: { ...workingState.board.index[oldFloor] },
+      [destinationFound.floor]: { ...workingState.board.index[destinationFound.floor] },
+    };
+    delete nextIndex[oldFloor][oldKey];
+    nextIndex[destinationFound.floor][cellKey(destinationFound.x, destinationFound.y)] =
+      newId;
+
+    const nextPlaced = { ...workingState.board.placed };
+    delete nextPlaced[elevatorPlacedId];
+    nextPlaced[newId] = {
+      ...placedElevator,
+      id: newId,
+      floor: destinationFound.floor,
+      x: destinationFound.x,
+      y: destinationFound.y,
+      rotation: destinationFound.rotation,
+    };
+
+    const nextPlayers = { ...workingState.players };
+    for (const [pSeat, pState] of Object.entries(nextPlayers)) {
+      if (pState.location === elevatorPlacedId) {
+        nextPlayers[pSeat as SeatId] = { ...pState, location: newId };
+      }
+    }
+
+    const nextTokens = workingState.tokens.map((t) =>
+      t.location === elevatorPlacedId ? { ...t, location: newId } : t,
+    );
+
+    workingState = {
+      ...workingState,
+      board: {
+        ...workingState.board,
+        placed: nextPlaced,
+        index: nextIndex,
+      },
+      players: nextPlayers,
+      tokens: nextTokens,
+    };
+
+    events.push({
+      t: 'moved',
+      seat,
+      from: elevatorPlacedId,
+      to: newId,
+    });
+    events.push({
+      t: 'log',
+      text: `The Mystic Elevator clanks into motion and moves to the ${destinationFound.floor} floor!`,
+    });
+  } else {
+    events.push({
+      t: 'log',
+      text: `The Mystic Elevator gears grind, but it remains in place.`,
+    });
+  }
+
+  if (damage > 0) {
+    const [dmgDice, dmgTotal, finalRng] = rollDice(workingState.rng ?? makeRng(12345), 1);
+    workingState = { ...workingState, rng: finalRng };
+    events.push({
+      t: 'rolled',
+      seat,
+      dice: dmgDice,
+      total: dmgTotal,
+      reason: 'Mystic Elevator Fall Damage',
+    });
+
+    if (dmgTotal > 0) {
+      const damageEffects: Effect[] = [];
+      for (let i = 0; i < dmgTotal; i++) {
+        damageEffects.push({
+          e: 'prompt',
+          who: 'actor',
+          prompt: {
+            kind: 'choose_trait',
+            traits: ['speed', 'might'],
+          },
+          then: [
+            {
+              e: 'trait',
+              who: 'actor',
+              trait: { ref: 'chosen' },
+              delta: -1,
+            },
+            {
+              e: 'log',
+              text: `${player.name} took 1 physical damage from the Mystic Elevator.`,
+            },
+          ],
+        });
+      }
+      const dmgOutcome = runEffects(
+        workingState,
+        damageEffects,
+        { actor: seat },
+        content,
+      );
+      workingState = dmgOutcome.state;
+      events.push(...dmgOutcome.events);
+    }
+  }
+
+  return { state: workingState, events };
+}
+
+export function resolveCollapsedRoomDiscovery(
+  state: GameState,
+  seat: SeatId,
+  collapsedRoomId: PlacedId,
+  content: Content,
+): { state: GameState; events: GameEvent[] } {
+  const player = state.players[seat];
+  if (!player) return { state, events: [] };
+  const flagKey = `collapsed_room_discovered_${collapsedRoomId}`;
+  if (state.flags[flagKey]) return { state, events: [] };
+
+  const events: GameEvent[] = [];
+  let workingState: GameState = {
+    ...state,
+    flags: { ...state.flags, [flagKey]: true },
+  };
+
+  const rng = workingState.rng ?? makeRng(12345);
+  const speedVal = Math.max(
+    1,
+    Math.min(8, traitValue(workingState, seat, 'speed', content)),
+  );
+  const [dice, total, nextRng] = rollDice(rng, speedVal);
+  workingState = { ...workingState, rng: nextRng };
+
+  events.push({
+    t: 'rolled',
+    seat,
+    dice,
+    total,
+    reason: 'Collapsed Room Fall Avoidance (Speed 5+)',
+  });
+
+  if (total >= 5) {
+    events.push({
+      t: 'log',
+      text: `${player.name} rolled ${total} (needed 5+) and avoided falling through the Collapsed Room!`,
+    });
+    return { state: workingState, events };
+  }
+
+  events.push({
+    t: 'log',
+    text: `${player.name} rolled ${total} (needed 5+) and fell through the hole in the Collapsed Room!`,
+  });
+
+  // Draw and place a basement tile
+  let destId: PlacedId | null = null;
+  const drawRes = drawTile(
+    workingState.tileDeck,
+    workingState.tileDiscard ?? [],
+    'basement',
+    content,
+    workingState.rng ?? makeRng(12345),
+  );
+
+  if (drawRes) {
+    workingState = {
+      ...workingState,
+      tileDeck: drawRes.deck,
+      tileDiscard: drawRes.discard,
+      rng: drawRes.rng,
+    };
+    const bTileDef = content.tilesById[drawRes.tileId];
+    // Find open doorway on basement
+    const basementTiles = Object.values(workingState.board.placed).filter(
+      (p) => p.floor === 'basement',
+    );
+    let targetSlot: { x: number; y: number; rotation: Rotation } | null = null;
+    for (const bTile of basementTiles) {
+      const bDef = content.tilesById[bTile.tileId];
+      if (!bDef) continue;
+      const bDoors = rotateDoors(bDef.doors, bTile.rotation);
+      for (const dir of DIR_ORDER) {
+        if (!bDoors[dir]) continue;
+        const [nx, ny] = neighbourCell(bTile.x, bTile.y, dir);
+        if (!workingState.board.index.basement[cellKey(nx, ny)]) {
+          const rots = bTileDef ? legalRotations(bTileDef, OPPOSITE[dir]) : [];
+          if (rots.length > 0) {
+            targetSlot = { x: nx, y: ny, rotation: rots[0]! };
+            break;
+          }
+        }
+      }
+      if (targetSlot) break;
+    }
+
+    if (targetSlot && bTileDef) {
+      destId = placedIdFor('basement', targetSlot.x, targetSlot.y);
+      const newPlaced: PlacedTile = {
+        id: destId,
+        tileId: drawRes.tileId,
+        floor: 'basement',
+        x: targetSlot.x,
+        y: targetSlot.y,
+        rotation: targetSlot.rotation,
+        discoveredBy: seat,
+        flags: {},
+      };
+      workingState = {
+        ...workingState,
+        board: {
+          ...workingState.board,
+          placed: { ...workingState.board.placed, [destId]: newPlaced },
+          index: {
+            ...workingState.board.index,
+            basement: {
+              ...workingState.board.index.basement,
+              [cellKey(targetSlot.x, targetSlot.y)]: destId,
+            },
+          },
+        },
+      };
+      events.push({ t: 'discovered', seat, placed: newPlaced });
+    }
+  }
+
+  if (!destId) {
+    destId =
+      workingState.board.index.basement['0,0'] ??
+      Object.keys(workingState.board.placed).find(
+        (pid) => workingState.board.placed[pid]?.floor === 'basement',
+      ) ??
+      null;
+  }
+
+  if (destId) {
+    const tokenState: TokenState = {
+      id: 'token.below_collapsed_room',
+      token: 'Below Collapsed Room',
+      location: destId,
+      flags: {},
+    };
+    workingState = {
+      ...workingState,
+      tokens: [
+        ...workingState.tokens.filter((t) => t.token !== 'Below Collapsed Room'),
+        tokenState,
+      ],
+      players: {
+        ...workingState.players,
+        [seat]: {
+          ...workingState.players[seat]!,
+          location: destId,
+          movesLeft: 0,
+        },
+      },
+    };
+    events.push({ t: 'moved', seat, from: collapsedRoomId, to: destId });
+    events.push({
+      t: 'log',
+      text: 'Token "Below Collapsed Room" placed in the basement.',
+    });
+
+    // Take 1 die of physical damage
+    const [dmgDice, dmgTotal, dmgRng] = rollDice(workingState.rng ?? makeRng(12345), 1);
+    workingState = { ...workingState, rng: dmgRng };
+    events.push({
+      t: 'rolled',
+      seat,
+      dice: dmgDice,
+      total: dmgTotal,
+      reason: 'Collapsed Room Fall Damage',
+    });
+
+    if (dmgTotal > 0) {
+      const damageEffects: Effect[] = [];
+      for (let i = 0; i < dmgTotal; i++) {
+        damageEffects.push({
+          e: 'prompt',
+          who: 'actor',
+          prompt: {
+            kind: 'choose_trait',
+            traits: ['speed', 'might'],
+          },
+          then: [
+            {
+              e: 'trait',
+              who: 'actor',
+              trait: { ref: 'chosen' },
+              delta: -1,
+            },
+            {
+              e: 'log',
+              text: `${player.name} took 1 physical damage from falling through the Collapsed Room.`,
+            },
+          ],
+        });
+      }
+      const dmgOutcome = runEffects(
+        workingState,
+        damageEffects,
+        { actor: seat },
+        content,
+      );
+      workingState = dmgOutcome.state;
+      events.push(...dmgOutcome.events);
+    }
+  }
+
+  return { state: workingState, events };
+}
+
 function roomAction(
   state: GameState,
   seat: SeatId,
   actionId: string,
-  _content: Content,
+  content: Content,
 ): ReduceResult {
   if (!['explore', 'haunt'].includes(state.phase)) {
     return fail('WRONG_PHASE', `Cannot perform room action during ${state.phase}`);
@@ -1792,29 +3168,263 @@ function roomAction(
     return fail('ILLEGAL_MOVE', 'Cannot perform room action');
   }
 
-  const tokenIndex = state.tokens.findIndex(
-    (t) => t.location === player.location && !t.flags['completed'],
-  );
-  if (tokenIndex !== -1) {
-    const token = state.tokens[tokenIndex]!;
-    const updatedTokens = [...state.tokens];
-    updatedTokens[tokenIndex] = {
-      ...token,
-      flags: { ...token.flags, completed: true },
-    };
-    const events: GameEvent[] = [
-      { t: 'log', text: `${player.name} interacted with ${token.token}!` },
-    ];
-    return {
-      state: {
-        ...state,
-        tokens: updatedTokens,
+  if (actionId === 'interact_token') {
+    const tokenIndex = state.tokens.findIndex(
+      (t) => t.location === player.location && !t.flags['completed'],
+    );
+    if (tokenIndex !== -1) {
+      const token = state.tokens[tokenIndex]!;
+      const updatedTokens = [...state.tokens];
+      updatedTokens[tokenIndex] = {
+        ...token,
+        flags: { ...token.flags, completed: true },
+      };
+      const events: GameEvent[] = [
+        { t: 'log', text: `${player.name} interacted with ${token.token}!` },
+      ];
+      return {
+        state: {
+          ...state,
+          tokens: updatedTokens,
+        },
+        events,
+      };
+    }
+    return fail('ILLEGAL_MOVE', 'No token to interact with here');
+  }
+
+  if (actionId === 'action.collapsed_room.fall') {
+    const token = state.tokens.find((t) => t.token === 'Below Collapsed Room');
+    const targetLoc =
+      token?.location ??
+      state.board.index.basement['0,0'] ??
+      Object.keys(state.board.placed).find(
+        (pid) => state.board.placed[pid]?.floor === 'basement',
+      );
+    if (!targetLoc) {
+      return fail('ILLEGAL_MOVE', 'No basement room placed to fall into');
+    }
+
+    const events: GameEvent[] = [];
+    const fromLoc = player.location;
+    const toLoc = targetLoc;
+
+    let workingState: GameState = {
+      ...state,
+      players: {
+        ...state.players,
+        [seat]: {
+          ...player,
+          location: toLoc,
+        },
       },
-      events,
+    };
+    events.push({ t: 'moved', seat, from: fromLoc, to: toLoc });
+
+    const rng = workingState.rng ?? makeRng(12345);
+    const [dice, total, nextRng] = rollDice(rng, 1);
+    workingState = { ...workingState, rng: nextRng };
+    events.push({
+      t: 'rolled',
+      seat,
+      dice,
+      total,
+      reason: 'Collapsed Room Fall Physical Damage',
+    });
+
+    if (total === 0) {
+      events.push({
+        t: 'log',
+        text: `${player.name} jumped down to the basement and landed safely!`,
+      });
+      return { state: workingState, events };
+    }
+
+    const damageEffects: Effect[] = [];
+    for (let i = 0; i < total; i++) {
+      damageEffects.push({
+        e: 'prompt',
+        who: 'actor',
+        prompt: {
+          kind: 'choose_trait',
+          traits: ['speed', 'might'],
+        },
+        then: [
+          {
+            e: 'trait',
+            who: 'actor',
+            trait: { ref: 'chosen' },
+            delta: -1,
+          },
+          {
+            e: 'log',
+            text: `${player.name} took 1 physical damage from the fall.`,
+          },
+        ],
+      });
+    }
+
+    const effOutcome = runEffects(workingState, damageEffects, { actor: seat }, content);
+    return {
+      state: effOutcome.state,
+      events: [...events, ...effOutcome.events],
     };
   }
 
-  return fail('ILLEGAL_MOVE', `No room action "${actionId}" available here`);
+  const placed = state.board.placed[player.location];
+  if (!placed) return fail('ILLEGAL_MOVE', 'Tile not found');
+  const tileDef = content.tilesById[placed.tileId];
+  const actionDef = tileDef?.actions?.find((a) => a.id === actionId);
+  if (!actionDef) {
+    return fail('ILLEGAL_MOVE', `No room action "${actionId}" available here`);
+  }
+
+  if (!isRoomActionEligible(state, seat, actionDef, placed, content)) {
+    return fail('ILLEGAL_MOVE', `Room action "${actionId}" is not eligible`);
+  }
+
+  if (actionId === 'action.gallery.fall_to_ballroom') {
+    const ballroomTile = Object.values(state.board.placed).find(
+      (t) => t.tileId === 'tile.ballroom',
+    );
+    if (!ballroomTile) {
+      return fail('ILLEGAL_MOVE', 'Ballroom is not on the board');
+    }
+
+    const events: GameEvent[] = [];
+    const fromLoc = player.location;
+    const toLoc = ballroomTile.id;
+
+    let workingState: GameState = {
+      ...state,
+      players: {
+        ...state.players,
+        [seat]: {
+          ...player,
+          location: toLoc,
+        },
+      },
+    };
+    events.push({ t: 'moved', seat, from: fromLoc, to: toLoc });
+
+    const rng = workingState.rng ?? makeRng(12345);
+    const [dice, total, nextRng] = rollDice(rng, 1);
+    workingState = { ...workingState, rng: nextRng };
+    events.push({
+      t: 'rolled',
+      seat,
+      dice,
+      total,
+      reason: 'Gallery Fall Physical Damage',
+    });
+
+    if (total === 0) {
+      events.push({
+        t: 'log',
+        text: `${player.name} fell from the Gallery to the Ballroom and took no damage.`,
+      });
+      return { state: workingState, events };
+    }
+
+    const damageEffects: Effect[] = [];
+    for (let i = 0; i < total; i++) {
+      damageEffects.push({
+        e: 'prompt',
+        who: 'actor',
+        prompt: {
+          kind: 'choose_trait',
+          traits: ['speed', 'might'],
+        },
+        then: [
+          {
+            e: 'trait',
+            who: 'actor',
+            trait: { ref: 'chosen' },
+            delta: -1,
+          },
+          {
+            e: 'log',
+            text: `${player.name} took 1 physical damage from falling.`,
+          },
+        ],
+      });
+    }
+
+    const effOutcome = runEffects(workingState, damageEffects, { actor: seat }, content);
+    return {
+      state: effOutcome.state,
+      events: [...events, ...effOutcome.events],
+    };
+  }
+
+  if (actionId === 'action.the_vault.open') {
+    const updatedPlayer: PlayerState = {
+      ...player,
+      flags: {
+        ...player.flags,
+        [`attempted_action:${actionId}`]: true,
+      },
+    };
+    let workingState: GameState = {
+      ...state,
+      players: {
+        ...state.players,
+        [seat]: updatedPlayer,
+      },
+    };
+
+    const diceCount = Math.max(
+      1,
+      Math.min(8, traitValue(workingState, seat, 'knowledge', content)),
+    );
+    const rng = workingState.rng ?? makeRng(12345);
+    const [dice, total, nextRng] = rollDice(rng, diceCount);
+    workingState = { ...workingState, rng: nextRng };
+    const events: GameEvent[] = [
+      { t: 'rolled', seat, dice, total, reason: 'The Vault Knowledge Roll' },
+    ];
+
+    if (total >= 6) {
+      workingState = {
+        ...workingState,
+        board: {
+          ...workingState.board,
+          placed: {
+            ...workingState.board.placed,
+            [placed.id]: {
+              ...placed,
+              flags: {
+                ...placed.flags,
+                vault_empty: true,
+              },
+            },
+          },
+        },
+      };
+      events.push({
+        t: 'log',
+        text: `${player.name} cracked the vault and found 2 items!`,
+      });
+
+      const draw1 = drawItemCard(workingState, seat, content);
+      workingState = draw1.state;
+      events.push(...draw1.events);
+
+      const draw2 = drawItemCard(workingState, seat, content);
+      workingState = draw2.state;
+      events.push(...draw2.events);
+
+      return { state: workingState, events };
+    } else {
+      events.push({
+        t: 'log',
+        text: `${player.name} failed to open the vault. The door remains locked.`,
+      });
+      return { state: workingState, events };
+    }
+  }
+
+  return fail('ILLEGAL_MOVE', `No handler for room action "${actionId}"`);
 }
 
 function attack(
@@ -2031,6 +3641,8 @@ function attack(
     nextState = {
       ...nextState,
       phase: 'game_over',
+      turnDeadline: null,
+      activeSeat: null,
       result,
     };
     events.push({ t: 'game_over', result });
@@ -2047,10 +3659,421 @@ function attack(
     nextState = {
       ...nextState,
       phase: 'game_over',
+      turnDeadline: null,
+      activeSeat: null,
       result,
     };
     events.push({ t: 'game_over', result });
   }
 
   return { state: nextState, events };
+}
+
+function startMonster(
+  state: GameState,
+  seat: SeatId,
+  monsterId: MonsterId,
+  content: Content,
+): ReduceResult {
+  if (state.phase !== 'haunt') {
+    return fail('WRONG_PHASE', 'Monsters can only act during the haunt phase');
+  }
+  if (!state.monsterTurn) {
+    return fail('WRONG_PHASE', 'It is not the monster phase');
+  }
+  if (state.activeSeat !== seat || state.monsterTurn.controllingSeat !== seat) {
+    return fail('NOT_YOUR_TURN', 'Only the controlling player can command monsters');
+  }
+  if (state.monsterTurn.activeMonsterId !== null) {
+    return fail('ILLEGAL_MOVE', 'A monster is already currently acting');
+  }
+  const monster = state.monsters[monsterId];
+  if (!monster || monster.isDead) {
+    return fail('ILLEGAL_MOVE', 'Monster does not exist or is dead');
+  }
+  if (state.monsterTurn.actedMonsterIds.includes(monsterId)) {
+    return fail('ILLEGAL_MOVE', 'Monster has already acted this round');
+  }
+
+  // Check stun lifecycle: clears stun on start and cannot act this turn
+  if (monster.flags['stunned']) {
+    const nextMonster: MonsterState = {
+      ...monster,
+      flags: { ...monster.flags, stunned: false },
+    };
+    const nextActed = [...state.monsterTurn.actedMonsterIds, monsterId];
+    const nextMonsterTurn: MonsterTurnState = {
+      ...state.monsterTurn,
+      activeMonsterId: null,
+      actedMonsterIds: nextActed,
+      movesLeft: 0,
+      hasAttacked: false,
+      rolledSpeed: null,
+    };
+    const nextState: GameState = {
+      ...state,
+      monsters: {
+        ...state.monsters,
+        [monsterId]: nextMonster,
+      },
+      monsterTurn: nextMonsterTurn,
+    };
+    const livingMonsters = Object.values(nextState.monsters).filter((m) => !m.isDead);
+    if (nextActed.length >= livingMonsters.length) {
+      return endMonsterPhase(nextState, seat, content, [
+        {
+          t: 'log',
+          text: `${monster.def} recovers from being stunned and cannot move or attack this turn.`,
+        },
+      ]);
+    }
+    return {
+      state: nextState,
+      events: [
+        {
+          t: 'log',
+          text: `${monster.def} recovers from being stunned and cannot move or attack this turn.`,
+        },
+      ],
+    };
+  }
+
+  // Roll monster Speed
+  if (!state.rng) return fail('INVARIANT_VIOLATION', 'Missing RNG');
+  const speedDice =
+    typeof monster.flags['speed'] === 'number' ? (monster.flags['speed'] as number) : 3;
+  const [dice, total, nextRng] = rollDice(state.rng, Math.max(1, speedDice));
+  // Official rule: guarantee at least 1 move space even on total 0
+  const moves = Math.max(1, total);
+
+  const nextMonsterTurn: MonsterTurnState = {
+    ...state.monsterTurn,
+    activeMonsterId: monsterId,
+    movesLeft: moves,
+    hasAttacked: false,
+    rolledSpeed: total,
+  };
+
+  return {
+    state: {
+      ...state,
+      rng: nextRng,
+      monsterTurn: nextMonsterTurn,
+    },
+    events: [
+      { t: 'rolled', seat, dice, total, reason: 'monster_speed' },
+      {
+        t: 'log',
+        text: `${monster.def} rolled ${total} Speed (moves: ${moves}).`,
+      },
+    ],
+  };
+}
+
+function moveMonster(
+  state: GameState,
+  seat: SeatId,
+  monsterId: MonsterId,
+  to: PlacedId,
+  content: Content,
+): ReduceResult {
+  if (state.phase !== 'haunt' || !state.monsterTurn) {
+    return fail('WRONG_PHASE', 'Cannot move monster outside monster phase');
+  }
+  if (state.activeSeat !== seat || state.monsterTurn.controllingSeat !== seat) {
+    return fail('NOT_YOUR_TURN', 'Only the controlling player can move monsters');
+  }
+  if (state.monsterTurn.activeMonsterId !== monsterId) {
+    return fail('ILLEGAL_MOVE', 'Monster is not the active monster');
+  }
+  const monster = state.monsters[monsterId];
+  if (!monster || monster.isDead || monster.location === null) {
+    return fail('ILLEGAL_MOVE', 'Monster cannot move');
+  }
+  const currentLoc = monster.location;
+  if (to === currentLoc) {
+    return fail('ILLEGAL_MOVE', 'Cannot move to current room');
+  }
+
+  const destTile = state.board.placed[to];
+  if (!destTile) {
+    return fail('ILLEGAL_MOVE', 'Destination room does not exist');
+  }
+
+  const connections = getMonsterConnections(state, currentLoc, content);
+  if (!connections.includes(to)) {
+    return fail('ILLEGAL_MOVE', 'Rooms are not connected');
+  }
+
+  const leaveCost = getMonsterLeaveCost(state, currentLoc);
+  if (state.monsterTurn.movesLeft < leaveCost) {
+    return fail(
+      'ILLEGAL_MOVE',
+      `Leaving room with heroes requires ${leaveCost} moves, but only ${state.monsterTurn.movesLeft} left.`,
+    );
+  }
+
+  const nextMoves = state.monsterTurn.movesLeft - leaveCost;
+  const nextMonster: MonsterState = {
+    ...monster,
+    location: to,
+  };
+  const nextMonsterTurn: MonsterTurnState = {
+    ...state.monsterTurn,
+    movesLeft: nextMoves,
+  };
+
+  const destName = content.tilesById[destTile.tileId]?.name ?? 'room';
+  return {
+    state: {
+      ...state,
+      monsters: {
+        ...state.monsters,
+        [monsterId]: nextMonster,
+      },
+      monsterTurn: nextMonsterTurn,
+    },
+    events: [
+      {
+        t: 'log',
+        text: `${monster.def} moved to ${destName}. (${nextMoves} moves left)`,
+      },
+    ],
+  };
+}
+
+function monsterAttack(
+  state: GameState,
+  seat: SeatId,
+  monsterId: MonsterId,
+  target: TargetRef,
+  trait: Trait | undefined,
+  content: Content,
+): ReduceResult {
+  if (state.phase !== 'haunt' || !state.monsterTurn) {
+    return fail('WRONG_PHASE', 'Cannot attack outside monster phase');
+  }
+  if (state.activeSeat !== seat || state.monsterTurn.controllingSeat !== seat) {
+    return fail(
+      'NOT_YOUR_TURN',
+      'Only the controlling player can command monster attacks',
+    );
+  }
+  if (state.monsterTurn.activeMonsterId !== monsterId) {
+    return fail('ILLEGAL_MOVE', 'Monster is not the active monster');
+  }
+  if (state.monsterTurn.hasAttacked) {
+    return fail('ILLEGAL_MOVE', 'Monster has already attacked this turn');
+  }
+  const monster = state.monsters[monsterId];
+  if (!monster || monster.isDead || monster.location === null) {
+    return fail('ILLEGAL_MOVE', 'Monster cannot attack');
+  }
+
+  if (target.kind !== 'seat') {
+    return fail('ILLEGAL_MOVE', 'Monster can only attack explorer seats');
+  }
+  const targetSeat = target.seatId;
+  const targetPlayer = state.players[targetSeat];
+  if (
+    !targetPlayer ||
+    targetPlayer.isDead ||
+    targetPlayer.removed ||
+    targetPlayer.isTraitor
+  ) {
+    return fail('ILLEGAL_MOVE', 'Target must be a living hero');
+  }
+  if (targetPlayer.location !== monster.location) {
+    return fail('ILLEGAL_MOVE', 'Target is not in the same room as the monster');
+  }
+
+  if (!state.rng) return fail('INVARIANT_VIOLATION', 'Missing RNG');
+
+  const attackTrait: Trait = trait ?? 'might';
+  const monsterMight =
+    typeof monster.flags[attackTrait] === 'number'
+      ? (monster.flags[attackTrait] as number)
+      : typeof monster.flags['might'] === 'number'
+        ? (monster.flags['might'] as number)
+        : 4;
+  const attackerDice = Math.max(1, monsterMight);
+  const defenderDice = Math.max(1, traitValue(state, targetSeat, attackTrait, content));
+
+  const [attDice, attTotal, rng1] = rollDice(state.rng, attackerDice);
+  const [defDice, defTotal, rng2] = rollDice(rng1, defenderDice);
+
+  const diff = Math.abs(attTotal - defTotal);
+  let winner: 'attacker' | 'defender' | 'tie' = 'tie';
+  if (attTotal > defTotal) winner = 'attacker';
+  else if (defTotal > attTotal) winner = 'defender';
+
+  const events: GameEvent[] = [
+    { t: 'rolled', seat, dice: attDice, total: attTotal, reason: 'monster_attack' },
+    { t: 'rolled', seat: targetSeat, dice: defDice, total: defTotal, reason: 'defense' },
+    {
+      t: 'attacked',
+      seat,
+      target,
+      result: {
+        attackerTotal: attTotal,
+        defenderTotal: defTotal,
+        winner,
+        damage: diff,
+      },
+    },
+  ];
+
+  const nextPlayers = { ...state.players };
+  if (winner === 'attacker' && diff > 0) {
+    const currentIdx = targetPlayer.traits[attackTrait];
+    const newIdx = Math.max(0, currentIdx - diff);
+    const isDead = newIdx === 0;
+    nextPlayers[targetSeat] = {
+      ...targetPlayer,
+      traits: { ...targetPlayer.traits, [attackTrait]: newIdx },
+      isDead: targetPlayer.isDead || isDead,
+    };
+    events.push({
+      t: 'trait_changed',
+      seat: targetSeat,
+      trait: attackTrait,
+      from: currentIdx,
+      to: newIdx,
+    });
+    if (isDead && !targetPlayer.isDead) {
+      events.push({ t: 'died', seat: targetSeat });
+    }
+  } else {
+    // Official 2E rulebook: Defending against a monster attack does NOT harm or stun the monster
+    events.push({
+      t: 'log',
+      text: `${targetPlayer.name} defended against ${monster.def}'s attack.`,
+    });
+  }
+
+  const nextMonsterTurn: MonsterTurnState = {
+    ...state.monsterTurn,
+    hasAttacked: true,
+  };
+
+  const workingState: GameState = {
+    ...state,
+    rng: rng2,
+    players: nextPlayers,
+    monsterTurn: nextMonsterTurn,
+  };
+
+  const livingHeroes = Object.values(nextPlayers).filter(
+    (p) => !p.isDead && !p.removed && !p.isTraitor,
+  );
+  if (livingHeroes.length === 0) {
+    const traitorWinners = Object.values(nextPlayers)
+      .filter((p) => p.isTraitor)
+      .map((p) => p.seatId);
+    const result = {
+      outcome: 'traitor' as const,
+      winners: traitorWinners.length > 0 ? traitorWinners : [seat],
+      reason: 'All heroes have perished. The traitor and monsters triumph!',
+    };
+    const gameOverState: GameState = {
+      ...workingState,
+      phase: 'game_over',
+      monsterTurn: null,
+      activeSeat: null,
+      turnDeadline: null,
+      result,
+    };
+    events.push({ t: 'game_over', result });
+    return { state: gameOverState, events };
+  }
+
+  return { state: workingState, events };
+}
+
+function endMonsterTurn(
+  state: GameState,
+  seat: SeatId,
+  monsterId: MonsterId,
+  content: Content,
+): ReduceResult {
+  if (state.phase !== 'haunt' || !state.monsterTurn) {
+    return fail('WRONG_PHASE', 'Cannot end monster turn outside monster phase');
+  }
+  if (state.activeSeat !== seat || state.monsterTurn.controllingSeat !== seat) {
+    return fail('NOT_YOUR_TURN', 'Only the controlling player can end monster turn');
+  }
+  if (state.monsterTurn.activeMonsterId !== monsterId) {
+    return fail('ILLEGAL_MOVE', 'Monster is not the active monster');
+  }
+  const monster = state.monsters[monsterId];
+  const nextActed = [...state.monsterTurn.actedMonsterIds, monsterId];
+  const nextMonsterTurn: MonsterTurnState = {
+    ...state.monsterTurn,
+    activeMonsterId: null,
+    actedMonsterIds: nextActed,
+    movesLeft: 0,
+    hasAttacked: false,
+    rolledSpeed: null,
+  };
+
+  const nextState: GameState = {
+    ...state,
+    monsterTurn: nextMonsterTurn,
+  };
+
+  const livingMonsters = Object.values(state.monsters).filter((m) => !m.isDead);
+  if (nextActed.length >= livingMonsters.length) {
+    return endMonsterPhase(nextState, seat, content, [
+      { t: 'log', text: `${monster?.def ?? monsterId} finished its turn.` },
+    ]);
+  }
+
+  return {
+    state: nextState,
+    events: [{ t: 'log', text: `${monster?.def ?? monsterId} finished its turn.` }],
+  };
+}
+
+function endMonsterPhase(
+  state: GameState,
+  seat: SeatId,
+  content: Content,
+  priorEvents: GameEvent[] = [],
+): ReduceResult {
+  if (state.phase !== 'haunt' || !state.monsterTurn) {
+    return fail('WRONG_PHASE', 'Cannot end monster phase outside monster phase');
+  }
+  if (state.activeSeat !== seat || state.monsterTurn.controllingSeat !== seat) {
+    return fail('NOT_YOUR_TURN', 'Only the controlling player can end monster phase');
+  }
+  if (state.monsterTurn.activeMonsterId !== null) {
+    return fail('ILLEGAL_MOVE', 'Finish active monster turn before ending monster phase');
+  }
+
+  const firstHero =
+    state.turnOrder.find(
+      (s) =>
+        !state.players[s]?.isDead &&
+        !state.players[s]?.removed &&
+        !state.players[s]?.isTraitor,
+    ) ?? state.turnOrder[0]!;
+
+  const round = state.round + 1;
+  let nextState: GameState = {
+    ...state,
+    monsterTurn: null,
+    activeSeat: firstHero,
+    round,
+    turnDeadline: null,
+  };
+  nextState = beginTurnFor(nextState, firstHero, content);
+
+  return {
+    state: nextState,
+    events: [
+      ...priorEvents,
+      { t: 'log', text: 'Monster Phase ended. Round advances to the heroes.' },
+      { t: 'turn_started', seat: firstHero, round },
+    ],
+  };
 }

@@ -8,7 +8,7 @@
  */
 
 import { z } from 'zod';
-import { EffectSchema } from './effects.js';
+import { EffectSchema, ConditionSchema } from './effects.js';
 
 export const FloorSchema = z.enum(['basement', 'ground', 'upper']);
 export const TraitSchema = z.enum(['speed', 'might', 'sanity', 'knowledge']);
@@ -85,6 +85,62 @@ export const StaticLinkSchema = z.discriminatedUnion('kind', [
   }),
 ]);
 
+export const CrossingSchema = z.object({
+  trait: TraitSchema,
+  threshold: z.number().int().min(1),
+  sides: z.tuple([DirSchema, DirSchema]).optional(),
+});
+export type Crossing = z.infer<typeof CrossingSchema>;
+
+export const RoomActionCadenceSchema = z.discriminatedUnion('kind', [
+  z.object({
+    kind: z.literal('once_per_game'),
+    key: z.string().min(1),
+    scope: z.enum(['tile', 'game']).default('tile'),
+  }),
+  z.object({ kind: z.literal('once_per_turn') }),
+  z.object({ kind: z.literal('repeatable') }),
+  z.object({ kind: z.literal('optional') }),
+]);
+export type RoomActionCadence = z.infer<typeof RoomActionCadenceSchema>;
+
+export const RoomActionSchema = z.object({
+  id: z.string().min(1),
+  name: z.string().min(1),
+  cadence: RoomActionCadenceSchema.default({ kind: 'repeatable' }),
+  condition: ConditionSchema.optional(),
+  effects: z
+    .array(EffectSchema)
+    .min(1, 'Room action must have at least one executable effect'),
+});
+export type RoomAction = z.infer<typeof RoomActionSchema>;
+
+export const NEUTRAL_ROOM_IDS = [
+  'tile.servants_quarters',
+  'tile.storeroom',
+  'tile.operating_laboratory',
+  'tile.research_laboratory',
+  'tile.underground_lake',
+  'tile.wine_cellar',
+  'tile.balcony',
+  'tile.master_bedroom',
+  'tile.bedroom',
+  'tile.gardens',
+  'tile.ballroom',
+  'tile.dining_room',
+  'tile.patio',
+  'tile.kitchen',
+  'tile.abandoned_room',
+  'tile.conservatory',
+  'tile.charred_room',
+  'tile.bloody_room',
+  'tile.organ_room',
+  'tile.statuary_corridor',
+  'tile.creaky_hallway',
+  'tile.dusty_hallway',
+  'tile.game_room',
+] as const;
+
 /**
  * A room tile as printed, in its **unrotated** frame. Effective doors are
  * `rotateDoors(tile.doors, placed.rotation)` — the tile never stores its own
@@ -104,7 +160,12 @@ export const TileSchema = z.object({
   symbol: SymbolSchema.nullable(),
   copies: z.number().int().min(1).default(1),
   staticLinks: z.array(StaticLinkSchema).default([]),
+  ruleText: z.string().min(1).optional(),
   onEnter: z.array(EffectSchema).default([]),
+  onExit: z.array(EffectSchema).default([]),
+  onEndTurn: z.array(EffectSchema).default([]),
+  crossing: CrossingSchema.optional(),
+  actions: z.array(RoomActionSchema).default([]),
   art: z.object({ bg: z.string(), icon: z.string().optional() }).optional(),
 });
 
@@ -194,23 +255,72 @@ export const CardSchema = z
 
 export const TraitorRuleSchema = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('trigger') }),
-  z.object({ kind: z.literal('highest'), trait: TraitSchema }),
-  z.object({ kind: z.literal('lowest'), trait: TraitSchema }),
+  z.object({
+    kind: z.literal('highest'),
+    trait: TraitSchema,
+    excludeRevealer: z.boolean().optional(),
+  }),
+  z.object({
+    kind: z.literal('lowest'),
+    trait: TraitSchema,
+    excludeRevealer: z.boolean().optional(),
+  }),
+  z.object({ kind: z.literal('left_of_revealer') }),
+  z.object({
+    kind: z.literal('specific_character_or_trait'),
+    characterId: z.string(),
+    fallbackTrait: TraitSchema,
+    fallbackComparison: z.enum(['highest', 'lowest']),
+  }),
+  z.object({
+    kind: z.literal('specific_character_or_left'),
+    characterId: z.string(),
+  }),
+  z.object({
+    kind: z.literal('age'),
+    comparison: z.enum(['oldest', 'youngest']),
+    excludeRevealer: z.boolean().optional(),
+  }),
   z.object({ kind: z.literal('holder'), cardId: z.string() }),
+  z.object({ kind: z.literal('hidden') }),
   z.object({ kind: z.literal('none') }),
 ]);
+
+export const HauntSectionSchema = z.object({
+  title: z.string(),
+  text: z.string().optional(),
+  bullets: z.array(z.string()).optional(),
+  steps: z.array(z.string()).optional(),
+});
+export type HauntSection = z.infer<typeof HauntSectionSchema>;
 
 export const SideSchema = z.object({
   goal: z.string(),
   rules: z.array(z.string()).default([]),
+  intro: z.string().optional(),
+  rightNow: z.array(z.string()).optional(),
+  whatYouKnow: z.array(z.string()).optional(),
+  winWhen: z.string().optional(),
+  specialAttackRules: z.array(z.string()).optional(),
+  ifYouWin: z.string().optional(),
+  additionalSections: z.array(HauntSectionSchema).optional(),
 });
+
+export const HauntChartEntrySchema = z.object({
+  roomTileId: z.string(),
+  omenCardId: z.string(),
+  hauntId: z.number().int().min(1).max(50),
+});
+export type HauntChartEntry = z.infer<typeof HauntChartEntrySchema>;
 
 export const HauntSchema = z.object({
   id: z.number().int().min(1).max(50),
   name: z.string().min(1),
   traitorRule: TraitorRuleSchema,
-  traitor: SideSchema,
-  heroes: SideSchema,
+  traitor: SideSchema.optional(),
+  heroes: SideSchema.optional(),
+  hasTraitor: z.boolean().default(true),
+  hasHiddenTraitor: z.boolean().default(false),
   implemented: z.boolean().default(false),
 });
 
@@ -219,6 +329,7 @@ export const ContentFileSchema = z.object({
   tiles: z.array(TileSchema).min(1),
   cards: z.array(CardSchema).default([]),
   haunts: z.array(HauntSchema).default([]),
+  hauntChart: z.array(HauntChartEntrySchema).default([]),
   house: HouseSchema,
 });
 
@@ -249,6 +360,8 @@ export interface Content {
   deckCards: Record<DeckKind, string[]>;
   haunts: Haunt[];
   hauntsById: Record<number, Haunt>;
+  hauntChart: HauntChartEntry[];
+  hauntByOmenAndRoom: Record<string, number>;
   house: House;
   /**
    * The draw deck as tile ids, one entry per copy, in file order: every tile

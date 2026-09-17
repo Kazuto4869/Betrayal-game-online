@@ -33,6 +33,7 @@ import {
 } from './layout.js';
 import type { TileView } from './layout.js';
 import { COLOUR_VAR } from './colour.js';
+import { useStore } from '../store.js';
 
 export interface Pawn {
   placedId: PlacedId;
@@ -261,6 +262,12 @@ export function Board({
           Centre on me
         </button>
       </div>
+      {floor === 'basement' && views.length <= 1 && (
+        <div className="board__floor-notice" role="status">
+          ℹ️ The Basement cannot be reached via Grand Staircase. Discover a special route
+          (Coal Chute, Collapsed Room, Mystic Elevator, or Stairs from Basement).
+        </div>
+      )}
       <div
         className="viewport"
         ref={viewportRef}
@@ -364,6 +371,8 @@ interface TileProps {
 }
 
 function Tile({ view, content, floor, reachable, pawns, onMoveTo, ghost }: TileProps) {
+  const selectTile = useStore((s) => s.selectTile);
+  const selectedTileId = useStore((s) => s.selectedTileId);
   const tile = content.tilesById[view.tileId];
   // Doors are drawn in the tile's PRINTED frame and then the frame itself is
   // rotated (docs/07-ui.md#73: "Rotation is a CSS transform on the tile's
@@ -455,7 +464,12 @@ function Tile({ view, content, floor, reachable, pawns, onMoveTo, ghost }: TileP
     );
   }
   return (
-    <div className={`tile${ghost ? ' tile--ghost' : ''}`} style={style}>
+    <div
+      className={`tile${ghost ? ' tile--ghost' : ''}${view.placedId === selectedTileId ? ' tile--selected' : ''}`}
+      style={style}
+      onClick={ghost ? undefined : () => selectTile(view.placedId)}
+      data-testid={`tile-${view.placedId}`}
+    >
       {content_}
     </div>
   );

@@ -55,4 +55,18 @@ describe('GET /api/content', () => {
       rebuilt.characters.some((character) => character.id === 'char.peter_akimoto'),
     ).toBe(true);
   });
+
+  it('serves haunts without private hero or traitor book bodies', async () => {
+    const res = await fetch(url);
+    expect(res.status).toBe(200);
+    const raw = (await res.json()) as { haunts?: Array<Record<string, unknown>> };
+    expect(raw.haunts).toBeDefined();
+    expect(raw.haunts!.length).toBe(50);
+    for (const h of raw.haunts!) {
+      expect(h.heroes).toBeUndefined();
+      expect(h.traitor).toBeUndefined();
+      expect(h.id).toBeDefined();
+      expect(h.name).toBeDefined();
+    }
+  });
 });

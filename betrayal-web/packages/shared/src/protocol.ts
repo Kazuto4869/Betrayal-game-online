@@ -78,6 +78,12 @@ export const GameActionSchema = z.discriminatedUnion('t', [
   }),
   z.object({ t: z.literal('ROOM_ACTION'), seat: z.string(), actionId: z.string() }),
   z.object({
+    t: z.literal('COMMAND_DOG'),
+    seat: z.string(),
+    destination: z.string(),
+    cardId: z.string().optional(),
+  }),
+  z.object({
     t: z.literal('ATTACK'),
     seat: z.string(),
     target: TargetRefSchema,
@@ -89,6 +95,34 @@ export const GameActionSchema = z.discriminatedUnion('t', [
     alloc: z.record(TraitSchema, z.number().int().min(0).max(8)),
   }),
   z.object({ t: z.literal('END_TURN'), seat: z.string() }),
+  z.object({ t: z.literal('ACK_HAUNT_BRIEFING'), seat: z.string() }),
+  z.object({
+    t: z.literal('START_MONSTER'),
+    seat: z.string(),
+    monsterId: z.string(),
+  }),
+  z.object({
+    t: z.literal('MOVE_MONSTER'),
+    seat: z.string(),
+    monsterId: z.string(),
+    to: z.string(),
+  }),
+  z.object({
+    t: z.literal('MONSTER_ATTACK'),
+    seat: z.string(),
+    monsterId: z.string(),
+    target: TargetRefSchema,
+    trait: TraitSchema.optional(),
+  }),
+  z.object({
+    t: z.literal('END_MONSTER_TURN'),
+    seat: z.string(),
+    monsterId: z.string(),
+  }),
+  z.object({
+    t: z.literal('END_MONSTER_PHASE'),
+    seat: z.string(),
+  }),
   z.object({
     t: z.literal('ANSWER'),
     seat: z.string(),

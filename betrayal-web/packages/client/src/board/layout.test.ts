@@ -57,15 +57,15 @@ describe('tileViewsForFloor', () => {
   });
 
   it('returns EFFECTIVE doors, not the printed ones, for a rotated tile', () => {
-    // tile.entrance_hall prints a single north door. Rotated 90 clockwise it
+    // tile.conservatory prints a single north door. Rotated 90 clockwise it
     // should show up east instead, per rotateDoors (packages/shared/src/geometry.ts).
-    const printed = content.tilesById['tile.entrance_hall']?.doors;
+    const printed = content.tilesById['tile.conservatory']?.doors;
     expect(printed).toEqual({ n: true, e: false, s: false, w: false });
 
     const board = makeBoard([
       {
         id: 'p1',
-        tileId: 'tile.entrance_hall',
+        tileId: 'tile.conservatory',
         floor: 'ground',
         x: 0,
         y: 0,
@@ -114,7 +114,7 @@ describe('openDoorways', () => {
     const board = makeBoard([
       {
         id: 'A',
-        tileId: 'tile.slate_undercroft',
+        tileId: 'tile.abandoned_room',
         floor: 'basement',
         x: 0,
         y: 0,
@@ -122,7 +122,7 @@ describe('openDoorways', () => {
       },
       {
         id: 'B',
-        tileId: 'tile.echo_chamber',
+        tileId: 'tile.junk_room',
         floor: 'basement',
         x: 0,
         y: 1,
@@ -148,7 +148,7 @@ describe('openDoorways', () => {
   });
 
   it('re-evaluates open vs occupied against EFFECTIVE (rotated) doors, not printed ones', () => {
-    // tile.entrance_hall prints a single north door. Rotated 90 it faces
+    // tile.conservatory prints a single north door. Rotated 90 it faces
     // east instead (asserted above in tileViewsForFloor), so a tile placed
     // to its east should close that doorway, while a tile placed to its
     // (still-open, printed) north should NOT — proof that occupancy here is
@@ -157,7 +157,7 @@ describe('openDoorways', () => {
     // by rotating which one lines up with the occupied neighbour.
     for (const rotation of [0, 90, 180, 270] as Rotation[]) {
       const board = makeBoard([
-        { id: 'p1', tileId: 'tile.entrance_hall', floor: 'ground', x: 0, y: 0, rotation },
+        { id: 'p1', tileId: 'tile.conservatory', floor: 'ground', x: 0, y: 0, rotation },
         // A neighbour directly east of p1, occupying whichever cell the
         // rotated door happens to face when rotation === 90.
         { id: 'p2', tileId: 'tile.foyer', floor: 'ground', x: 1, y: 0, rotation: 0 },

@@ -59,7 +59,11 @@ export function createServer() {
         characters: content.characters,
         tiles: content.tiles,
         cards: content.cards,
-        haunts: content.haunts,
+        haunts: content.haunts.map((h) => {
+          const { traitor: _t, heroes: _h, ...publicHaunt } = h;
+          return publicHaunt;
+        }),
+        hauntChart: content.hauntChart,
         house: content.house,
       });
     }

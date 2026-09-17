@@ -934,12 +934,17 @@ describe('MOVE_THROUGH: happy path', () => {
     const c = discoveryContent(START_1DOOR, AUTO4);
     const g = startedGame({ content: c });
     const seat = g.state.activeSeat!;
-    const before = g.state.tileDeck.length;
+    const beforeTotal = g.state.tileDeck.length + (g.state.tileDiscard ?? []).length;
 
     const res = reduce(g.state, { t: 'MOVE_THROUGH', seat, dir: 'n' }, c);
     expect(res.error).toBeUndefined();
-    expect(res.state.tileDeck).toHaveLength(before - 1);
+    // With the 2E shared-stack algorithm, tiles passed over during the draw
+    // move into tileDiscard (face-down set-aside pile) rather than staying
+    // in tileDeck. The drawn tile leaves both pools, so the total shrinks by 1.
+    const afterTotal = res.state.tileDeck.length + (res.state.tileDiscard ?? []).length;
+    expect(afterTotal).toBe(beforeTotal - 1);
     expect(res.state.tileDeck).not.toContain(AUTO4.id);
+    expect(res.state.tileDiscard ?? []).not.toContain(AUTO4.id);
   });
 
   it('auto-applies with no prompt when only one rotation is legal', () => {
@@ -960,7 +965,10 @@ describe('MOVE_THROUGH: onEnter effects', () => {
     const withOnEnter = dtile(
       'tile.auto4_onenter',
       { n: true, e: true, s: true, w: true },
-      { onEnter: [{ e: 'trait', who: 'actor', trait: 'knowledge', delta: 1 }] },
+      {
+        ruleText: 'Gain 1 Knowledge.',
+        onEnter: [{ e: 'trait', who: 'actor', trait: 'knowledge', delta: 1 }],
+      },
     );
     const c = discoveryContent(START_1DOOR, withOnEnter);
     const g = startedGame({ content: c });
@@ -1103,7 +1111,9 @@ describe('MOVE_THROUGH: rejections', () => {
     }
 
     const res = reduce(emptied, { t: 'MOVE_THROUGH', seat, dir: 'n' }, c);
-    expect(res.error?.code).toBe('ILLEGAL_MOVE');
+    // The shared-stack draw loop returns NO_ROOMS_FOR_FLOOR when no eligible
+    // tile remains for this floor. Either way the action is correctly blocked.
+    expect(res.error?.code).toMatch(/^(ILLEGAL_MOVE|NO_ROOMS_FOR_FLOOR)$/);
   });
 });
 
@@ -1426,5 +1436,124 @@ describe('a prompted seat leaving does not strand the room', () => {
     const active = removed.state.activeSeat!;
     expect(active).not.toBe(seat);
     expect(getLegalActions(removed.state, active, c).length).toBeGreaterThan(0);
+  });
+
+  describe('Task 11: Haunt Briefing Readiness Gate', () => {
+    it('records acknowledgements, handles idempotency, and gates ordinary gameplay until everyone acknowledges', () => {
+      const g = startedGame();
+      const s0 = g.state.turnOrder[0]!;
+      const s1 = g.state.turnOrder[1]!;
+      const s2 = g.state.turnOrder[2]!;
+
+      // Manually trigger haunt state
+      const hauntState: GameState = {
+        ...g.state,
+        phase: 'haunt',
+        activeSeat: s0,
+        haunt: {
+          hauntId: 1,
+          traitorSeat: s0,
+          revealed: true,
+          acknowledged: [],
+          hauntTitle: 'The Mummy Walks',
+        },
+      };
+
+      // 1. Initially, no one has acknowledged -> ordinary action fails with WRONG_PHASE
+      const moveAttempt = reduce(hauntState, { t: 'END_TURN', seat: s0 }, content);
+      expect(moveAttempt.error?.code).toBe('WRONG_PHASE');
+      expect(moveAttempt.error?.message).toContain('acknowledge haunt briefing');
+
+      // Check legal actions: unacknowledged seats only have ACK_HAUNT_BRIEFING
+      expect(getLegalActions(hauntState, s0, content)).toEqual([
+        { t: 'ACK_HAUNT_BRIEFING', seat: s0 },
+      ]);
+      expect(getLegalActions(hauntState, s1, content)).toEqual([
+        { t: 'ACK_HAUNT_BRIEFING', seat: s1 },
+      ]);
+
+      // 2. First player acknowledges
+      const ack1 = reduce(hauntState, { t: 'ACK_HAUNT_BRIEFING', seat: s0 }, content);
+      expect(ack1.error).toBeUndefined();
+      expect(ack1.state.haunt?.acknowledged).toEqual([s0]);
+
+      // Repeated acknowledgement is idempotent
+      const ack1Repeat = reduce(
+        ack1.state,
+        { t: 'ACK_HAUNT_BRIEFING', seat: s0 },
+        content,
+      );
+      expect(ack1Repeat.error).toBeUndefined();
+      expect(ack1Repeat.state.haunt?.acknowledged).toEqual([s0]);
+
+      // Seat 0 now waits for seats 1 & 2 -> no legal gameplay actions for seat 0 yet
+      expect(getLegalActions(ack1.state, s0, content)).toEqual([]);
+      // Seat 1 still has ACK_HAUNT_BRIEFING
+      expect(getLegalActions(ack1.state, s1, content)).toEqual([
+        { t: 'ACK_HAUNT_BRIEFING', seat: s1 },
+      ]);
+
+      // 3. Second player acknowledges
+      const ack2 = reduce(ack1.state, { t: 'ACK_HAUNT_BRIEFING', seat: s1 }, content);
+      expect(ack2.error).toBeUndefined();
+      expect(ack2.state.haunt?.acknowledged).toEqual([s0, s1]);
+
+      // Still gated because seat 2 hasn't acknowledged
+      const stillGated = reduce(ack2.state, { t: 'END_TURN', seat: s0 }, content);
+      expect(stillGated.error?.code).toBe('WRONG_PHASE');
+
+      // 4. Third player acknowledges
+      const ack3 = reduce(ack2.state, { t: 'ACK_HAUNT_BRIEFING', seat: s2 }, content);
+      expect(ack3.error).toBeUndefined();
+      expect(ack3.state.haunt?.acknowledged).toEqual([s0, s1, s2]);
+
+      // Now all 3 living players acknowledged -> gate opens!
+      // Active player s0 can now take legal actions (e.g. END_TURN)
+      const actionsAfterReady = getLegalActions(ack3.state, s0, content);
+      expect(actionsAfterReady.some((a) => a.t === 'END_TURN')).toBe(true);
+
+      const endTurnResult = reduce(ack3.state, { t: 'END_TURN', seat: s0 }, content);
+      expect(endTurnResult.error).toBeUndefined();
+      expect(endTurnResult.state.activeSeat).toBe(s1);
+    });
+
+    it('rejects ACK_HAUNT_BRIEFING from unknown or dead seats', () => {
+      const g = startedGame();
+      const hauntState: GameState = {
+        ...g.state,
+        phase: 'haunt',
+        haunt: {
+          hauntId: 1,
+          traitorSeat: g.state.turnOrder[0]!,
+          revealed: true,
+          acknowledged: [],
+        },
+      };
+
+      const invalidSeat = reduce(
+        hauntState,
+        { t: 'ACK_HAUNT_BRIEFING', seat: 'seat_99' },
+        content,
+      );
+      expect(invalidSeat.error?.code).toBe('UNKNOWN_SEAT');
+
+      const deadState: GameState = {
+        ...hauntState,
+        players: {
+          ...hauntState.players,
+          [g.state.turnOrder[1]!]: {
+            ...hauntState.players[g.state.turnOrder[1]!]!,
+            isDead: true,
+          },
+        },
+      };
+
+      const deadAck = reduce(
+        deadState,
+        { t: 'ACK_HAUNT_BRIEFING', seat: g.state.turnOrder[1]! },
+        content,
+      );
+      expect(deadAck.error?.code).toBe('UNKNOWN_SEAT');
+    });
   });
 });

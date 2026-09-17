@@ -766,7 +766,9 @@ function evalFlag(
         ? state.players[c.ref ?? ctx.actor]?.flags
         : c.ref
           ? state.board.placed[c.ref]?.flags
-          : undefined;
+          : state.players[ctx.actor]?.location
+            ? state.board.placed[state.players[ctx.actor]!.location!]?.flags
+            : undefined;
   if (!bag) return false;
   const actual = bag[c.key];
   if (actual === undefined) return false;

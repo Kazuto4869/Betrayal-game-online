@@ -11,8 +11,13 @@
 
 import { useEffect, useState } from 'react';
 import { useStore } from '../store.js';
-import { getLegalActions, getReachable, traitValue } from '@bahoth/engine';
-import { isRotateTilePayload } from '@bahoth/shared';
+import {
+  getLegalActions,
+  getMonsterReachable,
+  getReachable,
+  traitValue,
+} from '@bahoth/engine';
+import { isEffectPromptPayload, isRotateTilePayload } from '@bahoth/shared';
 import type { Floor, RotateTilePayload, Rotation } from '@bahoth/shared';
 import { Board } from '../board/Board.js';
 import { FloorTabs } from '../board/FloorTabs.js';
@@ -24,6 +29,8 @@ import { DiceRollTray } from '../components/DiceRollTray.js';
 import { HauntBanner } from '../components/HauntBanner.js';
 import { InventoryTray } from '../components/InventoryTray.js';
 import { GameOverModal } from '../components/GameOverModal.js';
+import { HauntBriefingModal } from '../components/HauntBriefingModal.js';
+import { MonsterPhasePanel } from '../components/MonsterPhasePanel.js';
 
 /** Seconds of countdown to show. Below this, the clock is worth watching. */
 const VISIBLE_WITHIN_MS = 60 * 1000;
@@ -108,6 +115,14 @@ export function Game() {
       : null;
   const isMyPrompt = pendingPayload !== null && state?.pending?.seatId === seatId;
 
+  const traitPayload =
+    state?.pending?.kind === 'choose_trait' &&
+    isEffectPromptPayload(state.pending.payload) &&
+    state.pending.payload.kind === 'choose_trait'
+      ? state.pending.payload
+      : null;
+  const isMyTraitPrompt = traitPayload !== null && state?.pending?.seatId === seatId;
+
   // The previewed rotation while I own the prompt: transient UI state seeded
   // to the prompt's own default (docs/07-ui.md#77 allows this — it is not
   // game state, `ROTATE_TILE` is what makes a choice real). Reset whenever
@@ -165,9 +180,27 @@ export function Game() {
   // the unfiltered list through would silently drop a same-turn destination
   // on another floor, which reads as the engine being wrong rather than as
   // "look at the other tab".
-  const reachableHere = getReachable(state, seatId, content).filter(
-    (id) => floorOf(state.board, id) === displayFloor,
-  );
+  const isMonsterTurnActive =
+    state?.monsterTurn?.activeMonsterId !== null &&
+    state?.monsterTurn?.activeMonsterId !== undefined;
+  const isMonsterController = state?.monsterTurn?.controllingSeat === seatId;
+  const activeMonster =
+    isMonsterTurnActive && state?.monsters && state.monsterTurn?.activeMonsterId
+      ? state.monsters[state.monsterTurn.activeMonsterId]
+      : null;
+
+  const reachableHere = isMonsterTurnActive
+    ? isMonsterController && activeMonster?.location
+      ? getMonsterReachable(
+          state,
+          activeMonster.location,
+          state.monsterTurn!.movesLeft,
+          content,
+        ).filter((id) => floorOf(state.board, id) === displayFloor)
+      : []
+    : getReachable(state, seatId, content).filter(
+        (id) => floorOf(state.board, id) === displayFloor,
+      );
 
   const promptTileName = pendingPayload
     ? (content.tilesById[pendingPayload.tileId]?.name ?? pendingPayload.tileId)
@@ -207,10 +240,18 @@ export function Game() {
     <main className="screen game">
       <header className="topbar">
         <span className="code">{roomCode}</span>
-        <span className="topbar__phase">{state.phase}</span>
+        <span className="topbar__phase">
+          {state.monsterTurn !== null ? '👹 monster phase' : state.phase}
+        </span>
         <span>Round {state.round}</span>
         <span className={isMyTurn ? 'topbar__turn topbar__turn--mine' : 'topbar__turn'}>
-          {isMyTurn ? 'Your turn' : `${activeName}'s turn`}
+          {state.monsterTurn !== null
+            ? isMonsterController
+              ? '👹 Monster Turn (You)'
+              : `👹 Monster Turn (${activeName})`
+            : isMyTurn
+              ? 'Your turn'
+              : `${activeName}'s turn`}
         </span>
         {showClock && (
           <span
@@ -351,6 +392,7 @@ export function Game() {
 
         <section className="panel game__board">
           <HauntBanner />
+          <MonsterPhasePanel />
           {pendingPayload && (
             <div className="panel rotate-prompt">
               {isMyPrompt ? (
@@ -428,6 +470,58 @@ export function Game() {
               )}
             </div>
           )}
+          {traitPayload && (
+            <div className="panel rotate-prompt choose-trait-prompt">
+              {isMyTraitPrompt ? (
+                <>
+                  <h3>
+                    Choose a trait:
+                    {promptRemaining !== null && (
+                      <span
+                        className={
+                          promptRemaining <= 10_000
+                            ? 'rotate-prompt__clock rotate-prompt__clock--urgent'
+                            : 'rotate-prompt__clock'
+                        }
+                        aria-live="polite"
+                      >
+                        {formatRemaining(promptRemaining)}
+                      </span>
+                    )}
+                  </h3>
+                  <div className="actions">
+                    {traitPayload.candidates.map((t) => (
+                      <button
+                        key={t}
+                        type="button"
+                        className="btn btn--primary"
+                        disabled={pending}
+                        onClick={() =>
+                          send({
+                            t: 'ANSWER',
+                            seat: seatId,
+                            promptId: state.pending!.id,
+                            answer: t,
+                          })
+                        }
+                      >
+                        {TRAIT_LABELS[t] ?? t}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <p>
+                  {promptSeatName} is choosing a trait…
+                  {promptRemaining !== null && (
+                    <span className="rotate-prompt__clock" aria-live="polite">
+                      {formatRemaining(promptRemaining)}
+                    </span>
+                  )}
+                </p>
+              )}
+            </div>
+          )}
           <FloorTabs active={displayFloor} onSelect={setFloor} pawnsByFloor={byFloor} />
           <Board
             board={state.board}
@@ -438,7 +532,18 @@ export function Game() {
             onMoveTo={
               pending
                 ? undefined
-                : (placedId) => send({ t: 'MOVE', seat: seatId, to: placedId })
+                : (placedId) => {
+                    if (isMonsterTurnActive && isMonsterController && activeMonster) {
+                      send({
+                        t: 'MOVE_MONSTER',
+                        seat: seatId,
+                        monsterId: activeMonster.id,
+                        to: placedId,
+                      });
+                    } else {
+                      send({ t: 'MOVE', seat: seatId, to: placedId });
+                    }
+                  }
             }
             moveThrough={
               pending || myLocation === null
@@ -470,6 +575,7 @@ export function Game() {
       <CardModal />
       <DiceRollTray />
       <GameOverModal />
+      <HauntBriefingModal />
     </main>
   );
 }

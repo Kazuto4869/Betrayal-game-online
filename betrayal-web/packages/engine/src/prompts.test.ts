@@ -307,6 +307,7 @@ function raisedChooseRoom(): { state: GameState; seat: string; content: Content 
     'tile.p_prompt_room',
     { n: true },
     {
+      ruleText: 'Choose a placed room.',
       onEnter: [
         {
           e: 'prompt',
@@ -317,7 +318,24 @@ function raisedChooseRoom(): { state: GameState; seat: string; content: Content 
       ],
     },
   );
-  const c = promptContent(START_1DOOR, withPrompt);
+  // Add a pre-placed ground neighbor with an open doorway so placing a
+  // single-door tile doesn't seal the floor (wouldSealFloor guard).
+  const NEIGHBOR = dtile('tile.p_neighbor', { n: true, e: true, s: true });
+  const tiles = [START_1DOOR, withPrompt, NEIGHBOR, LAND_B, LAND_U, FILL_B, FILL_U];
+  const house: House = {
+    layout: [
+      { tileId: START_1DOOR.id, floor: 'ground', x: 0, y: 0, rotation: 0 },
+      { tileId: NEIGHBOR.id, floor: 'ground', x: 1, y: 0, rotation: 0 },
+      { tileId: LAND_B.id, floor: 'basement', x: 0, y: 0, rotation: 0 },
+      { tileId: LAND_U.id, floor: 'upper', x: 0, y: 0, rotation: 0 },
+    ],
+    startTile: START_1DOOR.id,
+    landings: { basement: LAND_B.id, ground: START_1DOOR.id, upper: LAND_U.id },
+  };
+  const c = buildContent(
+    { characters: fixtureContent().characters, tiles, house },
+    'prompts.test.ts',
+  );
   const g = startedGame({ content: c });
   const seat = g.state.activeSeat!;
   const res = reduce(g.state, { t: 'MOVE_THROUGH', seat, dir: 'n' }, c);
