@@ -114,16 +114,18 @@ export function HauntBriefingModal() {
             </section>
           )}
 
-          {side.rules && side.rules.length > 0 && (
-            <section className="haunt-briefing-section">
-              <h4>Special Haunt Rules</h4>
-              <ul>
-                {side.rules.map((item, i) => (
-                  <li key={i}>{item}</li>
-                ))}
-              </ul>
-            </section>
-          )}
+          {side.rules &&
+            side.rules.length > 0 &&
+            (!side.additionalSections || side.additionalSections.length === 0) && (
+              <section className="haunt-briefing-section">
+                <h4>Special Haunt Rules</h4>
+                <ul>
+                  {side.rules.map((item, i) => (
+                    <li key={i}>{item}</li>
+                  ))}
+                </ul>
+              </section>
+            )}
 
           {side.specialAttackRules && side.specialAttackRules.length > 0 && (
             <section className="haunt-briefing-section">

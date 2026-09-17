@@ -12,6 +12,7 @@ import { describe, expect, it } from 'vitest';
 import charactersJson from '../fixtures/characters.json' with { type: 'json' };
 import tilesJson from '../fixtures/tiles.json' with { type: 'json' };
 import canonicalTilesJson from '../../../content/tiles.json' with { type: 'json' };
+import canonicalHauntsJson from '../../../content/haunts.json' with { type: 'json' };
 import { COLOURS } from '@bahoth/shared';
 import { buildContent, ContentError } from './load.js';
 import { fixtureContent } from './fixtures.js';
@@ -668,6 +669,29 @@ describe('coherence checks reject', () => {
       expect(content.haunts).toHaveLength(50);
       const ids = content.haunts.map((h) => h.id).sort((a, b) => a - b);
       expect(ids).toEqual(Array.from({ length: 50 }, (_, i) => i + 1));
+    });
+
+    it('keeps the extracted haunt briefings readable and free of PDF footer fragments', () => {
+      const haunts = (canonicalHauntsJson as { haunts: Array<Record<string, any>> })
+        .haunts;
+      expect(haunts).toHaveLength(50);
+
+      const ids = haunts.map((h) => h.id).sort((a, b) => a - b);
+      expect(ids).toEqual(Array.from({ length: 50 }, (_, i) => i + 1));
+
+      for (const haunt of haunts) {
+        for (const sideName of ['heroes', 'traitor'] as const) {
+          const side = haunt[sideName];
+          expect(side?.goal).toEqual(expect.any(String));
+          expect(side.goal.trim().length).toBeGreaterThan(0);
+          expect(side?.intro).toEqual(expect.any(String));
+
+          const text = JSON.stringify(side);
+          expect(text).not.toMatch(
+            /300_266330|4\/22\/10|T his|offthe|^HAUNT$|\bHaunt \d+\b/,
+          );
+        }
+      }
     });
 
     it('every haunt has a non-empty name and structured hero and traitor entries', () => {
